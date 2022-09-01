@@ -1078,7 +1078,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.64.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"1.0.0", sdk:"connected"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1190,7 +1190,7 @@ utils.getParameterByName = function(a) {
   return (a = (new RegExp("[?&]" + a + "(=([^&#]*)|&|#|$)")).exec(b)) && a[2] ? decodeURIComponent(a[2].replace(/\+/g, " ")) : "";
 };
 utils.cleanLinkData = function(a) {
-  a.source = "web-sdk";
+  a.source = "connected-sdk";
   var b = a.data;
   switch(typeof b) {
     case "string":
@@ -1555,7 +1555,7 @@ utils.getUserData = function(a) {
   b = utils.addPropertyIfNotNull(b, "browser_fingerprint_id", a.browser_fingerprint_id);
   b = utils.addPropertyIfNotNull(b, "developer_identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "identity", a.identity);
-  b = utils.addPropertyIfNotNull(b, "sdk", "web");
+  b = utils.addPropertyIfNotNull(b, "sdk", config.sdk);
   return b = utils.addPropertyIfNotNull(b, "sdk_version", config.version);
 };
 utils.isIframe = function() {
@@ -1666,7 +1666,7 @@ resources.logCustomEvent = {destination:config.api_endpoint, endpoint:"/v2/event
 resources.crossPlatformIds = {destination:config.api_endpoint, endpoint:"/v1/cpid", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
 resources.lastAttributedTouchData = {destination:config.api_endpoint, endpoint:"/v1/cpid/latd", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
 // Input 6
-var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", storage, BranchStorage = function(a) {
+var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_CONNECTEDSDK_KEY", storage, BranchStorage = function(a) {
   for (var b = 0; b < a.length; b++) {
     var c = this[a[b]];
     c = "function" === typeof c ? c() : c;
@@ -2050,8 +2050,9 @@ var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_E
   this._queue = task_queue();
   this._storage = new BranchStorage(["session", "cookie", "pojo"]);
   this._server = new Server();
+  var a = config.sdk;
   this._listeners = [];
-  this.sdk = "web" + config.version;
+  this.sdk = a + config.version;
   this.init_state = init_states.NO_INIT;
   this.init_state_fail_code = init_state_fail_codes.NO_FAILURE;
   this.init_state_fail_details = null;
