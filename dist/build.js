@@ -1095,7 +1095,8 @@ var safejson = {parse:function(a) {
   throw Error("Could not stringify object");
 }};
 // Input 4
-var utils = {}, DEBUG = !0, message;
+var utils = {}, message;
+utils.debug = !0;
 utils.retries = 2;
 utils.retry_delay = 200;
 utils.timeout = 5000;
@@ -1175,7 +1176,7 @@ utils.message = function(a, b, c, d) {
   });
   c && (a += "\n Failure Code:" + c);
   d && (a += "\n Failure Details:" + d);
-  DEBUG && console && console.log(a);
+  utils.debug && console && console.log(a);
   return a;
 };
 utils.whiteListSessionData = function(a) {
@@ -2101,6 +2102,7 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   utils.retry_delay = c && c.retry_delay && Number.isInteger(c.retry_delay) ? c.retry_delay : utils.retry_delay;
   utils.timeout = c && c.timeout && Number.isInteger(c.timeout) ? c.timeout : utils.timeout;
   utils.nonce = c && c.nonce ? c.nonce : utils.nonce;
+  utils.debug = c && c.enableLogging ? c.enableLogging : utils.debug;
   utils.userPreferences.trackingDisabled = c && c.tracking_disabled && !0 === c.tracking_disabled ? !0 : !1;
   utils.userPreferences.allowErrorsInCallback = !1;
   utils.userPreferences.trackingDisabled && utils.cleanApplicationAndSessionStorage(d);
