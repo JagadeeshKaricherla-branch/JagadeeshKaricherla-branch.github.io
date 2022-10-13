@@ -1078,7 +1078,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"http://api-open.stage.branch.io:80", api_endpoint_open:"http://api-open.stage.branch.io:80", version:"1.0.0", sdk:"connected"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", api_endpoint_open:"https://api.stage.branch.io", version:"1.0.0", sdk:"connected"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
