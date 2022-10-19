@@ -1078,7 +1078,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", api_endpoint_open:"https://api.stage.branch.io", version:"1.0.0", sdk:"connected"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"1.0.0", sdk:"connected"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1113,7 +1113,7 @@ utils.calculateBrtt = function(a) {
 utils.userPreferences = {trackingDisabled:!1, whiteListedEndpointsWithData:{"/v1/open":{link_identifier:"\\d+"}, "/v1/url":{}}, allowErrorsInCallback:!1, shouldBlockRequest:function(a, b) {
   var c = document.createElement("a");
   c.href = a;
-  a = [config.api_endpoint, config.app_service_endpoint, config.link_service_endpoint, config.api_endpoint_open];
+  a = [config.api_endpoint, config.app_service_endpoint, config.link_service_endpoint];
   var d = c.origin;
   d.endsWith("/") && (d = d.substring(0, d.length - 1));
   if (!a.includes(d)) {
@@ -1159,7 +1159,7 @@ utils.generateDynamicBNCLink = function(a, b) {
   }
 };
 utils.cleanApplicationAndSessionStorage = function(a) {
-  a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.identity_id = null, a.identity = null, a.browser_fingerprint_id = null, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
+  a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.identity_id = null, a.identity = null, a.randomized_device_token = null, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
 };
 utils.httpMethod = {POST:"POST", GET:"GET"};
 utils.messages = {missingParam:"API request $1 missing parameter $2", invalidType:"API request $1, parameter $2 is not $3", nonInit:"Branch SDK not initialized", initPending:"Branch SDK initialization pending and a Branch method was called outside of the queue order", initFailed:"Branch SDK initialization failed, so further methods cannot be called", existingInit:"Branch SDK already initialized", missingAppId:"Missing Branch app ID", callBranchInitFirst:"Branch.init must be called first", timeout:"Request timed out", 
@@ -1364,13 +1364,11 @@ utils.isBase64Encoded = function(a) {
   }
 };
 utils.encodeBFPs = function(a) {
-  a && a.browser_fingerprint_id && !utils.isBase64Encoded(a.browser_fingerprint_id) && (a.browser_fingerprint_id = btoa(a.browser_fingerprint_id));
-  a && a.alternative_browser_fingerprint_id && !utils.isBase64Encoded(a.alternative_browser_fingerprint_id) && (a.alternative_browser_fingerprint_id = btoa(a.alternative_browser_fingerprint_id));
+  a && a.randomized_device_token && !utils.isBase64Encoded(a.randomized_device_token) && (a.randomized_device_token = btoa(a.randomized_device_token));
   return a;
 };
 utils.decodeBFPs = function(a) {
-  a && utils.isBase64Encoded(a.browser_fingerprint_id) && (a.browser_fingerprint_id = atob(a.browser_fingerprint_id));
-  a && utils.isBase64Encoded(a.alternative_browser_fingerprint_id) && (a.alternative_browser_fingerprint_id = atob(a.alternative_browser_fingerprint_id));
+  a && utils.isBase64Encoded(a.randomized_device_token) && (a.randomized_device_token = atob(a.randomized_device_token));
   return a;
 };
 utils.addEvent = function(a, b, c, d) {
@@ -1553,7 +1551,7 @@ utils.getUserData = function(a) {
   b = utils.addPropertyIfNotNull(b, "screen_width", utils.getScreenWidth());
   b = utils.addPropertyIfNotNull(b, "screen_height", utils.getScreenHeight());
   b = utils.addPropertyIfNotNull(b, "http_referrer", document.referrer);
-  b = utils.addPropertyIfNotNull(b, "browser_fingerprint_id", a.browser_fingerprint_id);
+  b = utils.addPropertyIfNotNull(b, "randomized_device_token", a.randomized_device_token);
   b = utils.addPropertyIfNotNull(b, "developer_identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "sdk", config.sdk);
@@ -1657,15 +1655,15 @@ function validator(a, b) {
   };
 }
 function defaults(a) {
-  var b = {browser_fingerprint_id:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), sdk_version:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
+  var b = {randomized_device_token:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), sdk_version:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
   return utils.merge(a, b);
 }
 function v2defaults(a) {
   var b = {user_data:validator(!0, validationTypes.OBJECT)};
   return utils.merge(a, b);
 }
-resources.open = {destination:config.api_endpoint_open, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{browser_fingerprint_id:validator(!1, validationTypes.STRING), alternative_browser_fingerprint_id:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), 
-tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
+resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
+validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
 resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
 resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
 resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
@@ -1721,7 +1719,7 @@ var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_CONNECTEDSDK_KEY", storage,
     }
     return utils.decodeBFPs(c);
   }, get:function(c, d) {
-    return "browser_fingerprint_id" === c || "alternative_browser_fingerprint_id" === c ? d && localStorage ? utils.base64Decode(localStorage.getItem(prefix(c))) : utils.base64Decode(b.getItem(prefix(c))) : retrieveValue(d && localStorage ? localStorage.getItem(prefix(c)) : b.getItem(prefix(c)));
+    return "randomized_device_token" === c ? d && localStorage ? utils.base64Decode(localStorage.getItem(prefix(c))) : utils.base64Decode(b.getItem(prefix(c))) : retrieveValue(d && localStorage ? localStorage.getItem(prefix(c)) : b.getItem(prefix(c)));
   }, set:function(c, d, e) {
     e && localStorage ? localStorage.setItem(prefix(c), d) : b.setItem(prefix(c), d);
   }, remove:function(c, d) {
@@ -1945,7 +1943,7 @@ Server.prototype.request = function(a, b, c, d) {
   utils.currentRequestBrttTag = a.endpoint + "-brtt";
   ("/v1/url" === a.endpoint || "/v1/has-app" === a.endpoint) && 1 < Object.keys(utils.instrumentation).length && (delete utils.instrumentation["-brtt"], b.instrumentation = safejson.stringify(utils.merge({}, utils.instrumentation)), utils.instrumentation = {});
   if (utils.userPreferences.trackingDisabled) {
-    for (var f = ["browser_fingerprint_id", "alternative_browser_fingerprint_id", "identity_id", "session_id", "identity"], g = 0; g < f.length; g++) {
+    for (var f = ["randomized_device_token", "identity_id", "session_id", "identity"], g = 0; g < f.length; g++) {
       b.hasOwnProperty(f[g]) && delete b[f[g]];
     }
   }
@@ -2081,7 +2079,7 @@ Branch.prototype._api = function(a, b, c) {
   0 > a.endpoint.indexOf("/v1/") ? (a.params && a.params.developer_identity || a.queryPart && a.queryPart.developer_identity) && this.identity && (b.developer_identity = this.identity) : (a.params && a.params.identity || a.queryPart && a.queryPart.identity) && this.identity && (b.identity = this.identity);
   (a.params && a.params.link_click_id || a.queryPart && a.queryPart.link_click_id) && this.link_click_id && (b.link_click_id = this.link_click_id);
   (a.params && a.params.sdk || a.queryPart && a.queryPart.sdk) && this.sdk && (b.sdk = this.sdk, b.sdk_version = this.sdk_version);
-  (a.params && a.params.browser_fingerprint_id || a.queryPart && a.queryPart.browser_fingerprint_id) && this.browser_fingerprint_id && (b.browser_fingerprint_id = this.browser_fingerprint_id);
+  (a.params && a.params.randomized_device_token || a.queryPart && a.queryPart.randomized_device_token) && this.randomized_device_token && (b.randomized_device_token = this.randomized_device_token);
   utils.userPreferences.trackingDisabled && (b.tracking_disabled = utils.userPreferences.trackingDisabled);
   return this._server.request(a, b, this._storage, function(d, e) {
     c(d, e);
@@ -2114,14 +2112,14 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
   var g = function(n) {
     var k = {sdk:config.version, branch_key:d.branch_key}, r = session.get(d._storage) || {}, q = session.get(d._storage, !0) || {};
-    q.browser_fingerprint_id && (k._t = q.browser_fingerprint_id);
+    q.randomized_device_token && (k._t = q.randomized_device_token);
     d._api(resources._r, k, function(t, u) {
       t && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = t.message);
-      u && (r.browser_fingerprint_id = u, n && n(null, r));
+      u && (r.randomized_device_token = u, n && n(null, r));
     });
   }, l = function(n, k) {
-    k && (k.link_click_id && (d.link_click_id = k.link_click_id.toString()), k.session_id && (d.session_id = k.session_id.toString()), k.identity_id && (d.identity_id = k.identity_id.toString()), k.identity && (d.identity = k.identity.toString()), k.link && (d.sessionLink = k.link), k.referring_link && (k.referring_link = utils.processReferringLink(k.referring_link)), !k.click_id && k.referring_link && (k.click_id = utils.getClickIdAndSearchStringFromLink(k.referring_link)), d.browser_fingerprint_id = 
-    k.browser_fingerprint_id, utils.userPreferences.trackingDisabled || (f && (k.identity = d.identity), session.set(d._storage, k, f)), d.init_state = init_states.INIT_SUCCEEDED, k.data_parsed = k.data && 0 !== k.data.length ? safejson.parse(k.data) : {});
+    k && (k.link_click_id && (d.link_click_id = k.link_click_id.toString()), k.session_id && (d.session_id = k.session_id.toString()), k.identity_id && (d.identity_id = k.identity_id.toString()), k.identity && (d.identity = k.identity.toString()), k.link && (d.sessionLink = k.link), k.referring_link && (k.referring_link = utils.processReferringLink(k.referring_link)), !k.click_id && k.referring_link && (k.click_id = utils.getClickIdAndSearchStringFromLink(k.referring_link)), d.randomized_device_token = 
+    k.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (k.identity = d.identity), session.set(d._storage, k, f)), d.init_state = init_states.INIT_SUCCEEDED, k.data_parsed = k.data && 0 !== k.data.length ? safejson.parse(k.data) : {});
     if (n) {
       return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = n.message), a(n, k && utils.whiteListSessionData(k));
     }
@@ -2150,7 +2148,7 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   } else {
     b = {sdk:config.version, branch_key:d.branch_key};
     var h = session.get(d._storage, !0) || {};
-    h.browser_fingerprint_id && (b._t = h.browser_fingerprint_id);
+    h.randomized_device_token && (b._t = h.randomized_device_token);
     h.identity && (d.identity = h.identity);
     var p = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
     d._api(resources._r, b, function(n, k) {
@@ -2158,7 +2156,7 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = n.message, l(n, null);
       }
       utils.delay(function() {
-        d._api(resources.open, {link_identifier:e, browser_fingerprint_id:e || k, alternative_browser_fingerprint_id:h.browser_fingerprint_id, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(r, q) {
+        d._api(resources.open, {link_identifier:e, randomized_device_token:e || k, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(r, q) {
           r && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = r.message);
           r || "object" !== typeof q || (q.branch_view_enabled && (d._branchViewEnabled = !!q.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), e && (q.click_id = e));
           m();
@@ -2218,7 +2216,7 @@ Branch.prototype.logout = wrap(callback_params.CALLBACK_ERR, function(a) {
 });
 Branch.prototype.getBrowserFingerprintId = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
   var b = session.get(this._storage, !0) || {};
-  a(null, b.browser_fingerprint_id || null);
+  a(null, b.randomized_device_token || null);
 });
 Branch.prototype.crossPlatformIds = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
   this._api(resources.crossPlatformIds, {user_data:safejson.stringify(utils.getUserData(this))}, function(b, c) {
