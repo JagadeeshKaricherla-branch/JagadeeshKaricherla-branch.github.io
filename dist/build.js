@@ -1159,7 +1159,7 @@ utils.generateDynamicBNCLink = function(a, b) {
   }
 };
 utils.cleanApplicationAndSessionStorage = function(a) {
-  a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.identity_id = null, a.identity = null, a.randomized_device_token = null, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
+  a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.randomized_bundle_token = null, a.identity = null, a.randomized_device_token = null, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
 };
 utils.httpMethod = {POST:"POST", GET:"GET"};
 utils.messages = {missingParam:"API request $1 missing parameter $2", invalidType:"API request $1, parameter $2 is not $3", nonInit:"Branch SDK not initialized", initPending:"Branch SDK initialization pending and a Branch method was called outside of the queue order", initFailed:"Branch SDK initialization failed, so further methods cannot be called", existingInit:"Branch SDK already initialized", missingAppId:"Missing Branch app ID", callBranchInitFirst:"Branch.init must be called first", timeout:"Request timed out", 
@@ -1655,23 +1655,23 @@ function validator(a, b) {
   };
 }
 function defaults(a) {
-  var b = {randomized_device_token:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), sdk_version:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
+  var b = {randomized_device_token:validator(!0, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), sdk_version:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
   return utils.merge(a, b);
 }
 function v2defaults(a) {
   var b = {user_data:validator(!0, validationTypes.OBJECT)};
   return utils.merge(a, b);
 }
-resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
+resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
 validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
 resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
 resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
 resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
-resources.profile = {destination:config.api_endpoint, endpoint:"/v1/profile", method:utils.httpMethod.POST, params:defaults({identity_id:validator(!0, validationTypes.STRING), identity:validator(!0, validationTypes.STRING)})};
-resources.link = {destination:config.api_endpoint, endpoint:"/v1/url", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), type:validator(!1, 
-validationTypes.NUMBER), source:validator(!1, validationTypes.STRING), instrumentation:validator(!1, validationTypes.STRING)})};
-resources.qrCode = {destination:config.api_endpoint, endpoint:"/v1/qr-code", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), qr_code_settings:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), 
-tags:validator(!1, validationTypes.ARRAY), type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING)})};
+resources.profile = {destination:config.api_endpoint, endpoint:"/v1/profile", method:utils.httpMethod.POST, params:defaults({randomized_bundle_token:validator(!0, validationTypes.STRING), identity:validator(!0, validationTypes.STRING)})};
+resources.link = {destination:config.api_endpoint, endpoint:"/v1/url", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), 
+type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING), instrumentation:validator(!1, validationTypes.STRING)})};
+resources.qrCode = {destination:config.api_endpoint, endpoint:"/v1/qr-code", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), qr_code_settings:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), stage:validator(!1, 
+validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING)})};
 resources.event = {destination:config.api_endpoint, endpoint:"/v1/event", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!0, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN)})};
 resources.commerceEvent = {destination:config.api_endpoint, endpoint:"/v1/event", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), commerce_data:validator(!0, validationTypes.OBJECT)})};
 resources.logStandardEvent = {destination:config.api_endpoint, endpoint:"/v2/event/standard", method:utils.httpMethod.POST, params:v2defaults({name:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)})};
@@ -1943,7 +1943,7 @@ Server.prototype.request = function(a, b, c, d) {
   utils.currentRequestBrttTag = a.endpoint + "-brtt";
   ("/v1/url" === a.endpoint || "/v1/has-app" === a.endpoint) && 1 < Object.keys(utils.instrumentation).length && (delete utils.instrumentation["-brtt"], b.instrumentation = safejson.stringify(utils.merge({}, utils.instrumentation)), utils.instrumentation = {});
   if (utils.userPreferences.trackingDisabled) {
-    for (var f = ["randomized_device_token", "identity_id", "session_id", "identity"], g = 0; g < f.length; g++) {
+    for (var f = ["randomized_device_token", "randomized_bundle_token", "session_id", "identity"], g = 0; g < f.length; g++) {
       b.hasOwnProperty(f[g]) && delete b[f[g]];
     }
   }
@@ -2075,7 +2075,7 @@ Branch.prototype._api = function(a, b, c) {
   this.app_id && (b.app_id = this.app_id);
   this.branch_key && (b.branch_key = this.branch_key);
   (a.params && a.params.session_id || a.queryPart && a.queryPart.session_id) && this.session_id && (b.session_id = this.session_id);
-  (a.params && a.params.identity_id || a.queryPart && a.queryPart.identity_id) && this.identity_id && (b.identity_id = this.identity_id);
+  (a.params && a.params.randomized_bundle_token || a.queryPart && a.queryPart.randomized_bundle_token) && this.randomized_bundle_token && (b.randomized_bundle_token = this.randomized_bundle_token);
   0 > a.endpoint.indexOf("/v1/") ? (a.params && a.params.developer_identity || a.queryPart && a.queryPart.developer_identity) && this.identity && (b.developer_identity = this.identity) : (a.params && a.params.identity || a.queryPart && a.queryPart.identity) && this.identity && (b.identity = this.identity);
   (a.params && a.params.link_click_id || a.queryPart && a.queryPart.link_click_id) && this.link_click_id && (b.link_click_id = this.link_click_id);
   (a.params && a.params.sdk || a.queryPart && a.queryPart.sdk) && this.sdk && (b.sdk = this.sdk, b.sdk_version = this.sdk_version);
@@ -2106,9 +2106,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   utils.userPreferences.trackingDisabled && utils.cleanApplicationAndSessionStorage(d);
   d.advertising_ids = c && c.advertising_ids && utils.validateParameterType(c.advertising_ids, "object") && utils.validateAdvertiserIDs(c.advertising_ids) ? c.advertising_ids : {};
   b = session.get(d._storage, !0);
-  d.identity_id = b && b.identity_id;
+  d.randomized_bundle_token = b && b.randomized_bundle_token;
   b = session.get(d._storage);
-  var e = (c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null) || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), f = !d.identity_id;
+  var e = (c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null) || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), f = !d.randomized_bundle_token;
   d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
   var g = function(p) {
     var l = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, r = session.get(d._storage, !0) || {};
@@ -2120,15 +2120,15 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   }, k = function(p, l) {
     p = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
     utils.delay(function() {
-      d._api(resources.open, {link_identifier:e, randomized_device_token:e || l.randomized_device_token, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
+      d._api(resources.open, {link_identifier:e, randomized_device_token:l.randomized_device_token, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
         t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
         t || "object" !== typeof r || (r.branch_view_enabled && (d._branchViewEnabled = !!r.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), e && (r.click_id = e));
         m(t, r);
       });
     }, p);
   }, m = function(p, l) {
-    l && (l.link_click_id && (d.link_click_id = l.link_click_id.toString()), l.session_id && (d.session_id = l.session_id.toString()), l.identity_id && (d.identity_id = l.identity_id.toString()), l.identity && (d.identity = l.identity.toString()), l.link && (d.sessionLink = l.link), l.referring_link && (l.referring_link = utils.processReferringLink(l.referring_link)), !l.click_id && l.referring_link && (l.click_id = utils.getClickIdAndSearchStringFromLink(l.referring_link)), d.randomized_device_token = 
-    l.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (l.identity = d.identity), session.set(d._storage, l, f)), d.init_state = init_states.INIT_SUCCEEDED, l.data_parsed = l.data && 0 !== l.data.length ? safejson.parse(l.data) : {});
+    l && (l.link_click_id && (d.link_click_id = l.link_click_id.toString()), l.session_id && (d.session_id = l.session_id.toString()), l.randomized_bundle_token && (d.randomized_bundle_token = l.randomized_bundle_token.toString()), l.identity && (d.identity = l.identity.toString()), l.link && (d.sessionLink = l.link), l.referring_link && (l.referring_link = utils.processReferringLink(l.referring_link)), !l.click_id && l.referring_link && (l.click_id = utils.getClickIdAndSearchStringFromLink(l.referring_link)), 
+    d.randomized_device_token = l.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (l.identity = d.identity), session.set(d._storage, l, f)), d.init_state = init_states.INIT_SUCCEEDED, l.data_parsed = l.data && 0 !== l.data.length ? safejson.parse(l.data) : {});
     if (p) {
       return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = p.message), a(p, l && utils.whiteListSessionData(l));
     }
@@ -2200,12 +2200,12 @@ Branch.prototype.setIdentity = wrap(callback_params.CALLBACK_ERR_DATA, function(
   this._api(resources.profile, {identity:b}, function(d, e) {
     d && a(d);
     e = e || {};
-    c.identity_id = e.identity_id ? e.identity_id.toString() : null;
+    c.randomized_bundle_token = e.randomized_bundle_token ? e.randomized_bundle_token.toString() : null;
     c.sessionLink = e.link;
     c.identity = b;
     e.developer_identity = b;
     e.referring_data_parsed = e.referring_data ? safejson.parse(e.referring_data) : null;
-    session.patch(c._storage, {identity:b, identity_id:c.identity_id}, !0);
+    session.patch(c._storage, {identity:b, randomized_bundle_token:c.randomized_bundle_token}, !0);
     a(null, e);
   });
 });
@@ -2214,10 +2214,10 @@ Branch.prototype.logout = wrap(callback_params.CALLBACK_ERR, function(a) {
   this._api(resources.logout, {}, function(c, d) {
     c && a(c);
     d = d || {};
-    d = {data_parsed:null, data:null, referring_link:null, click_id:null, link_click_id:null, identity:null, session_id:d.session_id, identity_id:d.identity_id, link:d.link, device_fingerprint_id:b.device_fingerprint_id || null};
+    d = {data_parsed:null, data:null, referring_link:null, click_id:null, link_click_id:null, identity:null, session_id:d.session_id, randomized_bundle_token:d.randomized_bundle_token, link:d.link, device_fingerprint_id:b.device_fingerprint_id || null};
     b.sessionLink = d.link;
     b.session_id = d.session_id;
-    b.identity_id = d.identity_id;
+    b.randomized_bundle_token = d.randomized_bundle_token;
     b.identity = null;
     session.patch(b._storage, d, !0, !0);
     a(null);
