@@ -1663,7 +1663,7 @@ function v2defaults(a) {
   return utils.merge(a, b);
 }
 resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
-validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.STRING)}};
+validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
 resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
 resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
 resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
