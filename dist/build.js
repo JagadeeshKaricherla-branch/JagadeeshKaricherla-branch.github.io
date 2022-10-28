@@ -1663,7 +1663,7 @@ function v2defaults(a) {
   return utils.merge(a, b);
 }
 resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
-validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
+validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.STRING)}};
 resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
 resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
 resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
@@ -1864,7 +1864,7 @@ Server.prototype.getUrl = function(a, b) {
     }
   }
   "/v1/event" === a.endpoint && (k.metadata = safejson.stringify(k.metadata || {}), k.hasOwnProperty("commerce_data") && (k.commerce_data = safejson.stringify(k.commerce_data || {})));
-  "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids = safejson.stringify(k.advertising_ids || {}));
+  "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {})));
   return {data:this.serializeObject(k, ""), url:e.replace(/^\//, "")};
 };
 Server.prototype.createScript = function(a, b, c) {
