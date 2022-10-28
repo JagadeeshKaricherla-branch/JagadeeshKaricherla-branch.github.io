@@ -281,9 +281,9 @@
         e = d.transpile;
       }
     }
-    e || (e = d.transpile = function(k, m) {
-      goog.logToConsole_(m + " requires transpilation but no transpiler was found.");
-      return k;
+    e || (e = d.transpile = function(l, k) {
+      goog.logToConsole_(k + " requires transpilation but no transpiler was found.");
+      return l;
     });
     return e(a, b, c);
   };
@@ -425,8 +425,8 @@
     a.prototype = new c();
     a.prototype.constructor = a;
     a.base = function(d, e, f) {
-      for (var g = Array(arguments.length - 2), k = 2; k < arguments.length; k++) {
-        g[k - 2] = arguments[k];
+      for (var g = Array(arguments.length - 2), l = 2; l < arguments.length; l++) {
+        g[l - 2] = arguments[l];
       }
       return b.prototype[e].apply(d, g);
     };
@@ -649,16 +649,16 @@
           e = !0;
           a.loaded_(d);
         }, pending:function() {
-          for (var g = [], k = 0; k < a.loadingDeps_.length; k++) {
-            g.push(a.loadingDeps_[k]);
+          for (var g = [], l = 0; l < a.loadingDeps_.length; l++) {
+            g.push(a.loadingDeps_[l]);
           }
           return g;
         }, setModuleState:function(g) {
           goog.moduleLoaderState_ = {type:g, moduleName:"", declareLegacyNamespace:!1};
-        }, registerEs6ModuleExports:function(g, k, m) {
-          m && (goog.loadedModules_[m] = {exports:k, type:goog.ModuleType.ES6, moduleId:m || ""});
-        }, registerGoogModuleExports:function(g, k) {
-          goog.loadedModules_[g] = {exports:k, type:goog.ModuleType.GOOG, moduleId:g};
+        }, registerEs6ModuleExports:function(g, l, k) {
+          k && (goog.loadedModules_[k] = {exports:l, type:goog.ModuleType.ES6, moduleId:k || ""});
+        }, registerGoogModuleExports:function(g, l) {
+          goog.loadedModules_[g] = {exports:l, type:goog.ModuleType.GOOG, moduleId:g};
         }, clearModuleState:function() {
           goog.moduleLoaderState_ = null;
         }, defer:function(g) {
@@ -776,8 +776,8 @@
         }
         var c = goog.getScriptNonce_();
         if (!goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING && goog.isDocumentLoading_()) {
-          var d = function(k) {
-            k.readyState && "complete" != k.readyState ? k.onload = d : (goog.Dependency.unregisterCallback_(e), a.loaded());
+          var d = function(l) {
+            l.readyState && "complete" != l.readyState ? l.onload = d : (goog.Dependency.unregisterCallback_(e), a.loaded());
           };
           var e = goog.Dependency.registerCallback_(d);
           c = c ? ' nonce="' + c + '"' : "";
@@ -839,17 +839,17 @@
         });
         f(void 0, 'goog.Dependency.callback_("' + g + '")');
         f(this.path, void 0);
-        var k = goog.Dependency.registerCallback_(function(h) {
-          goog.Dependency.unregisterCallback_(k);
+        var l = goog.Dependency.registerCallback_(function(h) {
+          goog.Dependency.unregisterCallback_(l);
           a.registerEs6ModuleExports(e.path, h, goog.moduleLoaderState_.moduleName);
         });
-        f(void 0, 'import * as m from "' + this.path + '"; goog.Dependency.callback_("' + k + '", m)');
-        var m = goog.Dependency.registerCallback_(function() {
-          goog.Dependency.unregisterCallback_(m);
+        f(void 0, 'import * as m from "' + this.path + '"; goog.Dependency.callback_("' + l + '", m)');
+        var k = goog.Dependency.registerCallback_(function() {
+          goog.Dependency.unregisterCallback_(k);
           a.clearModuleState();
           a.loaded();
         });
-        f(void 0, 'goog.Dependency.callback_("' + m + '")');
+        f(void 0, 'goog.Dependency.callback_("' + k + '")');
       } else {
         goog.logToConsole_("Cannot use default debug loader outside of HTML documents."), a.pause();
       }
@@ -903,15 +903,15 @@
           c();
         });
       } else {
-        var k = goog.global.document;
+        var l = goog.global.document;
         g = goog.inHtmlDocument_() && ("ActiveXObject" in goog.global || goog.isEdge_());
         if (f && goog.inHtmlDocument_() && goog.isDocumentLoading_() && !g) {
           goog.Dependency.defer_ = !0;
           a.pause();
-          var m = k.onreadystatechange;
-          k.onreadystatechange = function() {
-            "interactive" == k.readyState && (k.onreadystatechange = m, c(), a.resume());
-            "function" === typeof m && m.apply(void 0, arguments);
+          var k = l.onreadystatechange;
+          l.onreadystatechange = function() {
+            "interactive" == l.readyState && (l.onreadystatechange = k, c(), a.resume());
+            "function" === typeof k && k.apply(void 0, arguments);
           };
         } else {
           goog.inHtmlDocument_() && goog.isDocumentLoading_() ? d() : c();
@@ -1343,10 +1343,10 @@
       c = a.charCodeAt(d++);
       f = g >> 2;
       g = (g & 3) << 4 | e >> 4;
-      var k = (e & 15) << 2 | c >> 6;
-      var m = c & 63;
-      isNaN(e) ? m = k = 64 : isNaN(c) && (m = 64);
-      b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(f) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(g) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(m);
+      var l = (e & 15) << 2 | c >> 6;
+      var k = c & 63;
+      isNaN(e) ? k = l = 64 : isNaN(c) && (k = 64);
+      b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(f) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(g) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(l) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k);
     }
     return b;
   };
@@ -1663,7 +1663,7 @@
     return utils.merge(a, b);
   }
   resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
-  validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING)}};
+  validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
   resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
   resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
   resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
@@ -1813,7 +1813,7 @@
     return c.join("&");
   };
   Server.prototype.getUrl = function(a, b) {
-    var c, d, e = a.destination + a.endpoint, f = /^[0-9]{15,20}$/, g = /key_(live|test)_[A-Za-z0-9]{32}/, k = function(h, n) {
+    var c, d, e = a.destination + a.endpoint, f = /^[0-9]{15,20}$/, g = /key_(live|test)_[A-Za-z0-9]{32}/, l = function(h, n) {
       "undefined" === typeof n && (n = {});
       if (h.branch_key && g.test(h.branch_key)) {
         return n.branch_key = h.branch_key, n;
@@ -1829,7 +1829,7 @@
     };
     if ("/v1/has-app" === a.endpoint) {
       try {
-        a.queryPart = k(b, a.queryPart);
+        a.queryPart = l(b, a.queryPart);
       } catch (h) {
         return {error:h.message};
       }
@@ -1844,7 +1844,7 @@
         }
       }
     }
-    var m = {};
+    var k = {};
     if ("undefined" !== typeof a.params) {
       for (c in a.params) {
         if (a.params.hasOwnProperty(c)) {
@@ -1852,20 +1852,20 @@
             return {error:d};
           }
           d = b[c];
-          "undefined" !== typeof d && "" !== d && null !== d && (m[c] = d);
+          "undefined" !== typeof d && "" !== d && null !== d && (k[c] = d);
         }
       }
     }
     if ("POST" === a.method) {
       try {
-        b = k(b, m);
+        b = l(b, k);
       } catch (h) {
         return {error:h.message};
       }
     }
-    "/v1/event" === a.endpoint && (m.metadata = safejson.stringify(m.metadata || {}), m.hasOwnProperty("commerce_data") && (m.commerce_data = safejson.stringify(m.commerce_data || {})));
-    "/v1/open" === a.endpoint && (m.options = safejson.stringify(m.options || {}));
-    return {data:this.serializeObject(m, ""), url:e.replace(/^\//, "")};
+    "/v1/event" === a.endpoint && (k.metadata = safejson.stringify(k.metadata || {}), k.hasOwnProperty("commerce_data") && (k.commerce_data = safejson.stringify(k.commerce_data || {})));
+    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids && (k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {}))));
+    return {data:this.serializeObject(k, ""), url:e.replace(/^\//, "")};
   };
   Server.prototype.createScript = function(a, b, c) {
     var d = document.createElement("script");
@@ -1879,19 +1879,19 @@
   Server.prototype.jsonpRequest = function(a, b, c, d) {
     var e = Date.now(), f = utils.currentRequestBrttTag;
     0 === this._jsonp_callback_index && utils.isSafari11OrGreater() && this._jsonp_callback_index++;
-    var g = "branch_callback__" + this._jsonp_callback_index++, k = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
+    var g = "branch_callback__" + this._jsonp_callback_index++, l = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
     b = "POST" === c ? encodeURIComponent(utils.base64encode(goog.json.serialize(b))) : "";
-    var m = window.setTimeout(function() {
+    var k = window.setTimeout(function() {
       window[g] = function() {
       };
       utils.addPropertyIfNotNull(utils.instrumentation, f, utils.calculateBrtt(e));
       d(Error(utils.messages.timeout), null, 504);
     }, utils.timeout);
     window[g] = function(h) {
-      window.clearTimeout(m);
+      window.clearTimeout(k);
       d(null, h);
     };
-    this.createScript(a + (0 > a.indexOf("?") ? "?" : "") + (b ? k + b : "") + (0 <= a.indexOf("/c/") ? "&click=1" : "") + "&callback=" + g, function() {
+    this.createScript(a + (0 > a.indexOf("?") ? "?" : "") + (b ? l + b : "") + (0 <= a.indexOf("/c/") ? "&click=1" : "") + "&callback=" + g, function() {
       d(Error(utils.messages.blockedByClient), null);
     }, function() {
       utils.addPropertyIfNotNull(utils.instrumentation, f, utils.calculateBrtt(e));
@@ -1903,10 +1903,10 @@
     });
   };
   Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
-    var k = Date.now(), m = utils.currentRequestBrttTag, h = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+    var l = Date.now(), k = utils.currentRequestBrttTag, h = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
     g && (h.responseType = g);
     h.ontimeout = function() {
-      utils.addPropertyIfNotNull(utils.instrumentation, m, utils.calculateBrtt(k));
+      utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(l));
       e(Error(utils.messages.timeout), null, 504);
     };
     h.onerror = function(n) {
@@ -1914,7 +1914,7 @@
     };
     h.onreadystatechange = function() {
       if (4 === h.readyState) {
-        if (utils.addPropertyIfNotNull(utils.instrumentation, m, utils.calculateBrtt(k)), 200 === h.status) {
+        if (utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(l)), 200 === h.status) {
           if ("arraybuffer" === h.responseType) {
             var n = h.response;
           } else if (f) {
@@ -1951,31 +1951,31 @@
     if (f.error) {
       return d(Error(safejson.stringify({message:f.error, endpoint:a.endpoint, data:b})));
     }
-    var k = "";
+    var l = "";
     if ("GET" === a.method) {
-      var m = f.url + "?" + f.data;
+      var k = f.url + "?" + f.data;
     } else {
-      m = f.url, k = f.data;
+      k = f.url, l = f.data;
     }
-    var h = c.get("use_jsonp") || a.jsonp ? b : k;
+    var h = c.get("use_jsonp") || a.jsonp ? b : l;
     var n = utils.retries, q = function(r, u, v) {
       if ("function" === typeof e.onAPIResponse) {
-        e.onAPIResponse(m, a.method, h, r, v, u);
+        e.onAPIResponse(k, a.method, h, r, v, u);
       }
       r && 0 < n && "5" === (v || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
         t();
       }, utils.retry_delay)) : d(r, u);
     };
-    if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(m, b)) {
+    if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(k, b)) {
       return utils.userPreferences.allowErrorsInCallback ? q(Error(utils.messages.trackingDisabled), null, 300) : q(null, {}, 200);
     }
     var p = !1;
     if ("/v1/qr-code" === a.endpoint) {
       p = !0;
-      var l = "arraybuffer";
+      var m = "arraybuffer";
     }
     var t = function() {
-      c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(m, b, a.method, q) : e.XHRRequest(m, k, a.method, c, q, p, l);
+      c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, q) : e.XHRRequest(k, l, a.method, c, q, p, m);
     };
     t();
   };
@@ -2013,8 +2013,8 @@
       a.set("branch_session", b);
     }
   }, patch:function(a, b, c, d) {
-    var e = function(g, k) {
-      return utils.encodeBFPs(utils.merge(safejson.parse(g), k, d));
+    var e = function(g, l) {
+      return utils.encodeBFPs(utils.merge(safejson.parse(g), l, d));
     }, f = a.get("branch_session", !1) || {};
     a.set("branch_session", goog.json.serialize(e(f, b)));
     c && (c = a.get("branch_session_first", !0) || {}, a.set("branch_session_first", goog.json.serialize(e(c, b)), !0));
@@ -2024,35 +2024,35 @@
     return function() {
       var d = this, e = arguments[arguments.length - 1];
       if (a === callback_params.NO_CALLBACK || "function" !== typeof e) {
-        var f = function(k) {
+        var f = function(l) {
         };
         var g = Array.prototype.slice.call(arguments);
       } else {
         g = Array.prototype.slice.call(arguments, 0, arguments.length - 1) || [], f = e;
       }
-      d._queue(function(k) {
-        var m = function(h, n) {
+      d._queue(function(l) {
+        var k = function(h, n) {
           try {
             if (h && a === callback_params.NO_CALLBACK) {
               throw h;
             }
             a === callback_params.CALLBACK_ERR ? f(h) : a === callback_params.CALLBACK_ERR_DATA && f(h, n);
           } finally {
-            k();
+            l();
           }
         };
         if (!c) {
           if (d.init_state === init_states.INIT_PENDING) {
-            return m(Error(utils.message(utils.messages.initPending)), null);
+            return k(Error(utils.message(utils.messages.initPending)), null);
           }
           if (d.init_state === init_states.INIT_FAILED) {
-            return m(Error(utils.message(utils.messages.initFailed, d.init_state_fail_code, d.init_state_fail_details)), null);
+            return k(Error(utils.message(utils.messages.initFailed, d.init_state_fail_code, d.init_state_fail_details)), null);
           }
           if (d.init_state === init_states.NO_INIT || !d.init_state) {
-            return m(Error(utils.message(utils.messages.nonInit)), null);
+            return k(Error(utils.message(utils.messages.nonInit)), null);
           }
         }
-        g.unshift(m);
+        g.unshift(k);
         b.apply(d, g);
       });
     };
@@ -2111,65 +2111,65 @@
     var e = (c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null) || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), f = !d.randomized_bundle_token;
     d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
     var g = function(p) {
-      var l = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, r = session.get(d._storage, !0) || {};
-      r.randomized_device_token && (l._t = r.randomized_device_token);
-      d._api(resources._r, l, function(u, v) {
+      var m = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, r = session.get(d._storage, !0) || {};
+      r.randomized_device_token && (m._t = r.randomized_device_token);
+      d._api(resources._r, m, function(u, v) {
         u && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = u.message);
         v && (t.randomized_device_token = v, p && p(null, t));
       });
-    }, k = function(p, l) {
+    }, l = function(p, m) {
       p = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
       utils.delay(function() {
-        d._api(resources.open, {link_identifier:e, randomized_device_token:l.randomized_device_token, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
+        d._api(resources.open, {link_identifier:e, randomized_device_token:m.randomized_device_token, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
           t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
           t || "object" !== typeof r || e && (r.click_id = e);
-          m(t, r);
+          k(t, r);
         });
       }, p);
-    }, m = function(p, l) {
-      l && (l.link_click_id && (d.link_click_id = l.link_click_id.toString()), l.session_id && (d.session_id = l.session_id.toString()), l.randomized_bundle_token && (d.randomized_bundle_token = l.randomized_bundle_token.toString()), l.identity && (d.identity = l.identity.toString()), l.link && (d.sessionLink = l.link), l.referring_link && (l.referring_link = utils.processReferringLink(l.referring_link)), !l.click_id && l.referring_link && (l.click_id = utils.getClickIdAndSearchStringFromLink(l.referring_link)), 
-      d.randomized_device_token = l.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (l.identity = d.identity), session.set(d._storage, l, f)), d.init_state = init_states.INIT_SUCCEEDED, l.data_parsed = l.data && 0 !== l.data.length ? safejson.parse(l.data) : {});
+    }, k = function(p, m) {
+      m && (m.link_click_id && (d.link_click_id = m.link_click_id.toString()), m.session_id && (d.session_id = m.session_id.toString()), m.randomized_bundle_token && (d.randomized_bundle_token = m.randomized_bundle_token.toString()), m.identity && (d.identity = m.identity.toString()), m.link && (d.sessionLink = m.link), m.referring_link && (m.referring_link = utils.processReferringLink(m.referring_link)), !m.click_id && m.referring_link && (m.click_id = utils.getClickIdAndSearchStringFromLink(m.referring_link)), 
+      d.randomized_device_token = m.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (m.identity = d.identity), session.set(d._storage, m, f)), d.init_state = init_states.INIT_SUCCEEDED, m.data_parsed = m.data && 0 !== m.data.length ? safejson.parse(m.data) : {});
       if (p) {
-        return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = p.message), a(p, l && utils.whiteListSessionData(l));
+        return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = p.message), a(p, m && utils.whiteListSessionData(m));
       }
       try {
-        a(p, l && utils.whiteListSessionData(l));
+        a(p, m && utils.whiteListSessionData(m));
       } catch (t) {
       } finally {
         d.renderFinalize();
       }
       p = utils.getAdditionalMetadata();
-      (l = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (l = utils.mergeHostedDeeplinkData(p.hosted_deeplink_data, l)) && 0 < Object.keys(l).length && (p.hosted_deeplink_data = l);
+      (m = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (m = utils.mergeHostedDeeplinkData(p.hosted_deeplink_data, m)) && 0 < Object.keys(m).length && (p.hosted_deeplink_data = m);
       utils.userPreferences.trackingDisabled && (utils.userPreferences.allowErrorsInCallback = !0);
     }, h = function() {
       if ("undefined" !== typeof document.hidden) {
         var p = "hidden";
-        var l = "visibilitychange";
+        var m = "visibilitychange";
       } else {
-        "undefined" !== typeof document.mozHidden ? (p = "mozHidden", l = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (p = "msHidden", l = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (p = "webkitHidden", l = "webkitvisibilitychange");
+        "undefined" !== typeof document.mozHidden ? (p = "mozHidden", m = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (p = "msHidden", m = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (p = "webkitHidden", m = "webkitvisibilitychange");
       }
-      l && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(l, function() {
-        document[p] || (g(k), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
+      m && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(m, function() {
+        document[p] || (g(l), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
       }, !1));
     };
     if (b && b.session_id && !e && !utils.getParamValue("branchify_url")) {
-      session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), h(), g(m);
+      session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), h(), g(k);
     } else {
       b = {sdk:config.version, branch_key:d.branch_key};
       var n = session.get(d._storage, !0) || {};
       n.randomized_device_token && (b._t = n.randomized_device_token);
       n.identity && (d.identity = n.identity);
       var q = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
-      d._api(resources._r, b, function(p, l) {
+      d._api(resources._r, b, function(p, m) {
         if (p) {
-          return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = p.message, m(p, null);
+          return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = p.message, k(p, null);
         }
         utils.delay(function() {
-          d._api(resources.open, {link_identifier:e, randomized_device_token:e || l, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
+          d._api(resources.open, {link_identifier:e, randomized_device_token:e || m, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
             t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
             t || "object" !== typeof r || (r.branch_view_enabled && (d._branchViewEnabled = !!r.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), e && (r.click_id = e));
             h();
-            m(t, r);
+            k(t, r);
           });
         }, q);
       });
@@ -2304,7 +2304,7 @@
       if (f) {
         return a(Error(f));
       }
-      e._api(resources.commerceEvent, {event:b, metadata:utils.merge({url:document.URL, user_agent:navigator.userAgent, language:navigator.language}, d || {}), initial_referrer:utils.getInitialReferrer(e._referringLink()), commerce_data:c}, function(g, k) {
+      e._api(resources.commerceEvent, {event:b, metadata:utils.merge({url:document.URL, user_agent:navigator.userAgent, language:navigator.language}, d || {}), initial_referrer:utils.getInitialReferrer(e._referringLink()), commerce_data:c}, function(g, l) {
         a(g || null);
       });
     });
