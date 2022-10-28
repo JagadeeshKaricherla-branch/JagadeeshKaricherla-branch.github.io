@@ -1864,7 +1864,7 @@
       }
     }
     "/v1/event" === a.endpoint && (k.metadata = safejson.stringify(k.metadata || {}), k.hasOwnProperty("commerce_data") && (k.commerce_data = safejson.stringify(k.commerce_data || {})));
-    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids && (k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {}))));
+    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {})));
     return {data:this.serializeObject(k, ""), url:e.replace(/^\//, "")};
   };
   Server.prototype.createScript = function(a, b, c) {
