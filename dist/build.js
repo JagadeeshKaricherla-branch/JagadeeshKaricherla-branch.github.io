@@ -1864,7 +1864,7 @@
       }
     }
     "/v1/event" === a.endpoint && (k.metadata = safejson.stringify(k.metadata || {}), k.hasOwnProperty("commerce_data") && (k.commerce_data = safejson.stringify(k.commerce_data || {})));
-    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {})));
+    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids && (k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {}))));
     return {data:this.serializeObject(k, ""), url:e.replace(/^\//, "")};
   };
   Server.prototype.createScript = function(a, b, c) {
@@ -2149,7 +2149,7 @@
         "undefined" !== typeof document.mozHidden ? (p = "mozHidden", m = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (p = "msHidden", m = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (p = "webkitHidden", m = "webkitvisibilitychange");
       }
       m && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(m, function() {
-        document[p] || (g(l), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
+        document[p] || g(l);
       }, !1));
     };
     if (b && b.session_id && !e && !utils.getParamValue("branchify_url")) {
