@@ -2104,7 +2104,7 @@
     utils.userPreferences.trackingDisabled = c && c.tracking_disabled && !0 === c.tracking_disabled ? !0 : !1;
     utils.userPreferences.allowErrorsInCallback = !1;
     utils.userPreferences.trackingDisabled && utils.cleanApplicationAndSessionStorage(d);
-    d.advertising_ids = c && c.advertising_ids && utils.validateParameterType(c.advertising_ids, "object") && utils.validateAdvertiserIDs(c.advertising_ids) ? c.advertising_ids : {};
+    d.advertising_ids = c && c.advertising_ids && utils.validateParameterType(c.advertising_ids, "object") && utils.validateAdvertiserIDs(c.advertising_ids) ? c.advertising_ids : null;
     b = session.get(d._storage, !0);
     d.randomized_bundle_token = b && b.randomized_bundle_token;
     b = session.get(d._storage);
