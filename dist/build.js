@@ -2165,7 +2165,7 @@
           return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = p.message, k(p, null);
         }
         utils.delay(function() {
-          d._api(resources.open, {link_identifier:e, randomized_device_token:e || m, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
+          d._api(resources.open, {link_identifier:e, randomized_device_token:m, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
             t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
             t || "object" !== typeof r || (r.branch_view_enabled && (d._branchViewEnabled = !!r.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), e && (r.click_id = e));
             h();
