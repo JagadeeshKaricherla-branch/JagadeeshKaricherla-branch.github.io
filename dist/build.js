@@ -4,6 +4,96 @@
    Copyright The Closure Library Authors.
    SPDX-License-Identifier: Apache-2.0
   */
+  var $jscomp = $jscomp || {};
+  $jscomp.scope = {};
+  $jscomp.ASSUME_ES5 = !1;
+  $jscomp.ASSUME_NO_NATIVE_MAP = !1;
+  $jscomp.ASSUME_NO_NATIVE_SET = !1;
+  $jscomp.SIMPLE_FROUND_POLYFILL = !1;
+  $jscomp.ISOLATE_POLYFILLS = !1;
+  $jscomp.FORCE_POLYFILL_PROMISE = !1;
+  $jscomp.FORCE_POLYFILL_PROMISE_WHEN_NO_UNHANDLED_REJECTION = !1;
+  $jscomp.defineProperty = $jscomp.ASSUME_ES5 || "function" == typeof Object.defineProperties ? Object.defineProperty : function(a, b, c) {
+    if (a == Array.prototype || a == Object.prototype) {
+      return a;
+    }
+    a[b] = c.value;
+    return a;
+  };
+  $jscomp.getGlobal = function(a) {
+    a = ["object" == typeof globalThis && globalThis, a, "object" == typeof window && window, "object" == typeof self && self, "object" == typeof global && global,];
+    for (var b = 0; b < a.length; ++b) {
+      var c = a[b];
+      if (c && c.Math == Math) {
+        return c;
+      }
+    }
+    throw Error("Cannot find global object");
+  };
+  $jscomp.global = $jscomp.getGlobal(this);
+  $jscomp.IS_SYMBOL_NATIVE = "function" === typeof Symbol && "symbol" === typeof Symbol("x");
+  $jscomp.TRUST_ES6_POLYFILLS = !$jscomp.ISOLATE_POLYFILLS || $jscomp.IS_SYMBOL_NATIVE;
+  $jscomp.polyfills = {};
+  $jscomp.propertyToPolyfillSymbol = {};
+  $jscomp.POLYFILL_PREFIX = "$jscp$";
+  var $jscomp$lookupPolyfilledValue = function(a, b) {
+    var c = $jscomp.propertyToPolyfillSymbol[b];
+    if (null == c) {
+      return a[b];
+    }
+    c = a[c];
+    return void 0 !== c ? c : a[b];
+  };
+  $jscomp.polyfill = function(a, b, c, d) {
+    b && ($jscomp.ISOLATE_POLYFILLS ? $jscomp.polyfillIsolated(a, b, c, d) : $jscomp.polyfillUnisolated(a, b, c, d));
+  };
+  $jscomp.polyfillUnisolated = function(a, b, c, d) {
+    c = $jscomp.global;
+    a = a.split(".");
+    for (d = 0; d < a.length - 1; d++) {
+      var e = a[d];
+      if (!(e in c)) {
+        return;
+      }
+      c = c[e];
+    }
+    a = a[a.length - 1];
+    d = c[a];
+    b = b(d);
+    b != d && null != b && $jscomp.defineProperty(c, a, {configurable:!0, writable:!0, value:b});
+  };
+  $jscomp.polyfillIsolated = function(a, b, c, d) {
+    var e = a.split(".");
+    a = 1 === e.length;
+    d = e[0];
+    d = !a && d in $jscomp.polyfills ? $jscomp.polyfills : $jscomp.global;
+    for (var f = 0; f < e.length - 1; f++) {
+      var g = e[f];
+      if (!(g in d)) {
+        return;
+      }
+      d = d[g];
+    }
+    e = e[e.length - 1];
+    c = $jscomp.IS_SYMBOL_NATIVE && "es6" === c ? d[e] : null;
+    b = b(c);
+    null != b && (a ? $jscomp.defineProperty($jscomp.polyfills, e, {configurable:!0, writable:!0, value:b}) : b !== c && (void 0 === $jscomp.propertyToPolyfillSymbol[e] && (c = 1E9 * Math.random() >>> 0, $jscomp.propertyToPolyfillSymbol[e] = $jscomp.IS_SYMBOL_NATIVE ? $jscomp.global.Symbol(e) : $jscomp.POLYFILL_PREFIX + c + "$" + e), $jscomp.defineProperty(d, $jscomp.propertyToPolyfillSymbol[e], {configurable:!0, writable:!0, value:b})));
+  };
+  $jscomp.polyfill("Array.prototype.includes", function(a) {
+    return a ? a : function(b, c) {
+      var d = this;
+      d instanceof String && (d = String(d));
+      var e = d.length;
+      c = c || 0;
+      for (0 > c && (c = Math.max(c + e, 0)); c < e; c++) {
+        var f = d[c];
+        if (f === b || Object.is(f, b)) {
+          return !0;
+        }
+      }
+      return !1;
+    };
+  }, "es7", "es3");
   var COMPILED = !0, goog = goog || {};
   goog.global = this || self;
   goog.exportPath_ = function(a, b, c, d) {
@@ -281,9 +371,9 @@
         e = d.transpile;
       }
     }
-    e || (e = d.transpile = function(l, k) {
-      goog.logToConsole_(k + " requires transpilation but no transpiler was found.");
-      return l;
+    e || (e = d.transpile = function(k, h) {
+      goog.logToConsole_(h + " requires transpilation but no transpiler was found.");
+      return k;
     });
     return e(a, b, c);
   };
@@ -425,8 +515,8 @@
     a.prototype = new c();
     a.prototype.constructor = a;
     a.base = function(d, e, f) {
-      for (var g = Array(arguments.length - 2), l = 2; l < arguments.length; l++) {
-        g[l - 2] = arguments[l];
+      for (var g = Array(arguments.length - 2), k = 2; k < arguments.length; k++) {
+        g[k - 2] = arguments[k];
       }
       return b.prototype[e].apply(d, g);
     };
@@ -649,16 +739,16 @@
           e = !0;
           a.loaded_(d);
         }, pending:function() {
-          for (var g = [], l = 0; l < a.loadingDeps_.length; l++) {
-            g.push(a.loadingDeps_[l]);
+          for (var g = [], k = 0; k < a.loadingDeps_.length; k++) {
+            g.push(a.loadingDeps_[k]);
           }
           return g;
         }, setModuleState:function(g) {
           goog.moduleLoaderState_ = {type:g, moduleName:"", declareLegacyNamespace:!1};
-        }, registerEs6ModuleExports:function(g, l, k) {
-          k && (goog.loadedModules_[k] = {exports:l, type:goog.ModuleType.ES6, moduleId:k || ""});
-        }, registerGoogModuleExports:function(g, l) {
-          goog.loadedModules_[g] = {exports:l, type:goog.ModuleType.GOOG, moduleId:g};
+        }, registerEs6ModuleExports:function(g, k, h) {
+          h && (goog.loadedModules_[h] = {exports:k, type:goog.ModuleType.ES6, moduleId:h || ""});
+        }, registerGoogModuleExports:function(g, k) {
+          goog.loadedModules_[g] = {exports:k, type:goog.ModuleType.GOOG, moduleId:g};
         }, clearModuleState:function() {
           goog.moduleLoaderState_ = null;
         }, defer:function(g) {
@@ -776,8 +866,8 @@
         }
         var c = goog.getScriptNonce_();
         if (!goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING && goog.isDocumentLoading_()) {
-          var d = function(l) {
-            l.readyState && "complete" != l.readyState ? l.onload = d : (goog.Dependency.unregisterCallback_(e), a.loaded());
+          var d = function(k) {
+            k.readyState && "complete" != k.readyState ? k.onload = d : (goog.Dependency.unregisterCallback_(e), a.loaded());
           };
           var e = goog.Dependency.registerCallback_(d);
           c = c ? ' nonce="' + c + '"' : "";
@@ -805,21 +895,21 @@
   }, goog.Es6ModuleDependency = function(a, b, c, d, e) {
     goog.Dependency.call(this, a, b, c, d, e);
   }, goog.inherits(goog.Es6ModuleDependency, goog.Dependency), goog.Es6ModuleDependency.prototype.load = function(a) {
-    function b(h, n) {
-      var q = "", p = goog.getScriptNonce_();
-      p && (q = ' nonce="' + p + '"');
-      h = n ? '<script type="module" crossorigin' + q + ">" + n + "\x3c/script>" : '<script type="module" crossorigin src="' + h + '"' + q + ">\x3c/script>";
-      d.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(h) : h);
+    function b(l, m) {
+      var q = "", r = goog.getScriptNonce_();
+      r && (q = ' nonce="' + r + '"');
+      l = m ? '<script type="module" crossorigin' + q + ">" + m + "\x3c/script>" : '<script type="module" crossorigin src="' + l + '"' + q + ">\x3c/script>";
+      d.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(l) : l);
     }
-    function c(h, n) {
+    function c(l, m) {
       var q = d.createElement("script");
       q.defer = !0;
       q.async = !1;
       q.type = "module";
       q.setAttribute("crossorigin", !0);
-      var p = goog.getScriptNonce_();
-      p && (q.nonce = p);
-      n ? q.text = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScript(n) : n : q.src = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScriptURL(h) : h;
+      var r = goog.getScriptNonce_();
+      r && (q.nonce = r);
+      m ? q.text = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScript(m) : m : q.src = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScriptURL(l) : l;
       d.head.appendChild(q);
     }
     if (goog.global.CLOSURE_IMPORT_SCRIPT) {
@@ -839,17 +929,17 @@
         });
         f(void 0, 'goog.Dependency.callback_("' + g + '")');
         f(this.path, void 0);
-        var l = goog.Dependency.registerCallback_(function(h) {
-          goog.Dependency.unregisterCallback_(l);
-          a.registerEs6ModuleExports(e.path, h, goog.moduleLoaderState_.moduleName);
-        });
-        f(void 0, 'import * as m from "' + this.path + '"; goog.Dependency.callback_("' + l + '", m)');
-        var k = goog.Dependency.registerCallback_(function() {
+        var k = goog.Dependency.registerCallback_(function(l) {
           goog.Dependency.unregisterCallback_(k);
+          a.registerEs6ModuleExports(e.path, l, goog.moduleLoaderState_.moduleName);
+        });
+        f(void 0, 'import * as m from "' + this.path + '"; goog.Dependency.callback_("' + k + '", m)');
+        var h = goog.Dependency.registerCallback_(function() {
+          goog.Dependency.unregisterCallback_(h);
           a.clearModuleState();
           a.loaded();
         });
-        f(void 0, 'goog.Dependency.callback_("' + k + '")');
+        f(void 0, 'goog.Dependency.callback_("' + h + '")');
       } else {
         goog.logToConsole_("Cannot use default debug loader outside of HTML documents."), a.pause();
       }
@@ -868,28 +958,28 @@
       if (e.contents_) {
         f && a.setModuleState(goog.ModuleType.ES6);
         try {
-          var h = e.contents_;
+          var l = e.contents_;
           e.contents_ = null;
-          goog.globalEval(goog.CLOSURE_EVAL_PREFILTER_.createScript(h));
+          goog.globalEval(goog.CLOSURE_EVAL_PREFILTER_.createScript(l));
           if (f) {
-            var n = goog.moduleLoaderState_.moduleName;
+            var m = goog.moduleLoaderState_.moduleName;
           }
         } finally {
           f && a.clearModuleState();
         }
         f && goog.global.$jscomp.require.ensure([e.getPathName()], function() {
-          a.registerEs6ModuleExports(e.path, goog.global.$jscomp.require(e.getPathName()), n);
+          a.registerEs6ModuleExports(e.path, goog.global.$jscomp.require(e.getPathName()), m);
         });
         a.loaded();
       }
     }
     function d() {
-      var h = goog.global.document, n = goog.Dependency.registerCallback_(function() {
-        goog.Dependency.unregisterCallback_(n);
+      var l = goog.global.document, m = goog.Dependency.registerCallback_(function() {
+        goog.Dependency.unregisterCallback_(m);
         c();
       }), q = goog.getScriptNonce_();
-      q = "<script" + (q ? ' nonce="' + q + '"' : "") + ">" + goog.protectScriptTag_('goog.Dependency.callback_("' + n + '");') + "\x3c/script>";
-      h.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(q) : q);
+      q = "<script" + (q ? ' nonce="' + q + '"' : "") + ">" + goog.protectScriptTag_('goog.Dependency.callback_("' + m + '");') + "\x3c/script>";
+      l.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(q) : q);
     }
     var e = this;
     if (goog.global.CLOSURE_IMPORT_SCRIPT) {
@@ -903,15 +993,15 @@
           c();
         });
       } else {
-        var l = goog.global.document;
+        var k = goog.global.document;
         g = goog.inHtmlDocument_() && ("ActiveXObject" in goog.global || goog.isEdge_());
         if (f && goog.inHtmlDocument_() && goog.isDocumentLoading_() && !g) {
           goog.Dependency.defer_ = !0;
           a.pause();
-          var k = l.onreadystatechange;
-          l.onreadystatechange = function() {
-            "interactive" == l.readyState && (l.onreadystatechange = k, c(), a.resume());
-            "function" === typeof k && k.apply(void 0, arguments);
+          var h = k.onreadystatechange;
+          k.onreadystatechange = function() {
+            "interactive" == k.readyState && (k.onreadystatechange = h, c(), a.resume());
+            "function" === typeof h && h.apply(void 0, arguments);
           };
         } else {
           goog.inHtmlDocument_() && goog.isDocumentLoading_() ? d() : c();
@@ -1078,7 +1168,7 @@
     b.push("}");
   };
   // Input 2
-  var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"1.0.0", sdk:"connected"};
+  var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.69.0"};
   // Input 3
   var safejson = {parse:function(a) {
     a = String(a);
@@ -1096,7 +1186,7 @@
   }};
   // Input 4
   var utils = {}, message;
-  utils.debug = !0;
+  utils.debug = !1;
   utils.retries = 2;
   utils.retry_delay = 200;
   utils.timeout = 5000;
@@ -1110,7 +1200,8 @@
   utils.calculateBrtt = function(a) {
     return a && "number" === typeof a ? (Date.now() - a).toString() : null;
   };
-  utils.userPreferences = {trackingDisabled:!1, whiteListedEndpointsWithData:{"/v1/open":{link_identifier:"\\d+"}, "/v1/url":{}}, allowErrorsInCallback:!1, shouldBlockRequest:function(a, b) {
+  utils.dismissEventToSourceMapping = {didClickJourneyClose:"Button(X)", didClickJourneyContinue:"Dismiss Journey text", didClickJourneyBackgroundDismiss:"Background Dismiss", didScrollJourneyBackgroundDismiss:"Background Dismiss"};
+  utils.userPreferences = {trackingDisabled:!1, whiteListedEndpointsWithData:{"/v1/open":{link_identifier:"\\d+"}, "/v1/pageview":{event:"pageview"}, "/v1/dismiss":{event:"dismiss"}, "/v1/url":{}}, allowErrorsInCallback:!1, shouldBlockRequest:function(a, b) {
     var c = document.createElement("a");
     c.href = a;
     a = [config.api_endpoint, config.app_service_endpoint, config.link_service_endpoint];
@@ -1121,9 +1212,6 @@
     }
     c = c.pathname;
     "/" != c[0] && (c = "/" + c);
-    if (c.startsWith("/c/")) {
-      return !1;
-    }
     c = utils.userPreferences.whiteListedEndpointsWithData[c];
     if (!c) {
       return !0;
@@ -1159,11 +1247,12 @@
     }
   };
   utils.cleanApplicationAndSessionStorage = function(a) {
-    a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.randomized_bundle_token = null, a.identity = null, a.randomized_device_token = null, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
+    a && (a.device_fingerprint_id = null, a.sessionLink = null, a.session_id = null, a.identity_id = null, a.identity = null, a.browser_fingerprint_id = null, a._deepviewCta && delete a._deepviewCta, a._deepviewRequestForReplay && delete a._deepviewRequestForReplay, a._storage.remove("branch_view_enabled"), session.set(a._storage, {}, !0));
   };
   utils.httpMethod = {POST:"POST", GET:"GET"};
   utils.messages = {missingParam:"API request $1 missing parameter $2", invalidType:"API request $1, parameter $2 is not $3", nonInit:"Branch SDK not initialized", initPending:"Branch SDK initialization pending and a Branch method was called outside of the queue order", initFailed:"Branch SDK initialization failed, so further methods cannot be called", existingInit:"Branch SDK already initialized", missingAppId:"Missing Branch app ID", callBranchInitFirst:"Branch.init must be called first", timeout:"Request timed out", 
-  blockedByClient:"Request blocked by client, probably adblock", missingUrl:"Required argument: URL, is missing", trackingDisabled:"Requested operation cannot be completed since tracking is disabled"};
+  blockedByClient:"Request blocked by client, probably adblock", missingUrl:"Required argument: URL, is missing", trackingDisabled:"Requested operation cannot be completed since tracking is disabled", deepviewNotCalled:"Cannot call Deepview CTA, please call branch.deepview() first"};
+  utils.bannerThemes = ["light", "dark"];
   utils.getLocationSearch = function() {
     return utils.isIframeAndFromSameOrigin() ? window.top.location.search : window.location.search;
   };
@@ -1182,6 +1271,29 @@
   utils.whiteListSessionData = function(a) {
     return {data:a.data || "", data_parsed:a.data_parsed || {}, has_app:utils.getBooleanOrNull(a.has_app), identity:a.identity || null, developer_identity:a.identity || null, referring_identity:a.referring_identity || null, referring_link:a.referring_link || null};
   };
+  utils.whiteListJourneysLanguageData = function(a) {
+    var b = /^\$journeys_\S+$/, c = a.data, d = {};
+    if (!c) {
+      return {};
+    }
+    switch(typeof c) {
+      case "string":
+        try {
+          c = safejson.parse(c);
+        } catch (e) {
+          c = {};
+        }
+        break;
+      case "object":
+        break;
+      default:
+        c = {};
+    }
+    Object.keys(c).forEach(function(e) {
+      b.test(e) && (d[e] = c[e]);
+    });
+    return d;
+  };
   utils.getWindowLocation = function() {
     return utils.isIframe() ? document.referrer : String(window.location);
   };
@@ -1191,13 +1303,13 @@
     return (a = (new RegExp("[?&]" + a + "(=([^&#]*)|&|#|$)")).exec(b)) && a[2] ? decodeURIComponent(a[2].replace(/\+/g, " ")) : "";
   };
   utils.cleanLinkData = function(a) {
-    a.source = "connected-sdk";
-    var b = a.data;
+    a.source = "web-sdk";
+    var b = a.data, c = b ? b.$og_redirect || b.$fallback_url || b.$desktop_url : !1;
     switch(typeof b) {
       case "string":
         try {
           b = safejson.parse(b);
-        } catch (c) {
+        } catch (d) {
           b = {_bncNoEval:!0};
         }
         break;
@@ -1207,15 +1319,15 @@
         b = {};
     }
     b.$canonical_url || (b.$canonical_url = utils.getWindowLocation());
-    b.$og_title || (b.$og_title = utils.getOpenGraphContent("title"));
-    b.$og_description || (b.$og_description = utils.getOpenGraphContent("description"));
-    b.$og_image_url || (b.$og_image_url = utils.getOpenGraphContent("image"));
-    b.$og_video || (b.$og_video = utils.getOpenGraphContent("video"));
-    b.$og_type || (b.$og_type = utils.getOpenGraphContent("type"));
+    b.$og_title || (b.$og_title = c ? null : utils.getOpenGraphContent("title"));
+    b.$og_description || (b.$og_description = c ? null : utils.getOpenGraphContent("description"));
+    b.$og_image_url || (b.$og_image_url = c ? null : utils.getOpenGraphContent("image"));
+    b.$og_video || (b.$og_video = c ? null : utils.getOpenGraphContent("video"));
+    b.$og_type || (b.$og_type = c ? null : utils.getOpenGraphContent("type"));
     "string" === typeof b.$desktop_url && (b.$desktop_url = b.$desktop_url.replace(/#r:[a-z0-9-_]+$/i, "").replace(/([\?&]_branch_match_id=\d+)/, ""));
     try {
       safejson.parse(b);
-    } catch (c) {
+    } catch (d) {
       b = goog.json.serialize(b);
     }
     a.data = b;
@@ -1343,10 +1455,10 @@
       c = a.charCodeAt(d++);
       f = g >> 2;
       g = (g & 3) << 4 | e >> 4;
-      var l = (e & 15) << 2 | c >> 6;
-      var k = c & 63;
-      isNaN(e) ? k = l = 64 : isNaN(c) && (k = 64);
-      b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(f) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(g) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(l) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k);
+      var k = (e & 15) << 2 | c >> 6;
+      var h = c & 63;
+      isNaN(e) ? h = k = 64 : isNaN(c) && (h = 64);
+      b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(f) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(g) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(h);
     }
     return b;
   };
@@ -1364,11 +1476,13 @@
     }
   };
   utils.encodeBFPs = function(a) {
-    a && a.randomized_device_token && !utils.isBase64Encoded(a.randomized_device_token) && (a.randomized_device_token = btoa(a.randomized_device_token));
+    a && a.browser_fingerprint_id && !utils.isBase64Encoded(a.browser_fingerprint_id) && (a.browser_fingerprint_id = btoa(a.browser_fingerprint_id));
+    a && a.alternative_browser_fingerprint_id && !utils.isBase64Encoded(a.alternative_browser_fingerprint_id) && (a.alternative_browser_fingerprint_id = btoa(a.alternative_browser_fingerprint_id));
     return a;
   };
   utils.decodeBFPs = function(a) {
-    a && utils.isBase64Encoded(a.randomized_device_token) && (a.randomized_device_token = atob(a.randomized_device_token));
+    a && utils.isBase64Encoded(a.browser_fingerprint_id) && (a.browser_fingerprint_id = atob(a.browser_fingerprint_id));
+    a && utils.isBase64Encoded(a.alternative_browser_fingerprint_id) && (a.alternative_browser_fingerprint_id = atob(a.alternative_browser_fingerprint_id));
     return a;
   };
   utils.addEvent = function(a, b, c, d) {
@@ -1475,6 +1589,9 @@
   utils.validateCommerceEventParams = function(a, b) {
     return a && "string" === typeof a && -1 !== validCommerceEvents.indexOf(a.toLowerCase()) ? b && "object" === typeof b && 0 !== Object.keys(b || {}).length ? (a = validateCommerceDataKeys(b)) ? a : null : commerceEventMessages.missingCommerceData : commerceEventMessages.missingPurchaseEvent;
   };
+  utils.cleanBannerText = function(a) {
+    return "string" !== typeof a ? null : a.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  };
   utils.getTitle = function() {
     var a = document.getElementsByTagName("title");
     return 0 < a.length ? a[0].innerText : null;
@@ -1551,10 +1668,10 @@
     b = utils.addPropertyIfNotNull(b, "screen_width", utils.getScreenWidth());
     b = utils.addPropertyIfNotNull(b, "screen_height", utils.getScreenHeight());
     b = utils.addPropertyIfNotNull(b, "http_referrer", document.referrer);
-    b = utils.addPropertyIfNotNull(b, "randomized_device_token", a.randomized_device_token);
+    b = utils.addPropertyIfNotNull(b, "browser_fingerprint_id", a.browser_fingerprint_id);
     b = utils.addPropertyIfNotNull(b, "developer_identity", a.identity);
     b = utils.addPropertyIfNotNull(b, "identity", a.identity);
-    b = utils.addPropertyIfNotNull(b, "sdk", config.sdk);
+    b = utils.addPropertyIfNotNull(b, "sdk", "web");
     return b = utils.addPropertyIfNotNull(b, "sdk_version", config.version);
   };
   utils.isIframe = function() {
@@ -1603,17 +1720,6 @@
   utils.delay = function(a, b) {
     isNaN(b) || 0 >= b ? a() : setTimeout(a, b);
   };
-  utils.validateAdvertiserIDs = function(a = {}) {
-    const b = "SAMSUNG_IFA LG_IFA PANASONIC_IFA PLAYSTATION_IFA XBOX_MSAI ROKU_RIDA MAC_ADDRESS OAID IDFA AAID ANDROID_ID IDFV".split(" ");
-    a = Object.keys(a).filter(c => -1 === b.indexOf(c)).map(c => Error(`${c} is invalid.`));
-    if (0 < a.length) {
-      for (let c = 0; c < a.length; c++) {
-        console.log(a[c]);
-      }
-      return !1;
-    }
-    return !0;
-  };
   // Input 5
   var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
   function validator(a, b) {
@@ -1655,31 +1761,36 @@
     };
   }
   function defaults(a) {
-    var b = {randomized_device_token:validator(!0, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), sdk_version:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
+    var b = {browser_fingerprint_id:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
     return utils.merge(a, b);
   }
-  function v2defaults(a) {
-    var b = {user_data:validator(!0, validationTypes.OBJECT)};
-    return utils.merge(a, b);
-  }
-  resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
-  validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), sdk_version:validator(!1, validationTypes.STRING), advertising_ids:validator(!1, validationTypes.OBJECT)}};
+  resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{browser_fingerprint_id:validator(!1, validationTypes.STRING), alternative_browser_fingerprint_id:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, 
+  validationTypes.BOOLEAN), current_url:validator(!1, validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER)}};
   resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
   resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
   resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
-  resources.profile = {destination:config.api_endpoint, endpoint:"/v1/profile", method:utils.httpMethod.POST, params:defaults({randomized_bundle_token:validator(!0, validationTypes.STRING), identity:validator(!0, validationTypes.STRING)})};
-  resources.link = {destination:config.api_endpoint, endpoint:"/v1/url", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), 
-  type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING), instrumentation:validator(!1, validationTypes.STRING)})};
-  resources.qrCode = {destination:config.api_endpoint, endpoint:"/v1/qr-code", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), qr_code_settings:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!0, validationTypes.STRING), stage:validator(!1, 
-  validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING)})};
+  resources.profile = {destination:config.api_endpoint, endpoint:"/v1/profile", method:utils.httpMethod.POST, params:defaults({identity_id:validator(!0, validationTypes.STRING), identity:validator(!0, validationTypes.STRING)})};
+  resources.link = {destination:config.api_endpoint, endpoint:"/v1/url", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), type:validator(!1, 
+  validationTypes.NUMBER), source:validator(!1, validationTypes.STRING), instrumentation:validator(!1, validationTypes.STRING)})};
+  resources.qrCode = {destination:config.api_endpoint, endpoint:"/v1/qr-code", method:utils.httpMethod.POST, ref:"obj", params:defaults({alias:validator(!1, validationTypes.STRING), campaign:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!1, validationTypes.STRING), qr_code_settings:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), stage:validator(!1, validationTypes.STRING), 
+  tags:validator(!1, validationTypes.ARRAY), type:validator(!1, validationTypes.NUMBER), source:validator(!1, validationTypes.STRING)})};
+  resources.deepview = {destination:config.api_endpoint, endpoint:"/v1/deepview", jsonp:!0, method:utils.httpMethod.POST, params:defaults({campaign:validator(!1, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), channel:validator(!1, validationTypes.STRING), data:validator(!0, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), link_click_id:validator(!1, validationTypes.STRING), open_app:validator(!1, validationTypes.BOOLEAN), append_deeplink_path:validator(!1, 
+  validationTypes.BOOLEAN), stage:validator(!1, validationTypes.STRING), tags:validator(!1, validationTypes.ARRAY), deepview_type:validator(!0, validationTypes.STRING), source:validator(!0, validationTypes.STRING)})};
+  resources.hasApp = {destination:config.api_endpoint, endpoint:"/v1/has-app", method:utils.httpMethod.GET, params:{browser_fingerprint_id:validator(!0, validationTypes.STRING), instrumentation:validator(!1, validationTypes.STRING)}};
   resources.event = {destination:config.api_endpoint, endpoint:"/v1/event", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!0, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN)})};
   resources.commerceEvent = {destination:config.api_endpoint, endpoint:"/v1/event", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), commerce_data:validator(!0, validationTypes.OBJECT)})};
-  resources.logStandardEvent = {destination:config.api_endpoint, endpoint:"/v2/event/standard", method:utils.httpMethod.POST, params:v2defaults({name:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)})};
-  resources.logCustomEvent = {destination:config.api_endpoint, endpoint:"/v2/event/custom", method:utils.httpMethod.POST, params:v2defaults({name:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)})};
+  resources.logStandardEvent = {destination:config.api_endpoint, endpoint:"/v2/event/standard", method:utils.httpMethod.POST, params:{name:validator(!0, validationTypes.STRING), user_data:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)}};
+  resources.logCustomEvent = {destination:config.api_endpoint, endpoint:"/v2/event/custom", method:utils.httpMethod.POST, params:{name:validator(!0, validationTypes.STRING), user_data:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)}};
+  resources.pageview = {destination:config.api_endpoint, endpoint:"/v1/pageview", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
+  validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), identity_id:validator(!1, 
+  validationTypes.STRING), identity:validator(!0, validationTypes.STRING)})};
+  resources.dismiss = {destination:config.api_endpoint, endpoint:"/v1/dismiss", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
+  validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), dismissal_source:validator(!1, 
+  validationTypes.STRING)})};
   resources.crossPlatformIds = {destination:config.api_endpoint, endpoint:"/v1/cpid", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
   resources.lastAttributedTouchData = {destination:config.api_endpoint, endpoint:"/v1/cpid/latd", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
   // Input 6
-  var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_CONNECTEDSDK_KEY", storage, BranchStorage = function(a) {
+  var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", storage, BranchStorage = function(a) {
     for (var b = 0; b < a.length; b++) {
       var c = this[a[b]];
       c = "function" === typeof c ? c() : c;
@@ -1719,7 +1830,7 @@
       }
       return utils.decodeBFPs(c);
     }, get:function(c, d) {
-      return "randomized_device_token" === c ? d && localStorage ? utils.base64Decode(localStorage.getItem(prefix(c))) : utils.base64Decode(b.getItem(prefix(c))) : retrieveValue(d && localStorage ? localStorage.getItem(prefix(c)) : b.getItem(prefix(c)));
+      return "browser_fingerprint_id" === c || "alternative_browser_fingerprint_id" === c ? d && localStorage ? utils.base64Decode(localStorage.getItem(prefix(c))) : utils.base64Decode(b.getItem(prefix(c))) : retrieveValue(d && localStorage ? localStorage.getItem(prefix(c)) : b.getItem(prefix(c)));
     }, set:function(c, d, e) {
       e && localStorage ? localStorage.setItem(prefix(c), d) : b.setItem(prefix(c), d);
     }, remove:function(c, d) {
@@ -1813,25 +1924,25 @@
     return c.join("&");
   };
   Server.prototype.getUrl = function(a, b) {
-    var c, d, e = a.destination + a.endpoint, f = /^[0-9]{15,20}$/, g = /key_(live|test)_[A-Za-z0-9]{32}/, l = function(h, n) {
-      "undefined" === typeof n && (n = {});
-      if (h.branch_key && g.test(h.branch_key)) {
-        return n.branch_key = h.branch_key, n;
+    var c, d, e = a.destination + a.endpoint, f = /^[0-9]{15,20}$/, g = /key_(live|test)_[A-Za-z0-9]{32}/, k = function(l, m) {
+      "undefined" === typeof m && (m = {});
+      if (l.branch_key && g.test(l.branch_key)) {
+        return m.branch_key = l.branch_key, m;
       }
-      if (h.app_id && f.test(h.app_id)) {
-        return n.app_id = h.app_id, n;
+      if (l.app_id && f.test(l.app_id)) {
+        return m.app_id = l.app_id, m;
       }
-      if (h.instrumentation) {
-        n.instrumentation = h.instrumentation;
+      if (l.instrumentation) {
+        m.instrumentation = l.instrumentation;
       } else {
         throw Error(utils.message(utils.messages.missingParam, [a.endpoint, "branch_key or app_id"]));
       }
     };
     if ("/v1/has-app" === a.endpoint) {
       try {
-        a.queryPart = l(b, a.queryPart);
-      } catch (h) {
-        return {error:h.message};
+        a.queryPart = k(b, a.queryPart);
+      } catch (l) {
+        return {error:l.message};
       }
     }
     if ("undefined" !== typeof a.queryPart) {
@@ -1844,28 +1955,31 @@
         }
       }
     }
-    var k = {};
-    if ("undefined" !== typeof a.params) {
+    var h = {};
+    if ("undefined" !== typeof a.params && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint) {
       for (c in a.params) {
         if (a.params.hasOwnProperty(c)) {
           if (d = a.params[c](a.endpoint, c, b[c])) {
             return {error:d};
           }
           d = b[c];
-          "undefined" !== typeof d && "" !== d && null !== d && (k[c] = d);
+          "undefined" !== typeof d && "" !== d && null !== d && (h[c] = d);
         }
       }
+    } else {
+      "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint || utils.merge(h, b);
     }
     if ("POST" === a.method) {
       try {
-        b = l(b, k);
-      } catch (h) {
-        return {error:h.message};
+        b = k(b, h);
+      } catch (l) {
+        return {error:l.message};
       }
     }
-    "/v1/event" === a.endpoint && (k.metadata = safejson.stringify(k.metadata || {}), k.hasOwnProperty("commerce_data") && (k.commerce_data = safejson.stringify(k.commerce_data || {})));
-    "/v1/open" === a.endpoint && (k.options = safejson.stringify(k.options || {}), k.advertising_ids && (k.advertising_ids = safejson.stringify(utils.convertObjectValuesToString(k.advertising_ids || {}))));
-    return {data:this.serializeObject(k, ""), url:e.replace(/^\//, "")};
+    "/v1/event" === a.endpoint && (h.metadata = safejson.stringify(h.metadata || {}), h.hasOwnProperty("commerce_data") && (h.commerce_data = safejson.stringify(h.commerce_data || {})));
+    ("/v1/pageview" === a.endpoint || "/v1/dismiss" === a.endpoint) && h.metadata && (h.metadata = safejson.stringify(h.metadata || {}));
+    "/v1/open" === a.endpoint && (h.options = safejson.stringify(h.options || {}));
+    return {data:this.serializeObject(h, ""), url:e.replace(/^\//, "")};
   };
   Server.prototype.createScript = function(a, b, c) {
     var d = document.createElement("script");
@@ -1879,71 +1993,71 @@
   Server.prototype.jsonpRequest = function(a, b, c, d) {
     var e = Date.now(), f = utils.currentRequestBrttTag;
     0 === this._jsonp_callback_index && utils.isSafari11OrGreater() && this._jsonp_callback_index++;
-    var g = "branch_callback__" + this._jsonp_callback_index++, l = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
+    var g = "branch_callback__" + this._jsonp_callback_index++, k = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
     b = "POST" === c ? encodeURIComponent(utils.base64encode(goog.json.serialize(b))) : "";
-    var k = window.setTimeout(function() {
+    var h = window.setTimeout(function() {
       window[g] = function() {
       };
       utils.addPropertyIfNotNull(utils.instrumentation, f, utils.calculateBrtt(e));
       d(Error(utils.messages.timeout), null, 504);
     }, utils.timeout);
-    window[g] = function(h) {
-      window.clearTimeout(k);
-      d(null, h);
+    window[g] = function(l) {
+      window.clearTimeout(h);
+      d(null, l);
     };
-    this.createScript(a + (0 > a.indexOf("?") ? "?" : "") + (b ? l + b : "") + (0 <= a.indexOf("/c/") ? "&click=1" : "") + "&callback=" + g, function() {
+    this.createScript(a + (0 > a.indexOf("?") ? "?" : "") + (b ? k + b : "") + (0 <= a.indexOf("/c/") ? "&click=1" : "") + "&callback=" + g, function() {
       d(Error(utils.messages.blockedByClient), null);
     }, function() {
       utils.addPropertyIfNotNull(utils.instrumentation, f, utils.calculateBrtt(e));
       try {
         "function" === typeof this.remove ? this.remove() : this.parentNode.removeChild(this);
-      } catch (h) {
+      } catch (l) {
       }
       delete window[g];
     });
   };
   Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
-    var l = Date.now(), k = utils.currentRequestBrttTag, h = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-    g && (h.responseType = g);
-    h.ontimeout = function() {
-      utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(l));
+    var k = Date.now(), h = utils.currentRequestBrttTag, l = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+    g && (l.responseType = g);
+    l.ontimeout = function() {
+      utils.addPropertyIfNotNull(utils.instrumentation, h, utils.calculateBrtt(k));
       e(Error(utils.messages.timeout), null, 504);
     };
-    h.onerror = function(n) {
-      e(Error(n.error || "Error in API: " + h.status), null, h.status);
+    l.onerror = function(m) {
+      e(Error(m.error || "Error in API: " + l.status), null, l.status);
     };
-    h.onreadystatechange = function() {
-      if (4 === h.readyState) {
-        if (utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(l)), 200 === h.status) {
-          if ("arraybuffer" === h.responseType) {
-            var n = h.response;
+    l.onreadystatechange = function() {
+      if (4 === l.readyState) {
+        if (utils.addPropertyIfNotNull(utils.instrumentation, h, utils.calculateBrtt(k)), 200 === l.status) {
+          if ("arraybuffer" === l.responseType) {
+            var m = l.response;
           } else if (f) {
-            n = h.responseText;
+            m = l.responseText;
           } else {
             try {
-              n = safejson.parse(h.responseText);
+              m = safejson.parse(l.responseText);
             } catch (q) {
-              n = {};
+              m = {};
             }
           }
-          e(null, n, h.status);
-        } else if ("4" === h.status.toString().substring(0, 1) || "5" === h.status.toString().substring(0, 1)) {
-          h.responseURL && h.responseURL.includes("v2/event") ? e(h.responseText, null, h.status) : e(Error("Error in API: " + h.status), null, h.status);
+          e(null, m, l.status);
+        } else if ("4" === l.status.toString().substring(0, 1) || "5" === l.status.toString().substring(0, 1)) {
+          l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : e(Error("Error in API: " + l.status), null, l.status);
         }
       }
     };
     try {
-      h.open(c, a, !0), h.timeout = utils.timeout, h.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"), h.send(b);
-    } catch (n) {
+      l.open(c, a, !0), l.timeout = utils.timeout, l.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"), l.send(b);
+    } catch (m) {
       d.set("use_jsonp", !0), this.jsonpRequest(a, b, c, e);
     }
   };
   Server.prototype.request = function(a, b, c, d) {
     var e = this;
-    utils.currentRequestBrttTag = a.endpoint + "-brtt";
+    utils.currentRequestBrttTag = "/v1/pageview" === a.endpoint && b && b.journey_displayed ? a.endpoint + "-1-brtt" : a.endpoint + "-brtt";
     ("/v1/url" === a.endpoint || "/v1/has-app" === a.endpoint) && 1 < Object.keys(utils.instrumentation).length && (delete utils.instrumentation["-brtt"], b.instrumentation = safejson.stringify(utils.merge({}, utils.instrumentation)), utils.instrumentation = {});
     if (utils.userPreferences.trackingDisabled) {
-      for (var f = ["randomized_device_token", "randomized_bundle_token", "session_id", "identity"], g = 0; g < f.length; g++) {
+      for (var f = ["browser_fingerprint_id", "alternative_browser_fingerprint_id", "identity_id", "session_id", "identity"], g = 0; g < f.length; g++) {
         b.hasOwnProperty(f[g]) && delete b[f[g]];
       }
     }
@@ -1951,50 +2065,124 @@
     if (f.error) {
       return d(Error(safejson.stringify({message:f.error, endpoint:a.endpoint, data:b})));
     }
-    var l = "";
+    var k = "";
     if ("GET" === a.method) {
-      var k = f.url + "?" + f.data;
+      var h = f.url + "?" + f.data;
     } else {
-      k = f.url, l = f.data;
+      h = f.url, k = f.data;
     }
-    var h = c.get("use_jsonp") || a.jsonp ? b : l;
-    var n = utils.retries, q = function(r, u, v) {
+    var l = c.get("use_jsonp") || a.jsonp ? b : k;
+    var m = utils.retries, q = function(p, t, u) {
       if ("function" === typeof e.onAPIResponse) {
-        e.onAPIResponse(k, a.method, h, r, v, u);
+        e.onAPIResponse(h, a.method, l, p, u, t);
       }
-      r && 0 < n && "5" === (v || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
-        t();
-      }, utils.retry_delay)) : d(r, u);
+      p && 0 < m && "5" === (u || "").toString().substring(0, 1) ? (m--, window.setTimeout(function() {
+        n();
+      }, utils.retry_delay)) : d(p, t);
     };
-    if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(k, b)) {
+    if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(h, b)) {
       return utils.userPreferences.allowErrorsInCallback ? q(Error(utils.messages.trackingDisabled), null, 300) : q(null, {}, 200);
     }
-    var p = !1;
+    var r = !1;
     if ("/v1/qr-code" === a.endpoint) {
-      p = !0;
-      var m = "arraybuffer";
+      r = !0;
+      var w = "arraybuffer";
     }
-    var t = function() {
-      c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, q) : e.XHRRequest(k, l, a.method, c, q, p, m);
+    var n = function() {
+      c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(h, b, a.method, q) : e.XHRRequest(h, k, a.method, c, q, r, w);
     };
-    t();
+    n();
   };
   // Input 8
-  var task_queue = function() {
-    var a = [], b = function() {
-      if (a.length) {
-        a[0](function() {
-          a.shift();
-          b();
-        });
+  var banner_utils = {animationSpeed:250, animationDelay:20, bannerHeight:"76px", error_timeout:2000, removeElement:function(a) {
+    a && a.parentNode.removeChild(a);
+  }, hasClass:function(a, b) {
+    return !!a.className.match(new RegExp("(\\s|^)" + b + "(\\s|$)"));
+  }, addClass:function(a, b) {
+    a && !banner_utils.hasClass(a, b) && (a.className += " " + b);
+  }, removeClass:function(a, b) {
+    a && banner_utils.hasClass(a, b) && (a.className = a.className.replace(new RegExp("(\\s|^)" + b + "(\\s|$)"), " "));
+  }, getDate:function(a) {
+    var b = new Date();
+    return b.setDate(b.getDate() + a);
+  }, getBodyStyle:function(a) {
+    return document.body.currentStyle ? document.body.currentStyle[utils.snakeToCamel(a)] : window.getComputedStyle(document.body).getPropertyValue(a);
+  }, addCSSLengths:function(a, b) {
+    var c = function(d) {
+      if (!d) {
+        return 0;
       }
+      var e = d.replace(/[0-9,\.]/g, "");
+      d = d.match(/\d+/g);
+      var f = parseInt(0 < d.length ? d[0] : "0", 10), g = function() {
+        return Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100;
+      }, k = function() {
+        return Math.max(document.documentElement.clientHeight, window.innerHeight || 0) / 100;
+      };
+      return parseInt({px:function(h) {
+        return h;
+      }, em:function(h) {
+        return document.body.currentStyle ? h * c(document.body.currentStyle.fontSize) : h * parseFloat(window.getComputedStyle(document.body).fontSize);
+      }, rem:function(h) {
+        return document.documentElement.currentStyle ? h * c(document.documentElement.currentStyle.fontSize) : h * parseFloat(window.getComputedStyle(document.documentElement).fontSize);
+      }, vw:function(h) {
+        return h * g();
+      }, vh:function(h) {
+        return h * k();
+      }, vmin:function(h) {
+        return h * Math.min(k(), g());
+      }, vmax:function(h) {
+        return h * Math.max(k(), g());
+      }, "%":function() {
+        return document.body.clientWidth / 100 * f;
+      }}[e](f), 10);
     };
-    return function(c) {
-      a.push(c);
-      1 === a.length && b();
-    };
-  };
+    return (c(a) + c(b)).toString() + "px";
+  }, shouldAppend:function(a, b) {
+    a = a.get("hideBanner", !0);
+    if (b.respectDNT && navigator && Number(navigator.doNotTrack)) {
+      return !1;
+    }
+    try {
+      "string" === typeof a && (a = safejson.parse(a));
+    } catch (d) {
+      a = !1;
+    }
+    a = "number" === typeof a ? new Date() >= new Date(a) : !a;
+    var c = b.forgetHide;
+    "number" === typeof c && (c = !1);
+    return !document.getElementById("branch-banner") && !document.getElementById("branch-banner-iframe") && (a || c) && (b.showAndroid && "android" === utils.mobileUserAgent() || b.showiPad && "ipad" === utils.mobileUserAgent() || b.showiOS && "ios" === utils.mobileUserAgent() || b.showBlackberry && "blackberry" === utils.mobileUserAgent() || b.showWindowsPhone && "windows_phone" === utils.mobileUserAgent() || b.showKindle && "kindle" === utils.mobileUserAgent());
+  }};
   // Input 9
+  var banner_css = {banner:function(a) {
+    return ".branch-banner-is-active { -webkit-transition: all " + 1.5 * banner_utils.animationSpeed / 1000 + "s ease; transition: all 0" + 1.5 * banner_utils.animationSpeed / 1000 + "s ease; }\n#branch-banner { width:100%; z-index: 99999; font-family: Helvetica Neue, Sans-serif; -webkit-font-smoothing: antialiased; -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-transition: all " + banner_utils.animationSpeed / 1000 + "s ease; transition: all 0" + banner_utils.animationSpeed / 
+    1000 + "s ease; }\n#branch-banner .button{ border: 1px solid " + (a.buttonBorderColor || ("dark" === a.theme ? "transparent" : "#ccc")) + "; background: " + (a.buttonBackgroundColor || "#fff") + "; color: " + (a.buttonFontColor || "#000") + "; cursor: pointer; margin-top: 0px; font-size: 14px; display: inline-block; margin-left: 5px; font-weight: 400; text-decoration: none;  border-radius: 4px; padding: 6px 12px; transition: all .2s ease;}\n#branch-banner .button:hover {  border: 1px solid " + 
+    (a.buttonBorderColorHover || ("dark" === a.theme ? "transparent" : "#BABABA")) + "; background: " + (a.buttonBackgroundColorHover || "#E0E0E0") + "; color: " + (a.buttonFontColorHover || "#000") + ";}\n#branch-banner .button:focus { outline: none; }\n#branch-banner * { margin-right: 4px; position: relative; line-height: 1.2em; }\n#branch-banner-close { font-weight: 400; cursor: pointer; float: left; z-index: 2;padding: 0 5px 0 5px; margin-right: 0; }\n#branch-banner .content { width:100%; overflow: hidden; height: " + 
+    banner_utils.bannerHeight + "; background: rgba(255, 255, 255, 0.95); color: #333; " + ("top" === a.position ? "border-bottom" : "border-top") + ': 1px solid #ddd; }\n#branch-banner-close { color: #000; font-size: 24px; top: 14px; opacity: .5; transition: opacity .3s ease; }\n#branch-banner-close:hover { opacity: 1; }\n#branch-banner .title { font-size: 18px; font-weight:bold; color: #555; }\n#branch-banner .description { font-size: 12px; font-weight: normal; color: #777; max-height: 30px; overflow: hidden; }\n#branch-banner .icon { float: left; padding-bottom: 40px; margin-right: 10px; margin-left: 5px; }\n#branch-banner .icon img { width: 63px; height: 63px; margin-right: 0; }\n#branch-banner .reviews { font-size:13px; margin: 1px 0 3px 0; color: #777; }\n#branch-banner .reviews .star { display:inline-block; position: relative; margin-right:0; }\n#branch-banner .reviews .star span { display: inline-block; margin-right: 0; color: #555; position: absolute; top: 0; left: 0; }\n#branch-banner .reviews .review-count { font-size:10px; }\n#branch-banner .reviews .star .half { width: 50%; overflow: hidden; display: block; }\n#branch-banner .content .left { padding: 6px 5px 6px 5px; }\n#branch-banner .vertically-align-middle { top: 50%; transform: translateY(-50%); -webkit-transform: translateY(-50%); -ms-transform: translateY(-50%); }\n#branch-banner .details > * { display: block; }\n#branch-banner .content .left { height: 63px; }\n#branch-banner .content .right { float: right; height: 63px; margin-bottom: 50px; padding-top: 22px; z-index: 1; }\n#branch-banner .right > div { float: left; }\n#branch-banner-action { top: 17px; }\n#branch-banner .content:after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 1px; background: rgba(0, 0, 0, 0.2); }\n#branch-banner .theme-dark.content { background: rgba(51, 51, 51, 0.95); }\n#branch-banner .theme-dark #branch-banner-close{ color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .15); }\n#branch-banner .theme-dark .details { text-shadow: 0 1px 1px rgba(0, 0, 0, .15); }\n#branch-banner .theme-dark .title { color: #fff; }\n#branch-banner .theme-dark .description { color: #fff; }\n#branch-banner .theme-dark .reviews { color: #888; }\n#branch-banner .theme-dark .reviews .star span{ color: #fff; }\n#branch-banner .theme-dark .reviews .review-count{ color: #fff; }\n';
+  }, other:"#branch-banner { position: fixed; min-width: 600px; }\n#branch-banner input{ border: 1px solid #ccc;  font-weight: 400;  border-radius: 4px; height: 30px; padding: 5px 7px 4px; width: 145px; font-size: 14px;}\n#branch-banner input:focus { outline: none; }\n#branch-banner input.error { color: rgb(194, 0, 0); border-color: rgb(194, 0, 0); }\n#branch-banner .branch-icon-wrapper { width:25px; height: 25px; vertical-align: middle; display: inline-block; margin-top: -18px; }\n@keyframes branch-spinner { 0% { transform: rotate(0deg); -webkit-transform: rotate(0deg); -ms-transform: rotate(0deg); } 100% { transform: rotate(360deg); -webkit-transform: rotate(360deg); -ms-transform: rotate(360deg); } }\n@-webkit-keyframes branch-spinner { 0% { transform: rotate(0deg); -webkit-transform: rotate(0deg); -ms-transform: rotate(0deg); } 100% { transform: rotate(360deg); -webkit-transform: rotate(360deg); -ms-transform: rotate(360deg); } }\n#branch-spinner { -webkit-animation: branch-spinner 1s ease-in-out infinite; animation: branch-spinner 1s ease-in-out infinite; transition: all 0.7s ease-in-out; border:2px solid #ddd; border-bottom-color:#428bca; width:80%; height:80%; border-radius:50%; -webkit-font-smoothing: antialiased !important; }\n#branch-banner .theme-dark input { border-color: transparent; }\n", 
+  mobile:"#branch-banner { position: absolute; }\n#branch-banner .content .left .details .title { font-size: 12px; }\n#branch-mobile-action { white-space: nowrap; }\n#branch-banner .content .left .details .description { font-size: 11px; font-weight: normal; }\n@media only screen and (min-device-width: 320px) and (max-device-width: 350px) { #branch-banner .content .right { max-width: 120px; } }\n@media only screen and (min-device-width: 351px) and (max-device-width: 400px) and (orientation: landscape) { #branch-banner .content .right { max-width: 150px; } }\n@media only screen and (min-device-width: 401px) and (max-device-width: 480px) and (orientation: landscape) { #branch-banner .content .right { max-width: 180px; } }\n", 
+  ios:"", android:"#branch-banner #branch-banner-close,#branch-banner .theme-dark #branch-banner-close { height:17px; width: 17px; text-align: center; font-size: 15px; top: 24px;  border-radius:14px; border:0; line-height:14px; color:#b1b1b3; background:#efefef; padding: 0; opacity: 1; }\n#branch-banner .button { top: 0; text-decoration:none; border-bottom: 3px solid #A4C639; padding: 0 10px; height: 24px; line-height: 24px; text-align: center; color: #fff; margin-top: 2px;  font-weight: bold; background-color: #A4C639; border-radius: 5px; }\n#branch-banner .button:hover { border-bottom:3px solid #8c9c29; background-color: #c1d739; }\n", 
+  blackberry:"", windows_phone:"", kindle:""};
+  banner_css.iframe = "body { -webkit-transition: all " + 1.5 * banner_utils.animationSpeed / 1000 + "s ease; transition: all 0" + 1.5 * banner_utils.animationSpeed / 1000 + "s ease; }\n#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + banner_utils.bannerHeight + "; z-index: 99999; -webkit-transition: all " + banner_utils.animationSpeed / 1000 + "s ease; transition: all 0" + banner_utils.animationSpeed / 1000 + "s ease; }\n";
+  banner_css.inneriframe = "body { margin: 0; }\n";
+  banner_css.iframe_position = function(a, b) {
+    return "#branch-banner-iframe { position: " + ("top" !== b || a ? "fixed" : "absolute") + "; }\n";
+  };
+  banner_css.css = function(a, b) {
+    var c = banner_css.banner(a), d = utils.mobileUserAgent();
+    "ios" !== d && "ipad" !== d || !a.showiOS ? "android" === d && a.showAndroid ? c += banner_css.mobile + banner_css.android : "blackberry" === d && a.showBlackberry ? c += banner_css.mobile + banner_css.blackberry : "windows_phone" === d && a.showWindowsPhone ? c += banner_css.mobile + banner_css.windows_phone : "kindle" === d && a.showKindle && (c += banner_css.mobile + banner_css.kindle) : c += banner_css.mobile + banner_css.ios;
+    c += a.customCSS;
+    a.iframe && (c += banner_css.inneriframe, d = document.createElement("style"), d.type = "text/css", d.id = "branch-iframe-css", utils.addNonceAttribute(d), d.innerHTML = banner_css.iframe + banner_css.iframe_position(a.mobileSticky, a.position), (document.head || document.getElementsByTagName("head")[0]).appendChild(d));
+    d = document.createElement("style");
+    d.type = "text/css";
+    d.id = "branch-css";
+    d.innerHTML = c;
+    utils.addNonceAttribute(d);
+    c = a.iframe ? b.contentWindow.document : document;
+    (c = c.head || c.getElementsByTagName("head")[0]) && "function" === typeof c.appendChild && c.appendChild(d);
+    "top" === a.position ? b.style.top = "-" + banner_utils.bannerHeight : "bottom" === a.position && (b.style.bottom = "-" + banner_utils.bannerHeight);
+  };
+  // Input 10
   var session = {get:function(a, b) {
     try {
       var c = safejson.parse(a.get(b ? "branch_session_first" : "branch_session", b)) || null;
@@ -2013,60 +2201,681 @@
       a.set("branch_session", b);
     }
   }, patch:function(a, b, c, d) {
-    var e = function(g, l) {
-      return utils.encodeBFPs(utils.merge(safejson.parse(g), l, d));
+    var e = function(g, k) {
+      return utils.encodeBFPs(utils.merge(safejson.parse(g), k, d));
     }, f = a.get("branch_session", !1) || {};
     a.set("branch_session", goog.json.serialize(e(f, b)));
     c && (c = a.get("branch_session_first", !0) || {}, a.set("branch_session_first", goog.json.serialize(e(c, b)), !0));
   }};
-  // Input 10
+  // Input 11
+  var banner_html = {banner:function(a, b) {
+    b = '<div class="content' + (a.theme ? " theme-" + a.theme : "") + '"><div class="right">' + b + '</div><div class="left">' + (a.disableHide ? "" : '<div id="branch-banner-close" class="branch-animation" aria-label="Close">&times;</div>') + '<div class="icon"><img src="' + a.icon + '" alt="Application icon"></div><div class="details vertically-align-middle"><div class="title">' + a.title + "</div>";
+    if (a.rating || a.reviewCount) {
+      if (a.rating) {
+        var c = "";
+        for (var d = 0; 5 > d; d++) {
+          c += '<span class="star"><svg class="star" fill="#555555" height="12" viewBox="3 2 20 19" width="12"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/><path d="M0 0h24v24H0z" fill="none"/><foreignObject display="none"><span class="star">\u2606</span></foreignObject></svg>', a.rating > d && (c += d + 1 > a.rating && a.rating % 1 ? '<span class="half"><svg fill="#555555" height="12" viewBox="3 2 20 19" width="12"><defs><path d="M0 0h24v24H0V0z" id="a"/></defs><clipPath id="b"><use overflow="visible" xlink:href="#a"/></clipPath><path clip-path="url(#b)" d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4V6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg><foreignObject display="none"><span class="half">\u2605</span></foreignObject></span>' : 
+          '<span class="full"><svg fill="#555555" height="12" viewBox="3 2 20 19" width="12"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/><path d="M0 0h24v24H0z" fill="none"/><foreignObject display="none"><span class="full">\u2605</span></foreignObject></svg> </span>'), c += "</span>";
+        }
+        c = '<span class="stars">' + c + "</span>";
+      } else {
+        c = "";
+      }
+      c = '<div class="reviews">' + c + (a.reviewCount ? '<span class="review-count">' + a.reviewCount + "</span>" : "") + "</div>";
+    } else {
+      c = "";
+    }
+    return b + c + '<div class="description">' + a.description + "</div></div></div></div>";
+  }, mobileAction:function(a, b) {
+    return '<a id="branch-mobile-action" class="button" href="#" target="_parent">' + ((session.get(b) || {}).has_app ? a.openAppButtonText : a.downloadAppButtonText) + "</a>";
+  }, checkmark:function() {
+    return window.ActiveXObject ? '<span class="checkmark">&#x2713;</span>' : '<svg version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 98.5 98.5" enable-background="new 0 0 98.5 98.5" xml:space="preserve"><path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3"/></svg>';
+  }, iframe:function(a, b, c) {
+    var d = document.createElement("iframe");
+    d.src = "about:blank";
+    d.style.overflow = "hidden";
+    d.scrolling = "no";
+    d.id = "branch-banner-iframe";
+    d.className = "branch-animation";
+    utils.addNonceAttribute(d);
+    d.onload = function() {
+      var e = utils.mobileUserAgent();
+      e = "ios" === e || "ipad" === e ? "branch-banner-ios" : "android" === e ? "branch-banner-android" : "branch-banner-other";
+      var f = d.contentDocument || d.contentWindow.document;
+      f.head = f.createElement("head");
+      f.body = f.createElement("body");
+      f.body.className = e;
+      banner_html.div(a, b, f);
+      c(d);
+    };
+    document.body.appendChild(d);
+  }, div:function(a, b, c) {
+    c = c || document;
+    var d = c.createElement("div");
+    d.id = "branch-banner";
+    d.className = "branch-animation";
+    d.innerHTML = banner_html.banner(a, b);
+    c.body.appendChild(d);
+    return d;
+  }, markup:function(a, b, c) {
+    b = '<div id="branch-banner-form-container">' + banner_html.mobileAction(a, b) + "</div>";
+    a.iframe ? banner_html.iframe(a, b, c) : (a = banner_html.div(a, b, document), c(a));
+  }};
+  // Input 12
+  var banner = function(a, b, c, d) {
+    if (!banner_utils.shouldAppend(d, b)) {
+      return a._publishEvent("willNotShowBanner"), null;
+    }
+    a._publishEvent("willShowBanner");
+    var e, f = document.body.style.marginTop, g = document.body.style.marginBottom, k = function(h, l) {
+      "function" === typeof h && (l = h, h = {});
+      h = h || {};
+      "top" === b.position ? e.style.top = "-" + banner_utils.bannerHeight : "bottom" === b.position && (e.style.bottom = "-" + banner_utils.bannerHeight);
+      "number" === typeof b.forgetHide ? d.set("hideBanner", banner_utils.getDate(b.forgetHide), !0) : d.set("hideBanner", !0, !0);
+      h.immediate ? ("top" === b.position ? document.body.style.marginTop = f : "bottom" === b.position && (document.body.style.marginBottom = g), banner_utils.removeClass(document.body, "branch-banner-is-active"), banner_utils.removeElement(e), banner_utils.removeElement(document.getElementById("branch-css")), l()) : (setTimeout(function() {
+        banner_utils.removeElement(e);
+        banner_utils.removeElement(document.getElementById("branch-css"));
+        l();
+      }, banner_utils.animationSpeed + banner_utils.animationDelay), setTimeout(function() {
+        "top" === b.position ? document.body.style.marginTop = f : "bottom" === b.position && (document.body.style.marginBottom = g);
+        banner_utils.removeClass(document.body, "branch-banner-is-active");
+      }, banner_utils.animationDelay));
+    };
+    banner_html.markup(b, d, function(h) {
+      function l() {
+        "top" === b.position ? e.style.top = "0" : "bottom" === b.position && (e.style.bottom = "0");
+        a._publishEvent("didShowBanner");
+      }
+      e = h;
+      banner_css.css(b, e);
+      c.channel = c.channel || "app banner";
+      h = b.iframe ? e.contentWindow.document : document;
+      if (utils.mobileUserAgent()) {
+        b.open_app = b.open_app;
+        b.append_deeplink_path = b.append_deeplink_path;
+        b.make_new_link = b.make_new_link;
+        b.deepview_type = "banner";
+        a.deepview(c, b);
+        var m = h.getElementById("branch-mobile-action");
+        m && (m.onclick = function(r) {
+          r.preventDefault();
+          a.deepviewCta();
+        });
+      }
+      m = banner_utils.getBodyStyle("margin-top");
+      var q = banner_utils.getBodyStyle("margin-bottom");
+      banner_utils.addClass(document.body, "branch-banner-is-active");
+      "top" === b.position ? document.body.style.marginTop = banner_utils.addCSSLengths(banner_utils.bannerHeight, m) : "bottom" === b.position && (document.body.style.marginBottom = banner_utils.addCSSLengths(banner_utils.bannerHeight, q));
+      if (m = h.getElementById("branch-banner-close")) {
+        m.onclick = function(r) {
+          r.preventDefault();
+          a._publishEvent("willCloseBanner");
+          k({}, function() {
+            a._publishEvent("didCloseBanner");
+          });
+        };
+      }
+      if (h = h.getElementById("branch-banner-modal-background")) {
+        h.onclick = function(r) {
+          r.preventDefault();
+          a._publishEvent("willCloseBanner");
+          k({}, function() {
+            a._publishEvent("didCloseBanner");
+          });
+        };
+      }
+      b.immediate ? l() : setTimeout(l, banner_utils.animationDelay);
+    });
+    return k;
+  };
+  // Input 13
+  var task_queue = function() {
+    var a = [], b = function() {
+      if (a.length) {
+        a[0](function() {
+          a.shift();
+          b();
+        });
+      }
+    };
+    return function(c) {
+      a.push(c);
+      1 === a.length && b();
+    };
+  };
+  // Input 14
+  var journeys_utils = {_callback_index:1, position:"top", sticky:"absolute", bannerHeight:"76px", isFullPage:!1, isHalfPage:!1, divToInjectParents:[], isSafeAreaEnabled:!1};
+  journeys_utils.windowHeight = window.innerHeight;
+  journeys_utils.windowWidth = window.innerWidth;
+  window.innerHeight < window.innerWidth && (journeys_utils.windowHeight = window.innerWidth, journeys_utils.windowWidth = window.innerHeight);
+  journeys_utils.bodyMarginTop = 0;
+  journeys_utils.bodyMarginBottom = 0;
+  journeys_utils.exitAnimationIsRunning = !1;
+  journeys_utils.jsonRe = /<script type="application\/json">((.|\s)*?)<\/script>/;
+  journeys_utils.jsRe = /<script type="text\/javascript">((.|\s)*?)<\/script>/;
+  journeys_utils.cssRe = /<style type="text\/css" id="branch-css">((.|\s)*?)<\/style>/;
+  journeys_utils.iframeCssRe = /<style type="text\/css" id="branch-iframe-css">((.|\s)*?)<\/style>/;
+  journeys_utils.spacerRe = /#branch-banner-spacer {((.|\s)*?)}/;
+  journeys_utils.findMarginRe = /margin-bottom: (.*?);/;
+  journeys_utils.branch = null;
+  journeys_utils.banner = null;
+  journeys_utils.isJourneyDisplayed = !1;
+  journeys_utils.animationSpeed = 250;
+  journeys_utils.animationDelay = 20;
+  journeys_utils.exitAnimationDisabled = !1;
+  journeys_utils.entryAnimationDisabled = !1;
+  journeys_utils.journeyDismissed = !1;
+  journeys_utils.exitAnimationDisabledPreviously = !1;
+  journeys_utils.previousPosition = "";
+  journeys_utils.previousDivToInjectParents = [];
+  journeys_utils.journeyLinkData = null;
+  journeys_utils.setPositionAndHeight = function(a) {
+    var b = journeys_utils.getMetadata(a) || {};
+    if (b && b.bannerHeight && b.position && b.sticky) {
+      journeys_utils.bannerHeight = b.bannerHeight, journeys_utils.position = b.position, journeys_utils.sticky = b.sticky;
+    } else {
+      if (a = a.match(journeys_utils.spacerRe)) {
+        journeys_utils.position = "top";
+        if (a = a[1].match(journeys_utils.findMarginRe)) {
+          journeys_utils.bannerHeight = a[1];
+        }
+        journeys_utils.sticky = "absolute";
+      } else {
+        journeys_utils.position = "bottom", journeys_utils.sticky = "fixed";
+      }
+    }
+    if (-1 !== journeys_utils.bannerHeight.indexOf("vh") || -1 !== journeys_utils.bannerHeight.indexOf("%")) {
+      a = journeys_utils.bannerHeight.indexOf("vh") ? journeys_utils.bannerHeight.slice(0, -2) : journeys_utils.bannerHeight.slice(0, -1), journeys_utils.bannerHeight = a / 100 * journeys_utils.windowHeight + "px", 100 > a ? journeys_utils.isHalfPage = !0 : journeys_utils.isFullPage = !0;
+    }
+  };
+  journeys_utils.getMetadata = function(a) {
+    if (a = a.match(journeys_utils.jsonRe)) {
+      return safejson.parse(a[1]);
+    }
+  };
+  journeys_utils.getIframeCss = function(a) {
+    if (a = a.match(journeys_utils.iframeCssRe)) {
+      return a[1];
+    }
+  };
+  journeys_utils.getCtaText = function(a, b) {
+    var c;
+    b && a && a.ctaText && a.ctaText.has_app ? c = a.ctaText.has_app : a && a.ctaText && a.ctaText.no_app && (c = a.ctaText.no_app);
+    return c;
+  };
+  journeys_utils.findInsertionDiv = function(a, b) {
+    journeys_utils.divToInjectParents = [];
+    if (b && b.injectorSelector && (a = document.querySelectorAll(b.injectorSelector))) {
+      for (b = 0; b < a.length; b++) {
+        journeys_utils.divToInjectParents.push(a[b].parentElement);
+      }
+    }
+  };
+  journeys_utils.getCss = function(a) {
+    if (a = a.match(journeys_utils.cssRe)) {
+      return a[1];
+    }
+  };
+  journeys_utils.getJsAndAddToParent = function(a) {
+    if (a = a.match(journeys_utils.jsRe)) {
+      a = a[1];
+      var b = document.createElement("script");
+      b.id = "branch-journey-cta";
+      utils.addNonceAttribute(b);
+      b.innerHTML = a;
+      document.body.appendChild(b);
+    }
+  };
+  journeys_utils.removeScriptAndCss = function(a) {
+    var b = a.match(journeys_utils.jsonRe), c = a.match(journeys_utils.jsRe), d = a.match(journeys_utils.cssRe), e = a.match(journeys_utils.iframeCssRe);
+    b && (a = a.replace(journeys_utils.jsonRe, ""));
+    c && (a = a.replace(journeys_utils.jsRe, ""));
+    d && (a = a.replace(journeys_utils.cssRe, ""));
+    e && (a = a.replace(journeys_utils.iframeCssRe, ""));
+    return a;
+  };
+  journeys_utils.createIframe = function() {
+    var a = document.createElement("iframe");
+    a.src = "about:blank";
+    a.style.overflow = "hidden";
+    a.scrolling = "no";
+    a.id = "branch-banner-iframe";
+    a.className = "branch-animation";
+    a.title = "Branch Banner";
+    a.setAttribute("aria-label", "Branch Banner");
+    utils.addNonceAttribute(a);
+    return a;
+  };
+  journeys_utils.addHtmlToIframe = function(a, b, c) {
+    c = "ios" === c || "ipad" === c ? "branch-banner-ios" : "android" === c ? "branch-banner-android" : "branch-banner-other";
+    a = a.contentDocument || a.contentWindow.document;
+    a.head = a.createElement("head");
+    a.body = a.createElement("body");
+    a.body.innerHTML = b;
+    a.body.className = c;
+    (b = a.querySelector('meta[name="accessibility"]')) && "wcag" === b.content && (b = a.createElement("script"), b.type = "text/javascript", b.text = "\n\t\t\tvar  focusableElements =\n\t\t\t\t\t'button, [href], input, select, textarea';\n\t\t\tvar modal = document.getElementById('branch-banner');\n\t\t\tvar focusableContent = modal.querySelectorAll(focusableElements);\n\t\t\tvar firstFocusableElement = focusableContent[0];\n\t\t\tvar lastFocusableElement = focusableContent[focusableContent.length - 1];\n\n\t\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\t\tvar isTabPressed = e.key === 'Tab' || e.keyCode === 9;\n\t\t\t\n\t\t\t\tif (!isTabPressed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (e.shiftKey) {\n\t\t\t\t\tif (document.activeElement === firstFocusableElement) {\n\t\t\t\t\t\tlastFocusableElement.focus();\n\t\t\t\t\t\te.preventDefault();\n\t\t\t\t\t}\n\t\t\t\t} else if (document.activeElement === lastFocusableElement) {\n\t\t\t\t\tfirstFocusableElement.focus();\n\t\t\t\t\te.preventDefault();\n\t\t\t\t}\n\t\t\t});\n\t\t\tsetTimeout(function() { firstFocusableElement.focus() }, 100);\n\t\t", 
+    a.querySelector("body").append(b));
+  };
+  journeys_utils.addIframeOuterCSS = function(a, b) {
+    var c = document.createElement("style");
+    c.type = "text/css";
+    c.id = "branch-iframe-css";
+    journeys_utils.bodyMarginTop = banner_utils.getBodyStyle("margin-top");
+    var d = +journeys_utils.bodyMarginTop.slice(0, -2);
+    journeys_utils.bodyMarginBottom = banner_utils.getBodyStyle("margin-bottom");
+    var e = +journeys_utils.bodyMarginBottom.slice(0, -2), f = +journeys_utils.bannerHeight.slice(0, -2);
+    a || ("top" === journeys_utils.position ? document.body.style.marginTop = (+f + d).toString() + "px" : "bottom" === journeys_utils.position && (document.body.style.marginBottom = (+f + e).toString() + "px"));
+    0 < journeys_utils.divToInjectParents.length && journeys_utils.divToInjectParents.forEach(function(g) {
+      var k, h = window.getComputedStyle(g);
+      h && (k = journeys_utils.isFullPage && "fixed" === h.getPropertyValue("position"));
+      k || (g.style.marginTop = journeys_utils.bannerHeight);
+    });
+    "top" === journeys_utils.previousPosition && journeys_utils.previousPosition !== journeys_utils.position && journeys_utils.exitAnimationDisabledPreviously && journeys_utils.previousDivToInjectParents && 0 < journeys_utils.previousDivToInjectParents.length && journeys_utils.previousDivToInjectParents.forEach(function(g) {
+      g.style.marginTop = 0;
+    });
+    journeys_utils.exitAnimationDisabledPreviously = !1;
+    journeys_utils.previousPosition = "";
+    journeys_utils.previousDivToInjectParents = [];
+    journeys_utils.journeyDismissed = !1;
+    c.innerHTML = a ? a : generateIframeOuterCSS(b);
+    utils.addNonceAttribute(c);
+    document.head.appendChild(c);
+  };
+  function generateIframeOuterCSS(a) {
+    var b = a = "";
+    document.body.style.transition = "";
+    document.getElementById("branch-banner-iframe") && (document.getElementById("branch-banner-iframe").style.transition = "");
+    journeys_utils.entryAnimationDisabled || (a = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", b = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
+    return (a ? a : "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + journeys_utils.bannerHeight + "; z-index: 99999; " + b + " }\n#branch-banner-iframe { position: " + journeys_utils.sticky + "; }\n@media only screen and (orientation: landscape) { body { " + ("top" === journeys_utils.position ? "margin-top: " : "margin-bottom: ") + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + 
+    "; }\n#branch-banner-iframe { height: " + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + "; }");
+  }
+  journeys_utils.addIframeInnerCSS = function(a, b) {
+    var c = document.createElement("style");
+    c.type = "text/css";
+    c.id = "branch-css";
+    c.innerHTML = b;
+    utils.addNonceAttribute(c);
+    b = a.contentWindow.document;
+    b.head.appendChild(c);
+    if (journeys_utils.isHalfPage || journeys_utils.isFullPage) {
+      c = b.getElementsByClassName("branch-banner-dismiss-background")[0];
+      var d = b.getElementsByClassName("branch-banner-content")[0];
+      !c && d && (d.style.height = journeys_utils.bannerHeight);
+    }
+    "top" === journeys_utils.position ? a.style.top = "-" + journeys_utils.bannerHeight : "bottom" === journeys_utils.position && (a.style.bottom = "-" + journeys_utils.bannerHeight);
+    try {
+      d = b.getElementsByClassName("branch-banner-content")[0];
+      var e = window.getComputedStyle(d).getPropertyValue("background-color").split(", ");
+      e[3] && 0 === parseFloat(e[3]) && (a.style.boxShadow = "none");
+    } catch (f) {
+    }
+  };
+  journeys_utils.addDynamicCtaText = function(a, b) {
+    a.contentWindow.document.getElementById("branch-mobile-action").innerHTML = b;
+  };
+  journeys_utils.centerOverlay = function(a) {
+    a && a.style && (a.style.bottom = "140px", a.style.width = "94%", a.style.borderRadius = "20px", a.style.margin = "auto");
+  };
+  journeys_utils.animateBannerEntrance = function(a, b) {
+    banner_utils.addClass(document.body, "branch-banner-is-active");
+    if (journeys_utils.isFullPage && "fixed" === journeys_utils.sticky) {
+      var c = document.createElement("style");
+      c.type = "text/css";
+      c.innerHTML = ".branch-banner-no-scroll {overflow: hidden;}";
+      document.head.appendChild(c);
+      banner_utils.addClass(document.body, "branch-banner-no-scroll");
+    }
+    setTimeout(function() {
+      b ? (a.style.top = null, a.style.bottom = null) : "top" === journeys_utils.position ? a.style.top = "0" : "bottom" === journeys_utils.position && (journeys_utils.journeyLinkData && journeys_utils.journeyLinkData.journey_link_data && !journeys_utils.journeyLinkData.journey_link_data.safeAreaRequired ? a.style.bottom = "0" : journeys_utils._dynamicallyRepositionBanner());
+      journeys_utils.branch._publishEvent("didShowJourney", journeys_utils.journeyLinkData);
+      journeys_utils.isJourneyDisplayed = !0;
+    }, journeys_utils.animationDelay);
+  };
+  journeys_utils._resizeListener = function() {
+    journeys_utils.isSafeAreaEnabled && journeys_utils._resetJourneysBannerPosition(!1, !1);
+  };
+  journeys_utils._scrollListener = function() {
+    journeys_utils.isSafeAreaEnabled && (window.pageYOffset > window.innerHeight ? journeys_utils._resetJourneysBannerPosition(!0, !1) : journeys_utils._resetJourneysBannerPosition(!1, !1));
+  };
+  journeys_utils._dynamicallyRepositionBanner = function() {
+    journeys_utils.isSafeAreaEnabled = !0;
+    document.getElementById("branch-banner-iframe").style.transition = "all 0s";
+    journeys_utils._resetJourneysBannerPosition(!1, !0);
+    window.addEventListener("resize", journeys_utils._resizeListener);
+    window.addEventListener("scroll", journeys_utils._scrollListener);
+  };
+  journeys_utils._resetJourneysBannerPosition = function(a, b) {
+    var c = document.getElementById("branch-banner-iframe"), d = c.offsetHeight, e = c.offsetTop, f = window.innerHeight;
+    if (b && 0 !== window.pageYOffset) {
+      return c.style.bottom = "0", !1;
+    }
+    a ? c.style.top = f - d + d / 2 + "px" : f - e != d && (c.style.top = "" + (f - d) + "px");
+  };
+  journeys_utils._addSecondsToDate = function(a) {
+    var b = new Date();
+    return b.setSeconds(b.getSeconds() + a);
+  };
+  journeys_utils._findGlobalDismissPeriod = function(a) {
+    a = a.globalDismissPeriod;
+    if ("number" === typeof a) {
+      return -1 === a ? !0 : journeys_utils._addSecondsToDate(a);
+    }
+  };
+  journeys_utils.finalHookups = function(a, b, c, d, e, f, g, k) {
+    if (d && e) {
+      var h = e.contentWindow.document.querySelectorAll("#branch-mobile-action");
+      Array.prototype.forEach.call(h, function(l) {
+        l.addEventListener("click", function(m) {
+          journeys_utils.branch._publishEvent("didClickJourneyCTA", journeys_utils.journeyLinkData);
+          journeys_utils.journeyDismissed = !0;
+          d();
+          journeys_utils.animateBannerExit(e);
+        });
+      });
+      journeys_utils._setupDismissBehavior(".branch-banner-continue", "didClickJourneyContinue", c, e, a, b, f, g, k, "click");
+      journeys_utils._setupDismissBehavior(".branch-banner-close", "didClickJourneyClose", c, e, a, b, f, g, k, "click");
+      journeys_utils._setupDismissBehavior(".branch-banner-dismiss-background", "didClickJourneyBackgroundDismiss", c, e, a, b, f, g, k, "click");
+      journeys_utils._setupDismissBehavior(".branch-banner-dismiss-background", "didScrollJourneyBackgroundDismiss", c, e, a, b, f, g, k, "touchmove");
+    }
+  };
+  journeys_utils._setupDismissBehavior = function(a, b, c, d, e, f, g, k, h, l) {
+    a = d.contentWindow.document.querySelectorAll(a);
+    Array.prototype.forEach.call(a, function(m) {
+      m.addEventListener(l, function(q) {
+        journeys_utils._handleJourneyDismiss(b, c, d, e, f, g, k, h);
+      });
+    });
+  };
+  journeys_utils._setJourneyDismiss = function(a, b, c) {
+    var d = a.get("journeyDismissals", !0);
+    d = d ? safejson.parse(d) : {};
+    d[c] = {view_id:b, dismiss_time:Date.now()};
+    a.set("journeyDismissals", safejson.stringify(d), !0);
+    return d;
+  };
+  journeys_utils.decodeSymbols = function(a) {
+    return void 0 === a || null === a ? null : a.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&brvbar;/g, "\u00a6").replace(/&laquo;/g, "\u00ab").replace(/&acute;/g, "\u00b4").replace(/&middot;/g, "\u00b7").replace(/&raquo;/g, "\u00bb").replace(/&amp;/g, "&").replace(/&iquest;/g, "\u00bf").replace(/&times;/g, "\u00d7").replace(/&divide;/g, "\u00f7").replace(/&Agrave;/g, "\u00c0").replace(/&Aacute;/g, "\u00c1").replace(/&Acirc;/g, 
+    "\u00c2").replace(/&Atilde;/g, "\u00c3").replace(/&Auml;/g, "\u00c4").replace(/&Aring;/g, "\u00c5").replace(/&AElig;/g, "\u00c6").replace(/&Ccedil;/g, "\u00c7").replace(/&Egrave;/g, "\u00c8").replace(/&Eacute;/g, "\u00c9").replace(/&Ecirc;/g, "\u00ca").replace(/&Euml;/g, "\u00cb").replace(/&Igrave;/g, "\u00cc").replace(/&Iacute;/g, "\u00cd").replace(/&Icirc;/g, "\u00ce").replace(/&Iuml;/g, "\u00cf").replace(/&ETH;/g, "\u00d0").replace(/&Ntilde;/g, "\u00d1").replace(/&Ograve;/g, "\u00d2").replace(/&Oacute;/g, 
+    "\u00d3").replace(/&Ocirc;/g, "\u00d4").replace(/&Otilde;/g, "\u00d5").replace(/&Ouml;/g, "\u00d6").replace(/&Oslash;/g, "\u00d8").replace(/&Ugrave;/g, "\u00d9").replace(/&Uacute;/g, "\u00da").replace(/&Ucirc;/g, "\u00db").replace(/&Uuml;/g, "\u00dc").replace(/&Yacute;/g, "\u00dd").replace(/&THORN;/g, "\u00de").replace(/&szlig;/g, "\u00df").replace(/&agrave;/g, "\u00e0").replace(/&aacute;/g, "\u00e1").replace(/&acirc;/g, "\u00e2").replace(/&atilde;/g, "\u00e3").replace(/&auml;/g, "\u00e4").replace(/&aring;/g, 
+    "\u00e5").replace(/&aelig;/g, "\u00e6").replace(/&ccedil;/g, "\u00e7").replace(/&egrave;/g, "\u00e8").replace(/&eacute;/g, "\u00e9").replace(/&ecirc;/g, "\u00ea").replace(/&euml;/g, "\u00eb").replace(/&igrave;/g, "\u00ec").replace(/&iacute;/g, "\u00ed").replace(/&icirc;/g, "\u00ee").replace(/&iuml;/g, "\u00ef").replace(/&eth;/g, "\u00f0").replace(/&ntilde;/g, "\u00f1").replace(/&ograve;/g, "\u00f2").replace(/&oacute;/g, "\u00f3").replace(/&ocirc;/g, "\u00f4").replace(/&otilde;/g, "\u00f5").replace(/&ouml;/g, 
+    "\u00f6").replace(/&oslash;/g, "\u00f8").replace(/&ugrave;/g, "\u00f9").replace(/&uacute;/g, "\u00fa").replace(/&ucirc;/g, "\u00fb").replace(/&uuml;/g, "\u00fc").replace(/&yacute;/g, "\u00fd").replace(/&thorn;/g, "\u00fe").replace(/&yuml;/g, "\u00ff");
+  };
+  journeys_utils._getDismissRequestData = function(a, b) {
+    var c = {}, d = utils.getHostedDeepLinkData();
+    d && 0 < Object.keys(d).length && (c.hosted_deeplink_data = d);
+    a = a._getPageviewRequestData(journeys_utils._getPageviewMetadata(null, c), null, journeys_utils.branch, !0);
+    if (journeys_utils.journeyLinkData && journeys_utils.journeyLinkData.journey_link_data) {
+      utils.addPropertyIfNotNull(a, "journey_id", journeys_utils.journeyLinkData.journey_link_data.journey_id);
+      utils.addPropertyIfNotNull(a, "journey_name", journeys_utils.decodeSymbols(journeys_utils.journeyLinkData.journey_link_data.journey_name));
+      utils.addPropertyIfNotNull(a, "view_id", journeys_utils.journeyLinkData.journey_link_data.view_id);
+      utils.addPropertyIfNotNull(a, "view_name", journeys_utils.decodeSymbols(journeys_utils.journeyLinkData.journey_link_data.view_name));
+      utils.addPropertyIfNotNull(a, "channel", journeys_utils.decodeSymbols(journeys_utils.journeyLinkData.journey_link_data.channel));
+      utils.addPropertyIfNotNull(a, "campaign", journeys_utils.decodeSymbols(journeys_utils.journeyLinkData.journey_link_data.campaign));
+      try {
+        utils.addPropertyIfNotNull(a, "tags", JSON.stringify(journeys_utils.journeyLinkData.journey_link_data.tags));
+      } catch (e) {
+        a.tags = JSON.stringify([]);
+      }
+    }
+    utils.addPropertyIfNotNull(a, "dismissal_source", b);
+    return a;
+  };
+  journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, k) {
+    var h = g ? 0 : journeys_utils._findGlobalDismissPeriod(f);
+    journeys_utils.branch._publishEvent(a, journeys_utils.journeyLinkData);
+    journeys_utils.journeyDismissed = !0;
+    journeys_utils.animateBannerExit(c);
+    if (!g) {
+      void 0 !== h && b.set("globalJourneysDismiss", h, !0);
+      journeys_utils._setJourneyDismiss(b, d, e);
+      var l = function() {
+        journeys_utils.branch.removeListener(l);
+        var m = journeys_utils._getDismissRequestData(k, utils.dismissEventToSourceMapping[a]);
+        journeys_utils.branch._api(resources.dismiss, m, function(q, r) {
+          !q && f && f.dismissRedirect ? window.location = f.dismissRedirect : !q && "object" === typeof r && r.template && k.shouldDisplayJourney(r, null, !1) && k.displayJourney(r.template, m, m.branch_view_id || r.event_data.branch_view_data.id, r.event_data.branch_view_data, !1, r.journey_link_data);
+        });
+      };
+      journeys_utils.branch.addListener("branch_internal_event_didCloseJourney", l);
+    }
+  };
+  journeys_utils._getPageviewMetadata = function(a, b) {
+    return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1}, b || {});
+  };
+  journeys_utils.animateBannerExit = function(a, b) {
+    journeys_utils.exitAnimationDisabled || (journeys_utils.exitAnimationIsRunning = !0);
+    if (journeys_utils.entryAnimationDisabled && !journeys_utils.exitAnimationDisabled) {
+      document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease";
+      document.getElementById("branch-banner-iframe").style.transition = "all 0" + journeys_utils.animationSpeed / 1000 + "s ease";
+      var c = document.getElementById("branch-iframe-css").innerHTML + "\n";
+      c += "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n";
+      c += "#branch-banner-iframe { -webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; }\n";
+      document.getElementById("branch-iframe-css").innerHTML = "";
+      document.getElementById("branch-iframe-css").innerHTML = c;
+    }
+    "top" === journeys_utils.position ? a.style.top = "-" + journeys_utils.bannerHeight : "bottom" === journeys_utils.position && (a.style.bottom = "-" + journeys_utils.bannerHeight);
+    journeys_utils.branch._publishEvent("willCloseJourney", journeys_utils.journeyLinkData);
+    setTimeout(function() {
+      banner_utils.removeElement(a);
+      banner_utils.removeElement(document.getElementById("branch-css"));
+      banner_utils.removeElement(document.getElementById("branch-iframe-css"));
+      banner_utils.removeElement(document.getElementById("branch-journey-cta"));
+      (!journeys_utils.exitAnimationDisabled || journeys_utils.journeyDismissed) && journeys_utils.divToInjectParents && 0 < journeys_utils.divToInjectParents.length ? journeys_utils.divToInjectParents.forEach(function(d) {
+        d.style.marginTop = 0;
+      }) : (journeys_utils.exitAnimationDisabledPreviously = journeys_utils.exitAnimationDisabled, journeys_utils.previousPosition = journeys_utils.position, journeys_utils.previousDivToInjectParents = journeys_utils.divToInjectParents);
+      "top" === journeys_utils.position ? document.body.style.marginTop = journeys_utils.bodyMarginTop : "bottom" === journeys_utils.position && (document.body.style.marginBottom = journeys_utils.bodyMarginBottom);
+      banner_utils.removeClass(document.body, "branch-banner-is-active");
+      banner_utils.removeClass(document.body, "branch-banner-no-scroll");
+      journeys_utils.isSafeAreaEnabled && (journeys_utils.isSafeAreaEnabled = !1, window.removeEventListener("resize", journeys_utils._resizeListener), window.removeEventListener("scroll", journeys_utils._scrollListener));
+      journeys_utils.branch._publishEvent("didCloseJourney", journeys_utils.journeyLinkData);
+      b || journeys_utils.branch._publishEvent("branch_internal_event_didCloseJourney", journeys_utils.journeyLinkData);
+      journeys_utils.isJourneyDisplayed = !1;
+      setTimeout(function() {
+        journeys_utils.exitAnimationIsRunning = !1;
+      }, journeys_utils.animationSpeed);
+    }, journeys_utils.exitAnimationDisabled ? 0 : journeys_utils.animationSpeed + journeys_utils.animationDelay);
+  };
+  journeys_utils.setJourneyLinkData = function(a) {
+    var b = {banner_id:journeys_utils.branchViewId};
+    a && "object" === typeof a && 0 < Object.keys(a || {}).length && (utils.removePropertiesFromObject(a, ["browser_fingerprint_id", "app_id", "source", "open_app", "link_click_id"]), b.journey_link_data = {}, utils.merge(b.journey_link_data, a));
+    journeys_utils.journeyLinkData = b;
+  };
+  journeys_utils.getValueForKeyInBranchViewData = function(a) {
+    return journeys_utils && journeys_utils.branch && journeys_utils.branch._branchViewData && journeys_utils.branch._branchViewData.data ? journeys_utils.branch._branchViewData.data[a] : !1;
+  };
+  journeys_utils.hasJourneyCtaLink = function() {
+    return journeys_utils.getValueForKeyInBranchViewData("$journeys_cta") ? 0 < journeys_utils.getBranchViewDataItemOrUndefined("$journeys_cta").length : !1;
+  };
+  journeys_utils.getBranchViewDataItemOrUndefined = function(a) {
+    if (journeys_utils.getValueForKeyInBranchViewData(a)) {
+      return journeys_utils.branch._branchViewData.data[a];
+    }
+  };
+  journeys_utils.getJourneyCtaLink = function() {
+    return journeys_utils.getBranchViewDataItemOrUndefined("$journeys_cta");
+  };
+  journeys_utils.tryReplaceJourneyCtaLink = function(a) {
+    try {
+      if (journeys_utils.hasJourneyCtaLink()) {
+        var b = 'validate("' + journeys_utils.getJourneyCtaLink() + '")';
+        return a.replace(/validate[(].+[)];/g, b).replace("window.top.location.replace(", "window.top.location = ");
+      }
+    } catch (c) {
+    }
+    return a;
+  };
+  journeys_utils.trySetJourneyUrls = function(a, b = ["$android_url", "$ios_url", "$fallback_url", "$desktop_url"]) {
+    if (!a) {
+      return a;
+    }
+    var c = function(e) {
+      return b.reduce((f, g) => {
+        if (f[g]) {
+          return f;
+        }
+        var k = journeys_utils.getBranchViewDataItemOrUndefined(g);
+        k && (f[g] = k);
+        return f;
+      }, e);
+    };
+    try {
+      var d = safejson.parse(a.data);
+      a.data = JSON.stringify(c(d));
+      return a;
+    } catch (e) {
+      return a;
+    }
+  };
+  // Input 15
+  var branch_view = {};
+  function checkPreviousBanner() {
+    return document.getElementById("branch-banner") || document.getElementById("branch-banner-iframe") || document.getElementById("branch-banner-container") ? !0 : !1;
+  }
+  function renderHtmlBlob(a, b, c, d) {
+    var e = c ? "OPEN" : "GET";
+    journeys_utils.setPositionAndHeight(b);
+    var f = journeys_utils.getMetadata(b);
+    f && (e = journeys_utils.getCtaText(f, c), journeys_utils.findInsertionDiv(a, f));
+    var g = journeys_utils.getCss(b);
+    journeys_utils.getJsAndAddToParent(b);
+    var k = journeys_utils.getIframeCss(b);
+    b = journeys_utils.removeScriptAndCss(b);
+    var h = journeys_utils.createIframe();
+    h.onload = function() {
+      journeys_utils.addHtmlToIframe(h, b, utils.mobileUserAgent());
+      journeys_utils.addIframeOuterCSS(k, f);
+      journeys_utils.addIframeInnerCSS(h, g);
+      journeys_utils.addDynamicCtaText(h, e);
+      journeys_utils.branch._publishEvent("willShowJourney", journeys_utils.journeyLinkData);
+      journeys_utils.animateBannerEntrance(h, k);
+      d(h);
+    };
+    document.body.appendChild(h);
+    return h;
+  }
+  function _areJourneysDismissedGlobally(a) {
+    var b = a._storage.get("globalJourneysDismiss", !0);
+    if (!0 === b || b > Date.now()) {
+      return !0;
+    }
+    a._storage.remove("globalJourneysDismiss", !0);
+    return !1;
+  }
+  branch_view.shouldDisplayJourney = function(a, b, c) {
+    return !checkPreviousBanner() && utils.mobileUserAgent() && a.event_data && a.template ? c ? !0 : !a.event_data.branch_view_data.id || b && b.no_journeys || _areJourneysDismissedGlobally(journeys_utils.branch) ? (branch_view.callback_index = 1, !1) : !0 : !1;
+  };
+  branch_view.incrementPageviewAnalytics = function(a) {
+    a = {event:"pageview", journey_displayed:!0, audience_rule_id:a.audience_rule_id, branch_view_id:a.branch_view_id};
+    var b = session.get(journeys_utils.branch._storage) || {};
+    b = b.hasOwnProperty("identity") ? b.identity : null;
+    a = utils.addPropertyIfNotNull(a, "identity", b);
+    journeys_utils.branch._api(resources.pageview, a, function(c, d) {
+    });
+  };
+  branch_view.displayJourney = function(a, b, c, d, e, f) {
+    if (!journeys_utils.exitAnimationIsRunning) {
+      journeys_utils.branchViewId = c;
+      journeys_utils.setJourneyLinkData(f);
+      var g = d.audience_rule_id;
+      (f = document.getElementById("branch-iframe-css")) && f.parentElement.removeChild(f);
+      var k = document.createElement("div");
+      k.id = "branch-banner";
+      document.body.insertBefore(k, null);
+      banner_utils.addClass(k, "branch-banner-is-active");
+      var h = !1, l = b.callback_string, m = null, q = journeys_utils.branch._storage;
+      if (a) {
+        var r = journeys_utils.getMetadata(a) || {};
+        a = journeys_utils.tryReplaceJourneyCtaLink(a);
+        var w = window.setTimeout(function() {
+          window[l] = function() {
+          };
+        }, utils.timeout);
+        window[l] = function(n) {
+          window.clearTimeout(w);
+          h || (m = n, journeys_utils.finalHookups(c, g, q, m, null, r, e, branch_view));
+        };
+        renderHtmlBlob(document.body, a, b.has_app_websdk, function(n) {
+          journeys_utils.banner = n;
+          null === n ? h = !0 : (journeys_utils.finalHookups(c, g, q, m, n, r, e, branch_view), utils.navigationTimingAPIEnabled && (utils.instrumentation["journey-load-time"] = utils.timeSinceNavigationStart()), document.body.removeChild(k), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d));
+        });
+      } else {
+        document.body.removeChild(k), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d);
+      }
+    }
+  };
+  branch_view._getPageviewRequestData = function(a, b, c, d) {
+    journeys_utils.branch = c;
+    b || (b = {});
+    a || (a = {});
+    journeys_utils.entryAnimationDisabled = b.disable_entry_animation || !1;
+    journeys_utils.exitAnimationDisabled = b.disable_exit_animation || !1;
+    var e = utils.merge({}, c._branchViewData), f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, k = f.hasOwnProperty("identity") ? f.identity : null, h = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, m = utils.getInitialReferrer(c._referringLink()), q = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
+    c = b.make_new_link ? null : utils.getClickIdAndSearchStringFromLink(c._referringLink());
+    e.event = d ? "dismiss" : "pageview";
+    e.metadata = a;
+    e = utils.addPropertyIfNotNull(e, "initial_referrer", m);
+    e = utils.addPropertyIfNotNull(e, "branch_view_id", q);
+    e = utils.addPropertyIfNotNull(e, "no_journeys", b.no_journeys);
+    e = utils.addPropertyIfNotNull(e, "is_iframe", utils.isIframe());
+    e = utils.addPropertyIfNotNull(e, "journey_dismissals", h);
+    e = utils.addPropertyIfNotNull(e, "identity", k);
+    e.user_language = l;
+    e.open_app = b.open_app || !1;
+    e.has_app_websdk = g;
+    e.feature = "journeys";
+    e.callback_string = "branch_view_callback__" + journeys_utils._callback_index++;
+    e.data || (e.data = {});
+    e.data = utils.merge(utils.getHostedDeepLinkData(), e.data);
+    e.data = utils.merge(utils.whiteListJourneysLanguageData(f || {}), e.data);
+    c && (e.data.link_click_id = c);
+    (a = f.data ? safejson.parse(f.data) : null) && a["+referrer"] && (e.data["+referrer"] = a["+referrer"]);
+    return e = utils.cleanLinkData(e);
+  };
+  // Input 16
   var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, init_states = {NO_INIT:0, INIT_PENDING:1, INIT_FAILED:2, INIT_SUCCEEDED:3}, init_state_fail_codes = {NO_FAILURE:0, UNKNOWN_CAUSE:1, OPEN_FAILED:2, BFP_NOT_FOUND:3, HAS_APP_FAILED:4}, wrap = function(a, b, c) {
     return function() {
       var d = this, e = arguments[arguments.length - 1];
       if (a === callback_params.NO_CALLBACK || "function" !== typeof e) {
-        var f = function(l) {
+        var f = function(k) {
         };
         var g = Array.prototype.slice.call(arguments);
       } else {
         g = Array.prototype.slice.call(arguments, 0, arguments.length - 1) || [], f = e;
       }
-      d._queue(function(l) {
-        var k = function(h, n) {
+      d._queue(function(k) {
+        var h = function(l, m) {
           try {
-            if (h && a === callback_params.NO_CALLBACK) {
-              throw h;
+            if (l && a === callback_params.NO_CALLBACK) {
+              throw l;
             }
-            a === callback_params.CALLBACK_ERR ? f(h) : a === callback_params.CALLBACK_ERR_DATA && f(h, n);
+            a === callback_params.CALLBACK_ERR ? f(l) : a === callback_params.CALLBACK_ERR_DATA && f(l, m);
           } finally {
-            l();
+            k();
           }
         };
         if (!c) {
           if (d.init_state === init_states.INIT_PENDING) {
-            return k(Error(utils.message(utils.messages.initPending)), null);
+            return h(Error(utils.message(utils.messages.initPending)), null);
           }
           if (d.init_state === init_states.INIT_FAILED) {
-            return k(Error(utils.message(utils.messages.initFailed, d.init_state_fail_code, d.init_state_fail_details)), null);
+            return h(Error(utils.message(utils.messages.initFailed, d.init_state_fail_code, d.init_state_fail_details)), null);
           }
           if (d.init_state === init_states.NO_INIT || !d.init_state) {
-            return k(Error(utils.message(utils.messages.nonInit)), null);
+            return h(Error(utils.message(utils.messages.nonInit)), null);
           }
         }
-        g.unshift(k);
+        g.unshift(h);
         b.apply(d, g);
       });
     };
   }, Branch = function() {
     if (!(this instanceof Branch)) {
-      return default_branch ||= new Branch(), default_branch;
+      return default_branch || (default_branch = new Branch()), default_branch;
     }
     this._queue = task_queue();
     this._storage = new BranchStorage(["session", "cookie", "pojo"]);
     this._server = new Server();
-    var a = config.sdk, b = config.version;
     this._listeners = [];
-    this.sdk = a;
-    this.sdk_version = b;
+    this.sdk = "web" + config.version;
     this.init_state = init_states.NO_INIT;
     this.init_state_fail_code = init_state_fail_codes.NO_FAILURE;
     this.init_state_fail_details = null;
@@ -2075,11 +2884,11 @@
     this.app_id && (b.app_id = this.app_id);
     this.branch_key && (b.branch_key = this.branch_key);
     (a.params && a.params.session_id || a.queryPart && a.queryPart.session_id) && this.session_id && (b.session_id = this.session_id);
-    (a.params && a.params.randomized_bundle_token || a.queryPart && a.queryPart.randomized_bundle_token) && this.randomized_bundle_token && (b.randomized_bundle_token = this.randomized_bundle_token);
+    (a.params && a.params.identity_id || a.queryPart && a.queryPart.identity_id) && this.identity_id && (b.identity_id = this.identity_id);
     0 > a.endpoint.indexOf("/v1/") ? (a.params && a.params.developer_identity || a.queryPart && a.queryPart.developer_identity) && this.identity && (b.developer_identity = this.identity) : (a.params && a.params.identity || a.queryPart && a.queryPart.identity) && this.identity && (b.identity = this.identity);
     (a.params && a.params.link_click_id || a.queryPart && a.queryPart.link_click_id) && this.link_click_id && (b.link_click_id = this.link_click_id);
-    (a.params && a.params.sdk || a.queryPart && a.queryPart.sdk) && this.sdk && (b.sdk = this.sdk, b.sdk_version = this.sdk_version);
-    (a.params && a.params.randomized_device_token || a.queryPart && a.queryPart.randomized_device_token) && this.randomized_device_token && (b.randomized_device_token = this.randomized_device_token);
+    (a.params && a.params.sdk || a.queryPart && a.queryPart.sdk) && this.sdk && (b.sdk = this.sdk);
+    (a.params && a.params.browser_fingerprint_id || a.queryPart && a.queryPart.browser_fingerprint_id) && this.browser_fingerprint_id && (b.browser_fingerprint_id = this.browser_fingerprint_id);
     utils.userPreferences.trackingDisabled && (b.tracking_disabled = utils.userPreferences.trackingDisabled);
     return this._server.request(a, b, this._storage, function(d, e) {
       c(d, e);
@@ -2088,6 +2897,11 @@
   Branch.prototype._referringLink = function() {
     var a = session.get(this._storage);
     return (a = a && a.referring_link) ? a : (a = this._storage.get("click_id")) ? config.link_service_endpoint + "/c/" + a : null;
+  };
+  Branch.prototype._publishEvent = function(a, b) {
+    for (var c = 0; c < this._listeners.length; c++) {
+      this._listeners[c].event && this._listeners[c].event !== a || this._listeners[c].listener(a, b);
+    }
   };
   Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c) {
     utils.navigationTimingAPIEnabled && (utils.instrumentation["init-began-at"] = utils.timeSinceNavigationStart());
@@ -2104,74 +2918,95 @@
     utils.userPreferences.trackingDisabled = c && c.tracking_disabled && !0 === c.tracking_disabled ? !0 : !1;
     utils.userPreferences.allowErrorsInCallback = !1;
     utils.userPreferences.trackingDisabled && utils.cleanApplicationAndSessionStorage(d);
-    d.advertising_ids = c && c.advertising_ids && utils.validateParameterType(c.advertising_ids, "object") && utils.validateAdvertiserIDs(c.advertising_ids) ? c.advertising_ids : null;
     b = session.get(d._storage, !0);
-    d.randomized_bundle_token = b && b.randomized_bundle_token;
+    d.identity_id = b && b.identity_id;
+    var e = function(n) {
+      n.link_click_id && (d.link_click_id = n.link_click_id.toString());
+      n.session_id && (d.session_id = n.session_id.toString());
+      n.identity_id && (d.identity_id = n.identity_id.toString());
+      n.identity && (d.identity = n.identity.toString());
+      n.link && (d.sessionLink = n.link);
+      n.referring_link && (n.referring_link = utils.processReferringLink(n.referring_link));
+      !n.click_id && n.referring_link && (n.click_id = utils.getClickIdAndSearchStringFromLink(n.referring_link));
+      d.browser_fingerprint_id = n.browser_fingerprint_id;
+      return n;
+    };
     b = session.get(d._storage);
-    var e = (c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null) || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), f = !d.randomized_bundle_token;
+    var f = c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null, g = f || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), k = !d.identity_id;
     d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
-    var g = function(p) {
-      var m = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, r = session.get(d._storage, !0) || {};
-      r.randomized_device_token && (m._t = r.randomized_device_token);
-      d._api(resources._r, m, function(u, v) {
-        u && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = u.message);
-        v && (t.randomized_device_token = v, p && p(null, t));
+    var h = function(n) {
+      var p = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, u = session.get(d._storage, !0) || {};
+      u.browser_fingerprint_id && (p._t = u.browser_fingerprint_id);
+      utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, p, function(v, x) {
+        v && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = v.message);
+        x && (t.browser_fingerprint_id = x);
       });
-    }, l = function(p, m) {
-      p = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
-      utils.delay(function() {
-        d._api(resources.open, {link_identifier:e, randomized_device_token:m.randomized_device_token, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
-          t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
-          t || "object" !== typeof r || e && (r.click_id = e);
-          k(t, r);
-        });
-      }, p);
-    }, k = function(p, m) {
-      m && (m.link_click_id && (d.link_click_id = m.link_click_id.toString()), m.session_id && (d.session_id = m.session_id.toString()), m.randomized_bundle_token && (d.randomized_bundle_token = m.randomized_bundle_token.toString()), m.identity && (d.identity = m.identity.toString()), m.link && (d.sessionLink = m.link), m.referring_link && (m.referring_link = utils.processReferringLink(m.referring_link)), !m.click_id && m.referring_link && (m.click_id = utils.getClickIdAndSearchStringFromLink(m.referring_link)), 
-      d.randomized_device_token = m.randomized_device_token, utils.userPreferences.trackingDisabled || (f && (m.identity = d.identity), session.set(d._storage, m, f)), d.init_state = init_states.INIT_SUCCEEDED, m.data_parsed = m.data && 0 !== m.data.length ? safejson.parse(m.data) : {});
-      if (p) {
-        return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = p.message), a(p, m && utils.whiteListSessionData(m));
+      d._api(resources.hasApp, {browser_fingerprint_id:t.browser_fingerprint_id}, function(v, x) {
+        v && (d.init_state_fail_code = init_state_fail_codes.HAS_APP_FAILED, d.init_state_fail_details = v.message);
+        v || !x || t.has_app || (t.has_app = !0, session.update(d._storage, t), d._publishEvent("didDownloadApp"));
+        n && n(null, t);
+      });
+    }, l = function(n) {
+      k && (n.identity = d.identity);
+      return n;
+    }, m = function(n, p) {
+      p && (p = e(p), utils.userPreferences.trackingDisabled || (p = l(p), session.set(d._storage, p, k)), d.init_state = init_states.INIT_SUCCEEDED, p.data_parsed = p.data && 0 !== p.data.length ? safejson.parse(p.data) : {});
+      if (n) {
+        return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = n.message), a(n, p && utils.whiteListSessionData(p));
       }
       try {
-        a(p, m && utils.whiteListSessionData(m));
-      } catch (t) {
+        a(n, p && utils.whiteListSessionData(p));
+      } catch (u) {
       } finally {
         d.renderFinalize();
       }
-      p = utils.getAdditionalMetadata();
-      (m = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (m = utils.mergeHostedDeeplinkData(p.hosted_deeplink_data, m)) && 0 < Object.keys(m).length && (p.hosted_deeplink_data = m);
-      utils.userPreferences.trackingDisabled && (utils.userPreferences.allowErrorsInCallback = !0);
-    }, h = function() {
+      n = utils.getAdditionalMetadata();
+      (p = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (p = utils.mergeHostedDeeplinkData(n.hosted_deeplink_data, p)) && 0 < Object.keys(p).length && (n.hosted_deeplink_data = p);
+      var t = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(c, n), c, d, !1);
+      d.renderQueue(function() {
+        d._api(resources.pageview, t, function(u, v) {
+          u || "object" !== typeof v || (u = t.branch_view_id ? !0 : !1, branch_view.shouldDisplayJourney(v, c, u) ? branch_view.displayJourney(v.template, t, t.branch_view_id || v.event_data.branch_view_data.id, v.event_data.branch_view_data, u, v.journey_link_data) : ((v.auto_branchify || !f && utils.getParamValue("branchify_url") && d._referringLink()) && this.branch.deepview({}, {make_new_link:!1, open_app:!0, auto_branchify:!0}), journeys_utils.branch._publishEvent("willNotShowJourney")));
+          utils.userPreferences.trackingDisabled && (utils.userPreferences.allowErrorsInCallback = !0);
+        });
+      });
+    }, q = function() {
       if ("undefined" !== typeof document.hidden) {
-        var p = "hidden";
-        var m = "visibilitychange";
+        var n = "hidden";
+        var p = "visibilitychange";
       } else {
-        "undefined" !== typeof document.mozHidden ? (p = "mozHidden", m = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (p = "msHidden", m = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (p = "webkitHidden", m = "webkitvisibilitychange");
+        "undefined" !== typeof document.mozHidden ? (n = "mozHidden", p = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (n = "msHidden", p = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (n = "webkitHidden", p = "webkitvisibilitychange");
       }
-      m && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(m, function() {
-        document[p] || g(l);
+      p && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(p, function() {
+        document[n] || (h(null), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
       }, !1));
     };
-    if (b && b.session_id && !e && !utils.getParamValue("branchify_url")) {
-      session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), h(), g(k);
+    if (b && b.session_id && !g && !utils.getParamValue("branchify_url")) {
+      session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), h(m);
     } else {
       b = {sdk:config.version, branch_key:d.branch_key};
-      var n = session.get(d._storage, !0) || {};
-      n.randomized_device_token && (b._t = n.randomized_device_token);
-      n.identity && (d.identity = n.identity);
-      var q = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
-      d._api(resources._r, b, function(p, m) {
-        if (p) {
-          return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = p.message, k(p, null);
+      var r = session.get(d._storage, !0) || {};
+      r.browser_fingerprint_id && (b._t = r.browser_fingerprint_id);
+      r.identity && (d.identity = r.identity);
+      var w = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
+      utils.isSafari11OrGreater() || utils.isIOSWKWebView() ? utils.delay(function() {
+        d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || r.browser_fingerprint_id, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(n, p) {
+          n && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = n.message);
+          n || "object" !== typeof p || (p.branch_view_enabled && (d._branchViewEnabled = !!p.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (p.click_id = g));
+          q();
+          m(n, p);
+        });
+      }, w) : d._api(resources._r, b, function(n, p) {
+        if (n) {
+          return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = n.message, m(n, null);
         }
         utils.delay(function() {
-          d._api(resources.open, {link_identifier:e, randomized_device_token:m, options:c, advertising_ids:d.advertising_ids, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, r) {
+          d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || p, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth()}, function(t, u) {
             t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
-            t || "object" !== typeof r || (r.branch_view_enabled && (d._branchViewEnabled = !!r.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), e && (r.click_id = e));
-            h();
-            k(t, r);
+            t || "object" !== typeof u || (u.branch_view_enabled && (d._branchViewEnabled = !!u.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (u.click_id = g));
+            q();
+            m(t, u);
           });
-        }, q);
+        }, w);
       });
     }
   }, !0);
@@ -2200,12 +3035,12 @@
     this._api(resources.profile, {identity:b}, function(d, e) {
       d && a(d);
       e = e || {};
-      c.randomized_bundle_token = e.randomized_bundle_token ? e.randomized_bundle_token.toString() : null;
+      c.identity_id = e.identity_id ? e.identity_id.toString() : null;
       c.sessionLink = e.link;
       c.identity = b;
       e.developer_identity = b;
       e.referring_data_parsed = e.referring_data ? safejson.parse(e.referring_data) : null;
-      session.patch(c._storage, {identity:b, randomized_bundle_token:c.randomized_bundle_token}, !0);
+      session.patch(c._storage, {identity:b, identity_id:c.identity_id}, !0);
       a(null, e);
     });
   });
@@ -2214,10 +3049,10 @@
     this._api(resources.logout, {}, function(c, d) {
       c && a(c);
       d = d || {};
-      d = {data_parsed:null, data:null, referring_link:null, click_id:null, link_click_id:null, identity:null, session_id:d.session_id, randomized_bundle_token:d.randomized_bundle_token, link:d.link, device_fingerprint_id:b.device_fingerprint_id || null};
+      d = {data_parsed:null, data:null, referring_link:null, click_id:null, link_click_id:null, identity:null, session_id:d.session_id, identity_id:d.identity_id, link:d.link, device_fingerprint_id:b.device_fingerprint_id || null};
       b.sessionLink = d.link;
       b.session_id = d.session_id;
-      b.randomized_bundle_token = d.randomized_bundle_token;
+      b.identity_id = d.identity_id;
       b.identity = null;
       session.patch(b._storage, d, !0, !0);
       a(null);
@@ -2225,7 +3060,7 @@
   });
   Branch.prototype.getBrowserFingerprintId = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
     var b = session.get(this._storage, !0) || {};
-    a(null, b.randomized_device_token || null);
+    a(null, b.browser_fingerprint_id || null);
   });
   Branch.prototype.crossPlatformIds = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
     this._api(resources.crossPlatformIds, {user_data:safejson.stringify(utils.getUserData(this))}, function(b, c) {
@@ -2244,9 +3079,21 @@
     c = c || {};
     d = d || {};
     utils.nonce = d.nonce ? d.nonce : utils.nonce;
-    this._api(resources.event, {event:b, metadata:utils.merge({url:utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language}, c), initial_referrer:utils.getInitialReferrer(this._referringLink())}, function(e, f) {
-      "function" === typeof a && a.apply(this, arguments);
-    });
+    if ("pageview" === b) {
+      (b = utils.mergeHostedDeeplinkData(utils.getHostedDeepLinkData(), c)) && 0 < Object.keys(b).length && (c.hosted_deeplink_data = b);
+      var e = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(d, c), d, this, !1);
+      this._api(resources.pageview, e, function(f, g) {
+        if (!f && "object" === typeof g) {
+          var k = e.branch_view_id ? !0 : !1;
+          branch_view.shouldDisplayJourney(g, d, k) ? branch_view.displayJourney(g.template, e, e.branch_view_id || g.event_data.branch_view_data.id, g.event_data.branch_view_data, k, g.journey_link_data) : journeys_utils.branch._publishEvent("willNotShowJourney");
+        }
+        "function" === typeof a && a.apply(this, arguments);
+      });
+    } else {
+      this._api(resources.event, {event:b, metadata:utils.merge({url:utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language}, c), initial_referrer:utils.getInitialReferrer(this._referringLink())}, function(f, g) {
+        "function" === typeof a && a.apply(this, arguments);
+      });
+    }
   });
   Branch.prototype.logEvent = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d, e) {
     b = utils.validateParameterType(b, "string") ? b : null;
@@ -2268,6 +3115,9 @@
       a(null, f && f.url);
     });
   });
+  Branch.prototype.sendSMS = function() {
+    console.warn("SMS feature has been deprecated. This is no-op.");
+  };
   Branch.prototype.qrCode = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c, d) {
     utils.cleanLinkData(b).qr_code_settings = safejson.stringify(utils.convertObjectValuesToString(c || {}));
     this._api(resources.qrCode, utils.cleanLinkData(b), function(e, f) {
@@ -2282,8 +3132,77 @@
       return a(e || null, g || null);
     });
   });
+  Branch.prototype.deepview = wrap(callback_params.CALLBACK_ERR, function(a, b, c) {
+    var d = this;
+    c || (c = {});
+    c.deepview_type = "undefined" === typeof c.deepview_type ? "deepview" : "banner";
+    b.data = utils.merge(utils.getHostedDeepLinkData(), b.data);
+    b = utils.isIframe() ? utils.merge({is_iframe:!0}, b) : b;
+    b = utils.cleanLinkData(b);
+    var e = utils.generateDynamicBNCLink(this.branch_key, b);
+    if (c.open_app || null === c.open_app || "undefined" === typeof c.open_app) {
+      b.open_app = !0;
+    }
+    b.append_deeplink_path = !!c.append_deeplink_path;
+    b.deepview_type = c.deepview_type;
+    var f = d._referringLink();
+    f && !c.make_new_link && (b.link_click_id = utils.getClickIdAndSearchStringFromLink(f));
+    b.banner_options = c;
+    c.auto_branchify && (b.auto_branchify = !0);
+    d._deepviewRequestForReplay = goog.bind(this._api, d, resources.deepview, b, function(g, k) {
+      if (g) {
+        return utils.userPreferences.trackingDisabled || (d._deepviewCta = function() {
+          d._windowRedirect(e);
+        }), a(g);
+      }
+      "function" === typeof k && (d._deepviewCta = k);
+      a(null);
+    });
+    d._deepviewRequestForReplay();
+  });
   Branch.prototype._windowRedirect = function(a) {
     window.top.location = a;
+  };
+  Branch.prototype.deepviewCta = wrap(callback_params.CALLBACK_ERR, function(a) {
+    if ("undefined" === typeof this._deepviewCta) {
+      return utils.userPreferences.trackingDisabled ? a(Error(utils.messages.trackingDisabled), null) : a(Error(utils.messages.deepviewNotCalled), null);
+    }
+    window.event && (window.event.preventDefault ? window.event.preventDefault() : window.event.returnValue = !1);
+    this._publishEvent("didDeepviewCTA");
+    this._deepviewCta();
+    a();
+  });
+  Branch.prototype.referrals = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.getCode = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.validateCode = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.applyCode = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.credits = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.creditHistory = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.redeem = function() {
+    console.warn("Credits feature has been deprecated. This is no-op.");
+  };
+  Branch.prototype.addListener = function(a, b) {
+    "function" === typeof a && void 0 === b && (b = a, a = null);
+    b && this._listeners.push({listener:b, event:a || null});
+  };
+  Branch.prototype.removeListener = function(a) {
+    a && (this._listeners = this._listeners.filter(function(b) {
+      if (b.listener !== a) {
+        return b;
+      }
+    }));
   };
   function _setBranchViewData(a, b, c) {
     c = c || {};
@@ -2297,6 +3216,50 @@
   Branch.prototype.setBranchViewData = wrap(callback_params.CALLBACK_ERR, function(a, b) {
     _setBranchViewData.call(null, this, a, b);
   }, !0);
+  Branch.prototype.closeJourney = wrap(callback_params.CALLBACK_ERR, function(a) {
+    var b = this;
+    b.renderQueue(function() {
+      if (journeys_utils.banner && journeys_utils.isJourneyDisplayed) {
+        b._publishEvent("didCallJourneyClose", journeys_utils.journeyLinkData), journeys_utils.animateBannerExit(journeys_utils.banner, !0);
+      } else {
+        return a("Journey already dismissed.");
+      }
+    });
+    a();
+  });
+  Branch.prototype.banner = wrap(callback_params.CALLBACK_ERR, function(a, b, c) {
+    if (utils.mobileUserAgent()) {
+      c = c || {};
+      _setBranchViewData.call(null, this, function() {
+      }, c);
+      "undefined" === typeof b.showAgain && "undefined" !== typeof b.forgetHide && (b.showAgain = b.forgetHide);
+      var d = {icon:utils.cleanBannerText(b.icon) || "", title:utils.cleanBannerText(b.title) || "", description:utils.cleanBannerText(b.description) || "", reviewCount:"number" === typeof b.reviewCount && 0 < b.reviewCount ? Math.floor(b.reviewCount) : null, rating:"number" === typeof b.rating && 5 >= b.rating && 0 < b.rating ? Math.round(2 * b.rating) / 2 : null, openAppButtonText:utils.cleanBannerText(b.openAppButtonText) || "View in app", downloadAppButtonText:utils.cleanBannerText(b.downloadAppButtonText) || 
+      "Download App", iframe:"undefined" === typeof b.iframe ? !0 : b.iframe, showiOS:"undefined" === typeof b.showiOS ? !0 : b.showiOS, showiPad:"undefined" === typeof b.showiPad ? !0 : b.showiPad, showAndroid:"undefined" === typeof b.showAndroid ? !0 : b.showAndroid, showBlackberry:"undefined" === typeof b.showBlackberry ? !0 : b.showBlackberry, showWindowsPhone:"undefined" === typeof b.showWindowsPhone ? !0 : b.showWindowsPhone, showKindle:"undefined" === typeof b.showKindle ? !0 : b.showKindle, 
+      disableHide:!!b.disableHide, forgetHide:"number" === typeof b.forgetHide ? b.forgetHide : !!b.forgetHide, respectDNT:"undefined" === typeof b.respectDNT ? !1 : b.respectDNT, position:b.position || "top", customCSS:b.customCSS || "", mobileSticky:"undefined" === typeof b.mobileSticky ? !1 : b.mobileSticky, buttonBorderColor:b.buttonBorderColor || "", buttonBackgroundColor:b.buttonBackgroundColor || "", buttonFontColor:b.buttonFontColor || "", buttonBorderColorHover:b.buttonBorderColorHover || 
+      "", buttonBackgroundColorHover:b.buttonBackgroundColorHover || "", buttonFontColorHover:b.buttonFontColorHover || "", make_new_link:!!b.make_new_link, open_app:!!b.open_app, immediate:!!b.immediate, append_deeplink_path:!!b.append_deeplink_path};
+      "undefined" !== typeof b.showMobile && (d.showiOS = b.showMobile, d.showAndroid = b.showMobile, d.showBlackberry = b.showMobile, d.showWindowsPhone = b.showMobile, d.showKindle = b.showMobile);
+      c.data = utils.merge(utils.getHostedDeepLinkData(), c.data);
+      var e = this;
+      e.renderQueue(function() {
+        e.closeBannerPointer = banner(e, d, c, e._storage);
+      });
+    } else {
+      console.info("banner functionality is not supported on desktop");
+    }
+    a();
+  });
+  Branch.prototype.closeBanner = wrap(0, function(a) {
+    var b = this;
+    b.renderQueue(function() {
+      b.closeBannerPointer && (b._publishEvent("willCloseBanner"), b.closeBannerPointer(function() {
+        b._publishEvent("didCloseBanner");
+      }));
+    });
+    a();
+  });
+  Branch.prototype.autoAppIndex = function() {
+    console.warn("autoAppIndex feature has been deprecated. This is no-op.");
+  };
   Branch.prototype.trackCommerceEvent = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
     var e = this;
     e.renderQueue(function() {
@@ -2304,7 +3267,7 @@
       if (f) {
         return a(Error(f));
       }
-      e._api(resources.commerceEvent, {event:b, metadata:utils.merge({url:document.URL, user_agent:navigator.userAgent, language:navigator.language}, d || {}), initial_referrer:utils.getInitialReferrer(e._referringLink()), commerce_data:c}, function(g, l) {
+      e._api(resources.commerceEvent, {event:b, metadata:utils.merge({url:document.URL, user_agent:navigator.userAgent, language:navigator.language}, d || {}), initial_referrer:utils.getInitialReferrer(e._referringLink()), commerce_data:c}, function(g, k) {
         a(g || null);
       });
     });
@@ -2314,7 +3277,7 @@
     if (!1 === b || "false" === b) {
       utils.userPreferences.trackingDisabled = !1, utils.userPreferences.allowErrorsInCallback = !1, this.branch_key && this.init_options && (!0 === this.init_options.tracking_disabled && delete this.init_options.tracking_disabled, this.init(this.branch_key, this.init_options));
     } else if (void 0 === b || !0 === b || "true" === b) {
-      utils.cleanApplicationAndSessionStorage(this), utils.userPreferences.trackingDisabled = !0, utils.userPreferences.allowErrorsInCallback = !0;
+      utils.cleanApplicationAndSessionStorage(this), utils.userPreferences.trackingDisabled = !0, utils.userPreferences.allowErrorsInCallback = !0, this.closeBanner(), this.closeJourney();
     }
     a();
   }, !0);
@@ -2322,7 +3285,7 @@
     this._server.onAPIResponse = b;
     a();
   }, !0);
-  // Input 11
+  // Input 17
   var branch_instance = new Branch();
   if (window.branch && window.branch._q) {
     for (var queue = window.branch._q, i = 0; i < queue.length; i++) {
