@@ -1632,7 +1632,7 @@
     return utils.merge(a, b);
   }
   function v2defaults(a) {
-    var b = {user_data:validator(!0, validationTypes.OBJECT)};
+    var b = {user_data:validator(!0, validationTypes.STRING)};
     return utils.merge(a, b);
   }
   resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{randomized_device_token:validator(!1, validationTypes.STRING), randomized_bundle_token:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), current_url:validator(!1, 
