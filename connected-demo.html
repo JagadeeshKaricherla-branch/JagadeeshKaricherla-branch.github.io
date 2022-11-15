@@ -84,7 +84,7 @@
     LG_IFA: 'olare'
   }
 };
-		branch.init($('meta[name="branch_key"]').attr('content'),options, function(err, data) {
+		branch.init($('meta[name="branch_key"]').attr('content'),null, function(err, data) {
 			// Avoid XSS by HTML escaping the data for display
 			$('#info').text(JSON.stringify(data));
 		});
