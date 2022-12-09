@@ -64,7 +64,8 @@
 			<div class="row col-lg-8 col-lg-offset-2">
 				<h4>Sharing and Tracking</h4>
 				<div class="group">
-					<button id="track" class="btn btn-info">.logEvent()</button>
+					<button id="track" class="btn btn-info">.logEvent() standard</button>
+					<button id="log-custom" class="btn btn-info">.logEvent() custom</button>
 					<button id="link" class="btn btn-info">.link()</button>
 					<button id="banner" class="btn btn-info">.banner()</button>
 					<button id="disable-tracking" class="btn btn-info">.disableTracking(true)</button>
@@ -226,6 +227,20 @@ branch.logEvent(
    content_items,
    customer_event_alias,
    function(err) { response.html(err || 'no error'); }
+);
+});
+
+$('#log-custom').click(function() {
+			request.html('branch.logEvent();');
+			var custom_data = {
+   "Custom_Event_Property_Key1": "Custom_Event_Property_val1",
+   "Custom_Event_Property_Key2": "Custom_Event_Property_val2"
+};
+
+branch.logEvent(
+    "my_custom_event",
+    custom_data,
+	function(err) { console.log(err); }
 );
 });
 		$('#link').click(function() {
