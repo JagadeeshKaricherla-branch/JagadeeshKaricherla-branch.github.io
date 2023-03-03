@@ -1579,7 +1579,9 @@ utils.getUserData = function(a) {
   b = utils.addPropertyIfNotNull(b, "developer_identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "sdk", "web");
-  return b = utils.addPropertyIfNotNull(b, "sdk_version", config.version);
+  b = utils.addPropertyIfNotNull(b, "sdk_version", config.version);
+  b = utils.addPropertyIfNotNull(b, "model", utils.userAgentData.model);
+  return b = utils.addPropertyIfNotNull(b, "os_version", utils.userAgentData.platformVersion);
 };
 utils.isIframe = function() {
   return window.self !== window.top;
@@ -1628,7 +1630,7 @@ utils.delay = function(a, b) {
   isNaN(b) || 0 >= b ? a() : setTimeout(a, b);
 };
 utils.getClientHints = function() {
-  void 0 != navigator.userAgentData ? navigator.userAgentData.getHighEntropyValues(["model", "platformVersion"]).then(a => {
+  navigator.userAgentData ? navigator.userAgentData.getHighEntropyValues(["model", "platformVersion"]).then(function(a) {
     utils.userAgentData = {model:a.model, platformVersion:a.platformVersion};
   }) : utils.userAgentData = null;
 };
@@ -1677,7 +1679,7 @@ function defaults(a) {
   return utils.merge(a, b);
 }
 resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{browser_fingerprint_id:validator(!1, validationTypes.STRING), alternative_browser_fingerprint_id:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, 
-validationTypes.BOOLEAN), current_url:validator(!1, validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), os_version:validator(!0, validationTypes.STRING)}};
+validationTypes.BOOLEAN), current_url:validator(!1, validationTypes.STRING), screen_height:validator(!1, validationTypes.NUMBER), screen_width:validator(!1, validationTypes.NUMBER), model:validator(!0, validationTypes.STRING), os_version:validator(!0, validationTypes.STRING)}};
 resources._r = {destination:config.app_service_endpoint, endpoint:"/_r", method:utils.httpMethod.GET, jsonp:!0, params:{sdk:validator(!0, validationTypes.STRING), _t:validator(!1, validationTypes.STRING), branch_key:validator(!0, validationTypes.STRING)}};
 resources.linkClick = {destination:"", endpoint:"", method:utils.httpMethod.GET, queryPart:{link_url:validator(!0, validationTypes.STRING)}, params:{click:validator(!0, validationTypes.STRING)}};
 resources.logout = {destination:config.api_endpoint, endpoint:"/v1/logout", method:utils.httpMethod.POST, params:defaults({session_id:validator(!0, validationTypes.STRING)})};
@@ -2551,7 +2553,7 @@ journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, k) {
   }
 };
 journeys_utils._getPageviewMetadata = function(a, b) {
-  return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1}, b || {});
+  return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1, model:utils.userAgentData.model, os_version:utils.userAgentData.platformVersion}, b || {});
 };
 journeys_utils.animateBannerExit = function(a, b) {
   journeys_utils.exitAnimationDisabled || (journeys_utils.exitAnimationIsRunning = !0);
