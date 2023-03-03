@@ -1097,7 +1097,7 @@ utils.timeout = 5000;
 utils.nonce = "";
 utils.extendedJourneysAssistExpiryTime = 604800000;
 utils.instrumentation = {};
-utils.userAgentData = {};
+utils.userAgentData = null;
 utils.navigationTimingAPIEnabled = "undefined" !== typeof window && !!(window.performance && window.performance.timing && window.performance.timing.navigationStart);
 utils.timeSinceNavigationStart = function() {
   return (Date.now() - window.performance.timing.navigationStart).toString();
@@ -2553,7 +2553,7 @@ journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, k) {
   }
 };
 journeys_utils._getPageviewMetadata = function(a, b) {
-  return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1, model:utils.userAgentData.model, os_version:utils.userAgentData.platformVersion}, b || {});
+  return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1, model:utils.userAgentData ? utils.userAgentData.model : "", os_version:utils.userAgentData ? utils.userAgentData.platformVersion : ""}, b || {});
 };
 journeys_utils.animateBannerExit = function(a, b) {
   journeys_utils.exitAnimationDisabled || (journeys_utils.exitAnimationIsRunning = !0);
