@@ -1580,8 +1580,8 @@ utils.getUserData = function(a) {
   b = utils.addPropertyIfNotNull(b, "identity", a.identity);
   b = utils.addPropertyIfNotNull(b, "sdk", "web");
   b = utils.addPropertyIfNotNull(b, "sdk_version", config.version);
-  b = utils.addPropertyIfNotNull(b, "model", utils.userAgentData.model);
-  return b = utils.addPropertyIfNotNull(b, "os_version", utils.userAgentData.platformVersion);
+  b = utils.addPropertyIfNotNullorEmpty(b, "model", utils.userAgentData ? utils.userAgentData.model : "");
+  return b = utils.addPropertyIfNotNullorEmpty(b, "os_version", utils.userAgentData ? utils.userAgentData.platformVersion : "");
 };
 utils.isIframe = function() {
   return window.self !== window.top;
@@ -1633,6 +1633,10 @@ utils.getClientHints = function() {
   navigator.userAgentData ? navigator.userAgentData.getHighEntropyValues(["model", "platformVersion"]).then(function(a) {
     utils.userAgentData = {model:a.model, platformVersion:a.platformVersion};
   }) : utils.userAgentData = null;
+};
+utils.addPropertyIfNotNullorEmpty = function(a, b, c) {
+  "string" === typeof c && c && (a[b] = c);
+  return a;
 };
 // Input 5
 var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
@@ -2553,7 +2557,9 @@ journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, k) {
   }
 };
 journeys_utils._getPageviewMetadata = function(a, b) {
-  return utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1, model:utils.userAgentData ? utils.userAgentData.model : "", os_version:utils.userAgentData ? utils.userAgentData.platformVersion : ""}, b || {});
+  a = utils.merge({url:a && a.url || utils.getWindowLocation(), user_agent:navigator.userAgent, language:navigator.language, screen_width:screen.width || -1, screen_height:screen.height || -1, window_device_pixel_ratio:window.devicePixelRatio || 1,}, b || {});
+  a = utils.addPropertyIfNotNullorEmpty(a, "model", utils.userAgentData ? utils.userAgentData.model : "");
+  return a = utils.addPropertyIfNotNullorEmpty(a, "os_version", utils.userAgentData ? utils.userAgentData.platformVersion : "");
 };
 journeys_utils.animateBannerExit = function(a, b) {
   journeys_utils.exitAnimationDisabled || (journeys_utils.exitAnimationIsRunning = !0);
