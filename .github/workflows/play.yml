@@ -8,6 +8,7 @@ on:
       - index.html
 env:
   SOME_SECRET: ${{ secrets.STAGING_SECRET }}
+  env_var: ${{ vars.STAGING_VAR }}
 
 jobs:
   env-test:
