@@ -17,5 +17,7 @@ public class SystemDemo {
        
        int length = read_string.length();
        System.out.println("The length of the String is: " +length); 
+        System.out.println("Test read - staging env variable");
+      System.out.println(System.getenv("STAGING_VAR"));
    }
 } 
