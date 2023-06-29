@@ -16,6 +16,11 @@ NC='\033[0m'
 # Set the value you want to assign to the environment variable
 my_variable="Hello, GitHub Actions!"
 
+# Get and print all release tags
+tags=$(git tag --list)
+
+echo "Release Tags:"
+echo "${tags}"
 
 # Last release tag
 LAST_RELEASE_TAG="v1.0" # Replace with your last release tag
