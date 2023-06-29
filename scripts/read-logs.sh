@@ -17,13 +17,25 @@ NC='\033[0m'
 my_variable="Hello, GitHub Actions!"
 
 
-# fetch tags, to be sure we have all the require info
+# Last release tag
+LAST_RELEASE_TAG="v1.0" # Replace with your last release tag
+
+# Fetch the latest changes from the remote repository
 git fetch --tags
 
-# collect the commits since the last tag
-export GIT_RELEASE_NOTES="$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")"
+# Get the commit hashes since the last release tag
+COMMITS=$(git log ${LAST_RELEASE_TAG}..HEAD --pretty=format:"%H")
 
+# Iterate over each commit hash
+for commit in $COMMITS; do
+    echo "Commit: $commit"
+    
+    # Get commit details
+    git show --quiet --format="%B" $commit
+    
+    echo "-------------------------"
+done
 # Write the value to the environment variable
-echo "MY_VARIABLE=$GIT_RELEASE_NOTES" >> $GITHUB_ENV
+echo "MY_VARIABLE=$COMMITS" >> $GITHUB_ENV
 
 echo -en "${GREEN}Done ...${NC}\n"
