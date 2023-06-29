@@ -64,3 +64,5 @@ jobs:
         run: echo $GITHUB_SHA_SHORT
       - name: Call the Build bash script for QA
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh
+      - name: Print environment variable
+        run: echo ${{ env.MY_VARIABLE }}
