@@ -11,11 +11,13 @@ on:
           description: 'Want to deploy to QA'
           required: true
           type: boolean
+          default: false
         
       perform_deploy_prod:
           description: 'Want to deploy to Prod'
           required: true
           type: boolean
+          default: false
         
       version:
           type: choice
@@ -42,7 +44,7 @@ env:
   BRANCH_NAME: '${{ github.event.inputs.branch_name || github.head_ref || github.ref_name  }}'
 jobs:
   build:
-    runs-on: [small]
+    runs-on: [ubuntu-latest]
     steps:
       - name: Run tests
         run: echo "Branch name is $BRANCH_NAME"
