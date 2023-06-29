@@ -24,7 +24,7 @@ LAST_RELEASE_TAG="v1.0" # Replace with your last release tag
 git fetch --tags
 
 # Get the commit hashes since the last release tag
-COMMITS=$(git log ${LAST_RELEASE_TAG}..HEAD --pretty=format:"%H")
+COMMITS=$(git log --pretty=format:"%H" ${LAST_RELEASE_TAG}..HEAD)
 
 # Iterate over each commit hash
 for commit in $COMMITS; do
