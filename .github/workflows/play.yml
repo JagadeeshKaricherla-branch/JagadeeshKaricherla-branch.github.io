@@ -56,6 +56,8 @@ jobs:
         run: |
             echo "Version selected is, ${{ github.event.inputs.version }}!"
             echo "- qa ${{ inputs.perform_deploy_qa }}!"
-            
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v3
+
       - name: Call the Build bash script for QA
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh
