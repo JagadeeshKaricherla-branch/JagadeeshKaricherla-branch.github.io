@@ -58,6 +58,9 @@ jobs:
             echo "- qa ${{ inputs.perform_deploy_qa }}!"
       - name: Checkout ${{ github.ref_name }}
         uses: actions/checkout@v3
-
+      - name: Set env
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+      - name: Test
+        run: echo $GITHUB_SHA_SHORT
       - name: Call the Build bash script for QA
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh
