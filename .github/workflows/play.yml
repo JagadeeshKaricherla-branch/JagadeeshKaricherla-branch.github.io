@@ -25,6 +25,8 @@ jobs:
           echo "input from_tag :  ${{ github.event.inputs.from_tag }}"
       - name: Print tags
         run: |
+          git pull origin
+          git fetch --tags origin
           git tag --list
       - name: Call the read-logs bash script for preparing changelog.md
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh ${{ github.event.inputs.from_tag }} ${{ github.event.inputs.package_version }}
@@ -46,5 +48,5 @@ jobs:
           gh pr create \
             --title "Changelog update - \`$VERSION\`" \
             --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-            --base master \
+            --base main \
             --head $BRANCH
