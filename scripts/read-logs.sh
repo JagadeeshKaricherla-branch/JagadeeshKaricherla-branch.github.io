@@ -33,6 +33,8 @@ LAST_RELEASE_TAG=$1
 
 # Function to get and print all release tags
 printReleaseTags() {
+    git pull origin
+    git fetch --tags origin
     tags=$(git tag --list)
 
     echo "Release Tags:"
@@ -55,6 +57,7 @@ checkReleaseTagParam() {
 # Function to get all commit hashes based on release tag
 getCommitsByReleaseTag() {
     # Fetch the latest changes from the remote repository
+    
     git fetch --tags
 
     # Get the commit hashes since the last release tag
