@@ -219,4 +219,4 @@ echo "Printing Updated '$changelog_file':"
 cat "$changelog_file"
 
 
-echo -en "${GREEN}Done ...${NC}\n"
+echo -en "${GREEN}Completed ...${NC}\n"
