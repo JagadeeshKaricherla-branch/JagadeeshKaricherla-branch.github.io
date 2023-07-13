@@ -1,4 +1,4 @@
-name: demo
+name: Automate Changelog
 on:
   workflow_dispatch:
     inputs:
@@ -23,6 +23,9 @@ jobs:
         run: |
           echo "input package_version :  ${{ github.event.inputs.package_version }}"
           echo "input from_tag :  ${{ github.event.inputs.from_tag }}"
+      - name: Print tags
+        run: |
+          git tag --list
       - name: Call the read-logs bash script for preparing changelog.md
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh ${{ github.event.inputs.from_tag }} ${{ github.event.inputs.package_version }}
       # Create pull request
