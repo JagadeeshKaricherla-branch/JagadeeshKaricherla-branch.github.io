@@ -27,8 +27,6 @@ jobs:
         run:  bash ${GITHUB_WORKSPACE}/scripts/read-logs.sh ${{ github.event.inputs.from_tag }} ${{ github.event.inputs.package_version }}
       # Create pull request
       - name: Create Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ github.event.inputs.package_version }}"
           BRANCH="changelog-update-$VERSION"
