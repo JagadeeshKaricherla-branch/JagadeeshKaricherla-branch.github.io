@@ -3,6 +3,10 @@ All notable changes to the Branch Web SDK will be documented here.
 The Branch Web SDK adheres to [Semantic Versioning](http://semver.org/).
 
 ## [VERSION] - unreleased
+## [2.75.0] - 2023-07-13
+- change edning
+
+
 ## [2.74.0] - 2023-04-04
 - INTENG-18040 Convert percentage banner height to pixels
 
