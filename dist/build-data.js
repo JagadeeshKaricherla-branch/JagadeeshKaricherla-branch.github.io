@@ -2762,7 +2762,7 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   e.data = utils.merge(utils.whiteListJourneysLanguageData(f || {}), e.data);
   c && (e.data.link_click_id = c);
   (a = f.data ? safejson.parse(f.data) : null) && a["+referrer"] && (e.data["+referrer"] = a["+referrer"]);
-  e.session_referring_link_data = a;
+  e.session_referring_link_data = f.data || null;
   return e = utils.cleanLinkData(e);
 };
 // Input 16
