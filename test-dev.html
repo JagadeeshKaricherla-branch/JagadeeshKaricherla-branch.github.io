@@ -149,7 +149,7 @@
 			});
 		});
 		$('#setIdentity').click(function() {
-			var identity = getInputVal('#identityID');
+			var identity = 1234;
 			request.text("branch.setIdentity('" + identity + "');");
 			branch.setIdentity(identity, function(err, data) {
 				response.text(err || JSON.stringify(data));
