@@ -2703,7 +2703,7 @@ function _areJourneysDismissedGlobally(a) {
   return !1;
 }
 branch_view.shouldDisplayJourney = function(a, b, c) {
-  return !checkPreviousBanner() && utils.mobileUserAgent() && a.event_data && a.template ? c ? !0 : !a.event_data.branch_view_data.id || b && b.no_journeys || _areJourneysDismissedGlobally(journeys_utils.branch) ? (branch_view.callback_index = 1, !1) : !0 : !1;
+  return !checkPreviousBanner() && a.event_data && a.template ? c ? !0 : !a.event_data.branch_view_data.id || b && b.no_journeys || _areJourneysDismissedGlobally(journeys_utils.branch) ? (branch_view.callback_index = 1, !1) : !0 : !1;
 };
 branch_view.incrementPageviewAnalytics = function(a) {
   a = {event:"pageview", journey_displayed:!0, audience_rule_id:a.audience_rule_id, branch_view_id:a.branch_view_id};
