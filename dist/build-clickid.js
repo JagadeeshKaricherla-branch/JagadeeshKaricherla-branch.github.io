@@ -1706,7 +1706,7 @@ resources.logStandardEvent = {destination:config.api_endpoint, endpoint:"/v2/eve
 resources.logCustomEvent = {destination:config.api_endpoint, endpoint:"/v2/event/custom", method:utils.httpMethod.POST, params:{name:validator(!0, validationTypes.STRING), user_data:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)}};
 resources.pageview = {destination:config.api_endpoint, endpoint:"/v1/pageview", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
 validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), identity_id:validator(!1, 
-validationTypes.STRING), identity:validator(!0, validationTypes.STRING), session_referring_link_data:validator(!1, validationTypes.STRING), session_link_click_id:validator(!1, validationTypes.STRING),})};
+validationTypes.STRING), identity:validator(!0, validationTypes.STRING), session_referring_link_data:validator(!1, validationTypes.STRING), session_link_click_id:validator(!1, validationTypes.STRING)})};
 resources.dismiss = {destination:config.api_endpoint, endpoint:"/v1/dismiss", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
 validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), dismissal_source:validator(!1, 
 validationTypes.STRING)})};
@@ -2103,8 +2103,6 @@ var session = {get:function(a, b) {
     return null;
   }
 }, set:function(a, b, c) {
-  console.log("session set called with data", b);
-  console.log("session set called with first", c);
   c && b.referring_link && utils.userPreferences.enableExtendedJourneysAssist && (b.referringLinkExpiry = (new Date()).getTime() + utils.extendedJourneysAssistExpiryTime);
   b = utils.encodeBFPs(b);
   a.set("branch_session", goog.json.serialize(b));
@@ -2868,7 +2866,6 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   b = session.get(d._storage, !0);
   d.identity_id = b && b.identity_id;
   var e = function(m) {
-    console.log("Inside setBranchValues", m);
     m.link_click_id && (d.link_click_id = m.link_click_id.toString());
     m.session_link_click_id && (d.session_link_click_id = m.session_link_click_id.toString());
     m.session_id && (d.session_id = m.session_id.toString());
@@ -2895,7 +2892,7 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
     h && (m.identity = d.identity);
     return m;
   }, n = function(m, p) {
-    p && (p = e(p), utils.userPreferences.trackingDisabled || (console.log("before restore", p), p = l(p), console.log("before set", p), console.log("freshInstall", h), session.set(d._storage, p, h), console.log("after set", p)), d.init_state = init_states.INIT_SUCCEEDED, p.data_parsed = p.data && 0 !== p.data.length ? safejson.parse(p.data) : {});
+    p && (p = e(p), utils.userPreferences.trackingDisabled || (p = l(p), session.set(d._storage, p, h)), d.init_state = init_states.INIT_SUCCEEDED, p.data_parsed = p.data && 0 !== p.data.length ? safejson.parse(p.data) : {});
     if (m) {
       return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = m.message), a(m, p && utils.whiteListSessionData(p));
     }
@@ -2939,9 +2936,6 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         m && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = m.message);
         m || "object" !== typeof p || (p.branch_view_enabled && (d._branchViewEnabled = !!p.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (p.click_id = g));
         q();
-        console.log("Data before 2", p);
-        p.session_link_click_id = "1229854151056408510";
-        console.log("Data after 2", p);
         n(m, p);
       });
     }, w) : d._api(resources._r, b, function(m, p) {
@@ -2954,9 +2948,6 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
           u && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = u.message);
           u || "object" !== typeof t || (t.branch_view_enabled && (d._branchViewEnabled = !!t.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (t.click_id = g));
           q();
-          console.log("Data before", t);
-          t.session_link_click_id = "1229854151056408510";
-          console.log("Data after", t);
           n(u, t);
         });
       }, w);
