@@ -2939,9 +2939,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         m && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = m.message);
         m || "object" !== typeof p || (p.branch_view_enabled && (d._branchViewEnabled = !!p.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (p.click_id = g));
         q();
-        console.log("Data before", p);
+        console.log("Data before 2", p);
         p.session_link_click_id = "1229854151056408510";
-        console.log("Data after", p);
+        console.log("Data after 2", p);
         n(m, p);
       });
     }, w) : d._api(resources._r, b, function(m, p) {
@@ -2954,6 +2954,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
           u && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = u.message);
           u || "object" !== typeof t || (t.branch_view_enabled && (d._branchViewEnabled = !!t.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (t.click_id = g));
           q();
+          console.log("Data before", t);
+          t.session_link_click_id = "1229854151056408510";
+          console.log("Data after", t);
           n(u, t);
         });
       }, w);
