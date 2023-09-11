@@ -2867,7 +2867,6 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   d.identity_id = b && b.identity_id;
   var e = function(m) {
     m.link_click_id && (d.link_click_id = m.link_click_id.toString());
-    m.session_link_click_id = "1229854151056408510";
     m.session_link_click_id && (d.session_link_click_id = m.session_link_click_id.toString());
     m.session_id && (d.session_id = m.session_id.toString());
     m.identity_id && (d.identity_id = m.identity_id.toString());
@@ -2937,6 +2936,7 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         m && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = m.message);
         m || "object" !== typeof p || (p.branch_view_enabled && (d._branchViewEnabled = !!p.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (p.click_id = g));
         q();
+        p.session_link_click_id = "1229854151056408510";
         n(m, p);
       });
     }, w) : d._api(resources._r, b, function(m, p) {
