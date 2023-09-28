@@ -1876,7 +1876,7 @@ Server.prototype.getUrl = function(a, b) {
   }
   if (b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata) {
     for (var k in b.branch_requestMetadata) {
-      b.branch_requestMetadata.hasOwnProperty("metadata_key") && (g[k] = b.branch_requestMetadata[k]);
+      b.branch_requestMetadata.hasOwnProperty(k) && (g[k] = b.branch_requestMetadata[k]);
     }
   }
   if ("POST" === a.method) {
