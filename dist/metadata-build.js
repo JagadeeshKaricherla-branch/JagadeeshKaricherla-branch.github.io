@@ -1876,23 +1876,32 @@ Server.prototype.getUrl = function(a, b) {
   }
   if ("POST" === a.method) {
     try {
-      var h = g;
-      "undefined" === typeof h && (h = {});
-      if (b.branch_key && f.test(b.branch_key)) {
-        h.branch_key = b.branch_key;
-      } else if (b.app_id && e.test(b.app_id)) {
-        h.app_id = b.app_id;
-      } else if (b.instrumentation) {
-        h.instrumentation = b.instrumentation;
+      var h = b;
+      c = g;
+      "undefined" === typeof c && (c = {});
+      if (h.branch_key && f.test(h.branch_key)) {
+        c.branch_key = h.branch_key, b = c;
+      } else if (h.app_id && e.test(h.app_id)) {
+        c.app_id = h.app_id, b = c;
       } else {
-        throw Error(utils.message(utils.messages.missingParam, [a.endpoint, "branch_key or app_id"]));
+        if (h.instrumentation) {
+          c.instrumentation = h.instrumentation;
+        } else {
+          throw Error(utils.message(utils.messages.missingParam, [a.endpoint, "branch_key or app_id"]));
+        }
+        b = void 0;
       }
-    } catch (k) {
-      return {error:k.message};
+    } catch (l) {
+      return {error:l.message};
     }
   }
   ("/v1/pageview" === a.endpoint || "/v1/dismiss" === a.endpoint) && g.metadata && (g.metadata = safejson.stringify(g.metadata || {}));
   "/v1/open" === a.endpoint && (g.options = safejson.stringify(g.options || {}));
+  if (b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata) {
+    for (var k in b.branch_requestMetadata) {
+      g[k] = b.branch_requestMetadata[k];
+    }
+  }
   return {data:this.serializeObject(g, ""), url:d.replace(/^\//, "")};
 };
 Server.prototype.createScript = function(a, b, c) {
@@ -2827,7 +2836,7 @@ Branch.prototype._api = function(a, b, c) {
   utils.userPreferences.trackingDisabled && (b.tracking_disabled = utils.userPreferences.trackingDisabled);
   if (this.requestMetadata) {
     for (var d in this.requestMetadata) {
-      this.requestMetadata.hasOwnProperty(d) && (b[d] = this.requestMetadata[d]);
+      this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata[d] = this.requestMetadata[d]);
     }
   }
   return this._server.request(a, b, this._storage, function(e, f) {
