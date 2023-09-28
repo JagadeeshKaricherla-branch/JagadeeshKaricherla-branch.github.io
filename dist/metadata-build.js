@@ -2836,7 +2836,7 @@ Branch.prototype._api = function(a, b, c) {
   utils.userPreferences.trackingDisabled && (b.tracking_disabled = utils.userPreferences.trackingDisabled);
   if (this.requestMetadata) {
     for (var d in this.requestMetadata) {
-      this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata[d] = this.requestMetadata[d]);
+      this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata || (b.branch_requestMetadata = {}), b.branch_requestMetadata[d] = this.requestMetadata[d]);
     }
   }
   return this._server.request(a, b, this._storage, function(e, f) {
