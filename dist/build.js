@@ -21,7 +21,7 @@ $jscomp.defineProperty = $jscomp.ASSUME_ES5 || "function" == typeof Object.defin
   return a;
 };
 $jscomp.getGlobal = function(a) {
-  a = ["object" == typeof globalThis && globalThis, a, "object" == typeof window && window, "object" == typeof self && self, "object" == typeof global && global,];
+  a = ["object" == typeof globalThis && globalThis, a, "object" == typeof window && window, "object" == typeof self && self, "object" == typeof global && global];
   for (var b = 0; b < a.length; ++b) {
     var c = a[b];
     if (c && c.Math == Math) {
@@ -36,13 +36,15 @@ $jscomp.TRUST_ES6_POLYFILLS = !$jscomp.ISOLATE_POLYFILLS || $jscomp.IS_SYMBOL_NA
 $jscomp.polyfills = {};
 $jscomp.propertyToPolyfillSymbol = {};
 $jscomp.POLYFILL_PREFIX = "$jscp$";
-var $jscomp$lookupPolyfilledValue = function(a, b) {
-  var c = $jscomp.propertyToPolyfillSymbol[b];
-  if (null == c) {
-    return a[b];
+var $jscomp$lookupPolyfilledValue = function(a, b, c) {
+  if (!c || null != a) {
+    c = $jscomp.propertyToPolyfillSymbol[b];
+    if (null == c) {
+      return a[b];
+    }
+    c = a[c];
+    return void 0 !== c ? c : a[b];
   }
-  c = a[c];
-  return void 0 !== c ? c : a[b];
 };
 $jscomp.polyfill = function(a, b, c, d) {
   b && ($jscomp.ISOLATE_POLYFILLS ? $jscomp.polyfillIsolated(a, b, c, d) : $jscomp.polyfillUnisolated(a, b, c, d));
@@ -124,9 +126,6 @@ goog.define = function(a, b) {
 goog.FEATURESET_YEAR = 2012;
 goog.DEBUG = !0;
 goog.LOCALE = "en";
-goog.getLocale = function() {
-  return goog.LOCALE;
-};
 goog.TRUSTED_SITE = !0;
 goog.DISALLOW_TEST_ONLY_CODE = COMPILED && !goog.DEBUG;
 goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING = !1;
@@ -256,7 +255,7 @@ goog.getObjectByName = function(a, b) {
 goog.addDependency = function(a, b, c, d) {
   !COMPILED && goog.DEPENDENCIES_ENABLED && goog.debugLoader_.addDependency(a, b, c, d);
 };
-goog.ENABLE_DEBUG_LOADER = !0;
+goog.ENABLE_DEBUG_LOADER = !1;
 goog.logToConsole_ = function(a) {
   goog.global.console && goog.global.console.error(a);
 };
@@ -1072,7 +1071,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.78.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.80.0"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1111,7 +1110,7 @@ utils.userPreferences = {trackingDisabled:!1, enableExtendedJourneysAssist:!1, w
   var c = document.createElement("a");
   c.href = a;
   a = [config.api_endpoint, config.app_service_endpoint, config.link_service_endpoint];
-  let d = c.origin;
+  var d = c.origin;
   d.endsWith("/") && (d = d.substring(0, d.length - 1));
   if (!a.includes(d)) {
     return !1;
@@ -1126,8 +1125,8 @@ utils.userPreferences = {trackingDisabled:!1, enableExtendedJourneysAssist:!1, w
     if (!b) {
       return !0;
     }
-    for (const e in c) {
-      if (c.hasOwnProperty(e) && (a = new RegExp(c[e]), !b.hasOwnProperty(e) || !a.test(b[e]))) {
+    for (var e in c) {
+      if (a = new RegExp(c[e]), !b.hasOwnProperty(e) || !a.test(b[e])) {
         return !0;
       }
     }
@@ -1136,21 +1135,16 @@ utils.userPreferences = {trackingDisabled:!1, enableExtendedJourneysAssist:!1, w
 }};
 utils.generateDynamicBNCLink = function(a, b) {
   if (a || b) {
-    var c = function(e, f, g) {
-      return ("?" === e[e.length - 1] ? e + f : e + "&" + f) + "=" + encodeURIComponent(g);
-    };
     a = config.link_service_endpoint + "/a/" + a + "?";
-    var d = "tags alias channel feature stage campaign type duration sdk source data".split(" ");
-    for (let e = 0; e < d.length; e++) {
-      const f = d[e];
-      let g = b[f];
-      if (g) {
-        if ("tags" === f && Array.isArray(g)) {
-          for (let h = 0; h < g.length; h++) {
-            a = c(a, f, g[h]);
+    for (var c = "tags alias channel feature stage campaign type duration sdk source data".split(" "), d = 0; d < c.length; d++) {
+      var e = c[d], f = b[e];
+      if (f) {
+        if ("tags" === e && Array.isArray(f)) {
+          for (var g = 0; g < f.length; g++) {
+            a = ("?" === a[a.length - 1] ? a + e : a + "&" + e) + "=" + encodeURIComponent(f[g]);
           }
-        } else if ("string" === typeof g && 0 < g.length || "number" === typeof g) {
-          "data" === f && "string" === typeof g && (g = utils.base64encode(g)), a = c(a, f, g);
+        } else if ("string" === typeof f && 0 < f.length || "number" === typeof f) {
+          "data" === e && "string" === typeof f && (f = utils.base64encode(f)), a = ("?" === a[a.length - 1] ? a + e : a + "&" + e) + "=" + encodeURIComponent(f);
         }
       }
     }
@@ -1183,9 +1177,7 @@ utils.whiteListSessionData = function(a) {
   return {data:a.data || "", data_parsed:a.data_parsed || {}, has_app:utils.getBooleanOrNull(a.has_app), identity:a.identity || null, developer_identity:a.identity || null, referring_identity:a.referring_identity || null, referring_link:a.referring_link || null};
 };
 utils.whiteListJourneysLanguageData = function(a) {
-  const b = /^\$journeys_\S+$/;
-  let c = a.data;
-  const d = {};
+  var b = /^\$journeys_\S+$/, c = a.data, d = {};
   if (!c) {
     return {};
   }
@@ -1212,12 +1204,12 @@ utils.getWindowLocation = function() {
 };
 utils.getParameterByName = function(a) {
   a = a.replace(/[\[\]]/g, "\\$&");
-  const b = utils.getWindowLocation();
+  var b = utils.getWindowLocation();
   return (a = (new RegExp("[?&]" + a + "(=([^&#]*)|&|#|$)")).exec(b)) && a[2] ? decodeURIComponent(a[2].replace(/\+/g, " ")) : "";
 };
 utils.cleanLinkData = function(a) {
   a.source = "web-sdk";
-  let b = a.data;
+  var b = a.data;
   switch(typeof b) {
     case "string":
       try {
@@ -1231,7 +1223,7 @@ utils.cleanLinkData = function(a) {
     default:
       b = {};
   }
-  const c = b.$og_redirect || b.$fallback_url || b.$desktop_url;
+  var c = b.$og_redirect || b.$fallback_url || b.$desktop_url;
   b.$canonical_url || (b.$canonical_url = utils.getWindowLocation());
   b.$og_title || (b.$og_title = c ? null : utils.getOpenGraphContent("title"));
   b.$og_description || (b.$og_description = c ? null : utils.getOpenGraphContent("description"));
@@ -1254,7 +1246,7 @@ utils.getClickIdAndSearchStringFromLink = function(a) {
   if (!a || "string" !== typeof a) {
     return "";
   }
-  const c = document.createElement("a");
+  var c = document.createElement("a");
   c.href = a;
   a = c.pathname && c.pathname.split("/").filter(b);
   return Array.isArray(a) && a.length ? a[a.length - 1] + c.search : c.search;
@@ -1267,9 +1259,9 @@ utils.merge = function(a, b, c) {
   if (!b || "object" !== typeof b) {
     return a;
   }
-  for (const d in b) {
+  for (var d in b) {
     if (b.hasOwnProperty(d)) {
-      const e = b[d];
+      var e = b[d];
       !c || void 0 !== e && null !== e ? a[d] = e : delete a[d];
     }
   }
@@ -1277,11 +1269,11 @@ utils.merge = function(a, b, c) {
 };
 utils.hashValue = function(a) {
   try {
-    const b = utils.getLocationHash().match(new RegExp(a + ":([^&]*)"));
+    var b = utils.getLocationHash().match(new RegExp(a + ":([^&]*)"));
     if (b && 1 <= b.length) {
       return b[1];
     }
-  } catch (b) {
+  } catch (c) {
   }
 };
 function isSafariBrowser(a) {
@@ -1324,27 +1316,27 @@ function isIOS(a) {
   return a && /(iPad|iPod|iPhone)/.test(a);
 }
 utils.mobileUserAgent = function() {
-  const a = navigator.userAgent;
+  var a = navigator.userAgent;
   return a.match(/android/i) ? "android" : a.match(/ipad/i) || isSafari13OrGreateriPad(a) ? "ipad" : a.match(/i(os|p(hone|od))/i) ? "ios" : a.match(/\(BB[1-9][0-9]*;/i) ? "blackberry" : a.match(/Windows Phone/i) ? "windows_phone" : a.match(/Kindle/i) || a.match(/Silk/i) || a.match(/KFTT/i) || a.match(/KFOT/i) || a.match(/KFJWA/i) || a.match(/KFJWI/i) || a.match(/KFSOWI/i) || a.match(/KFTHWA/i) || a.match(/KFTHWI/i) || a.match(/KFAPWA/i) || a.match(/KFAPWI/i) ? "kindle" : !1;
 };
 utils.isSafari11OrGreater = function() {
-  const a = navigator.userAgent;
+  var a = navigator.userAgent;
   return isSafariBrowser(a) ? isGTEVersion(a, 11) : !1;
 };
 utils.isWebKitBrowser = function() {
   return !!window.webkitURL;
 };
 utils.isIOSWKWebView = function() {
-  const a = navigator.userAgent;
+  var a = navigator.userAgent;
   return utils.isWebKitBrowser() && a && isIOS(a) && !isChromeBrowser(a) && !isFirefoxBrowser(a) && !isEdgeBrowser(a) && !isOperaBrowser(a) && !isYandexBrowser(a);
 };
 utils.getParamValue = function(a) {
   try {
-    const b = utils.getLocationSearch().substring(1).match(new RegExp(a + "=([^&]*)"));
+    var b = utils.getLocationSearch().substring(1).match(new RegExp(a + "=([^&]*)"));
     if (b && 1 <= b.length) {
       return b[1];
     }
-  } catch (b) {
+  } catch (c) {
   }
 };
 utils.isKey = function(a) {
@@ -1356,25 +1348,23 @@ utils.snakeToCamel = function(a) {
   });
 };
 utils.base64encode = function(a) {
-  let b = "";
-  var c;
-  let d, e, f = 0;
+  var b = "", c, d = 0;
   a = a.replace(/\r\n/g, "\n");
-  var g = "";
+  var e = "";
   for (c = 0; c < a.length; c++) {
-    var h = a.charCodeAt(c);
-    128 > h ? g += String.fromCharCode(h) : (127 < h && 2048 > h ? g += String.fromCharCode(h >> 6 | 192) : (g += String.fromCharCode(h >> 12 | 224), g += String.fromCharCode(h >> 6 & 63 | 128)), g += String.fromCharCode(h & 63 | 128));
+    var f = a.charCodeAt(c);
+    128 > f ? e += String.fromCharCode(f) : (127 < f && 2048 > f ? e += String.fromCharCode(f >> 6 | 192) : (e += String.fromCharCode(f >> 12 | 224), e += String.fromCharCode(f >> 6 & 63 | 128)), e += String.fromCharCode(f & 63 | 128));
   }
-  for (a = g; f < a.length;) {
-    var k = a.charCodeAt(f++);
-    g = a.charCodeAt(f++);
-    c = a.charCodeAt(f++);
-    h = k >> 2;
-    k = (k & 3) << 4 | g >> 4;
-    d = (g & 15) << 2 | c >> 6;
-    e = c & 63;
-    isNaN(g) ? e = d = 64 : isNaN(c) && (e = 64);
-    b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(h) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(d) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(e);
+  for (a = e; d < a.length;) {
+    var g = a.charCodeAt(d++);
+    e = a.charCodeAt(d++);
+    c = a.charCodeAt(d++);
+    f = g >> 2;
+    g = (g & 3) << 4 | e >> 4;
+    var h = (e & 15) << 2 | c >> 6;
+    var k = c & 63;
+    isNaN(e) ? k = h = 64 : isNaN(c) && (k = 64);
+    b = b + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(f) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(g) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(h) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(k);
   }
   return b;
 };
@@ -1402,7 +1392,7 @@ utils.decodeBFPs = function(a) {
   return a;
 };
 utils.addEvent = function(a, b, c, d) {
-  let e = 0;
+  var e = 0;
   "function" === typeof a.addEventListener ? e = a.addEventListener(b, c, d) : "function" === typeof a.attachEvent ? e = a.attachEvent("on" + b, c) : a["on" + b] = c;
   return e;
 };
@@ -1436,52 +1426,55 @@ utils.prioritizeDeeplinkPaths = function(a, b) {
   return a;
 };
 utils.processHostedDeepLinkData = function(a) {
-  const b = {};
+  var b = {};
   if (!a || 0 === a.length) {
     return b;
   }
-  const c = {hostedIOS:null, hostedAndroid:null, applinksIOS:null, applinksAndroid:null, twitterIOS:null, twitterAndroid:null};
-  for (let f = 0; f < a.length; f++) {
-    if ((a[f].getAttribute("name") || a[f].getAttribute("property")) && a[f].getAttribute("content")) {
-      var d = a[f].getAttribute("name"), e = a[f].getAttribute("property");
-      d = d || e;
-      e = d.split(":");
-      3 === e.length && "branch" === e[0] && "deeplink" === e[1] && ("$ios_deeplink_path" === e[2] ? c.hostedIOS = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")) : "$android_deeplink_path" === e[2] ? c.hostedAndroid = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")) : b[e[2]] = a[f].getAttribute("content"));
-      "al:ios:url" === d && (c.applinksIOS = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")));
-      "twitter:app:url:iphone" === d && (c.twitterIOS = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")));
-      "al:android:url" === d && (c.applinksAndroid = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")));
-      "twitter:app:url:googleplay" === d && (c.twitterAndroid = utils.extractMobileDeeplinkPath(a[f].getAttribute("content")));
+  for (var c = {hostedIOS:null, hostedAndroid:null, applinksIOS:null, applinksAndroid:null, twitterIOS:null, twitterAndroid:null}, d = 0; d < a.length; d++) {
+    if ((a[d].getAttribute("name") || a[d].getAttribute("property")) && a[d].getAttribute("content")) {
+      var e = a[d].getAttribute("name"), f = a[d].getAttribute("property");
+      e = e || f;
+      f = e.split(":");
+      3 === f.length && "branch" === f[0] && "deeplink" === f[1] && ("$ios_deeplink_path" === f[2] ? c.hostedIOS = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")) : "$android_deeplink_path" === f[2] ? c.hostedAndroid = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")) : b[f[2]] = a[d].getAttribute("content"));
+      "al:ios:url" === e && (c.applinksIOS = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")));
+      "twitter:app:url:iphone" === e && (c.twitterIOS = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")));
+      "al:android:url" === e && (c.applinksAndroid = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")));
+      "twitter:app:url:googleplay" === e && (c.twitterAndroid = utils.extractMobileDeeplinkPath(a[d].getAttribute("content")));
     }
   }
   return utils.prioritizeDeeplinkPaths(b, c);
 };
 utils.getHostedDeepLinkData = function() {
-  const a = document.getElementsByTagName("meta");
+  var a = document.getElementsByTagName("meta");
   return utils.processHostedDeepLinkData(a);
 };
 utils.getBrowserLanguageCode = function() {
-  let a;
   try {
-    navigator.languages && 0 < navigator.languages.length ? a = navigator.languages[0] : navigator.language && (a = navigator.language), a = a.substring(0, 2).toUpperCase();
+    if (navigator.languages && 0 < navigator.languages.length) {
+      var a = navigator.languages[0];
+    } else {
+      navigator.language && (a = navigator.language);
+    }
+    a = a.substring(0, 2).toUpperCase();
   } catch (b) {
     a = null;
   }
   return a;
 };
 utils.calculateDiffBetweenArrays = function(a, b) {
-  const c = [];
+  var c = [];
   b.forEach(function(d) {
     -1 === a.indexOf(d) && c.push(d);
   });
   return c;
 };
-const validCommerceEvents = ["purchase"], commerceEventMessages = {missingPurchaseEvent:"event name is either missing, of the wrong type or not valid. Please specify 'purchase' as the event name.", missingCommerceData:"commerce_data is either missing, of the wrong type or empty. Please ensure that commerce_data is constructed correctly.", invalidKeysForRoot:"Please remove the following keys from the root of commerce_data: ", invalidKeysForProducts:"Please remove the following keys from commerce_data.products: ", 
+var validCommerceEvents = ["purchase"], commerceEventMessages = {missingPurchaseEvent:"event name is either missing, of the wrong type or not valid. Please specify 'purchase' as the event name.", missingCommerceData:"commerce_data is either missing, of the wrong type or empty. Please ensure that commerce_data is constructed correctly.", invalidKeysForRoot:"Please remove the following keys from the root of commerce_data: ", invalidKeysForProducts:"Please remove the following keys from commerce_data.products: ", 
 invalidProductListType:"commerce_data.products must be an array of objects", invalidProductType:"Each product in the products list must be an object"}, validateCommerceDataKeys = function(a) {
-  const b = "sku name price quantity brand category variant".split(" "), c = utils.calculateDiffBetweenArrays("common type transaction_id currency revenue revenue_in_usd exchange_rate shipping tax coupon affiliation persona products".split(" "), Object.keys(a));
+  var b = "sku name price quantity brand category variant".split(" "), c = utils.calculateDiffBetweenArrays("common type transaction_id currency revenue revenue_in_usd exchange_rate shipping tax coupon affiliation persona products".split(" "), Object.keys(a));
   if (c.length) {
     return commerceEventMessages.invalidKeysForRoot + c.join(", ");
   }
-  let d = [], e;
+  var d = [], e;
   if (a.hasOwnProperty("products")) {
     if (!Array.isArray(a.products)) {
       return commerceEventMessages.invalidProductListType;
@@ -1506,15 +1499,15 @@ utils.cleanBannerText = function(a) {
   return "string" !== typeof a ? null : a.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 };
 utils.getTitle = function() {
-  const a = document.getElementsByTagName("title");
+  var a = document.getElementsByTagName("title");
   return 0 < a.length ? a[0].innerText : null;
 };
 utils.getDescription = function() {
-  const a = document.querySelector('meta[name="description"]');
+  var a = document.querySelector('meta[name="description"]');
   return a && a.content ? a.content : null;
 };
 utils.getCanonicalURL = function() {
-  const a = document.querySelector('link[rel="canonical"]');
+  var a = document.querySelector('link[rel="canonical"]');
   return a && a.href ? a.href : null;
 };
 utils.addPropertyIfNotNull = function(a, b, c) {
@@ -1527,7 +1520,7 @@ utils.addPropertyIfNotNull = function(a, b, c) {
   return a;
 };
 utils.openGraphDataAsObject = function() {
-  let a = {};
+  var a = {};
   a = utils.addPropertyIfNotNull(a, "$og_title", utils.getOpenGraphContent("title"));
   a = utils.addPropertyIfNotNull(a, "$og_description", utils.getOpenGraphContent("description"));
   a = utils.addPropertyIfNotNull(a, "$og_image_url", utils.getOpenGraphContent("image"));
@@ -1535,7 +1528,7 @@ utils.openGraphDataAsObject = function() {
   return (a = utils.addPropertyIfNotNull(a, "$og_type", utils.getOpenGraphContent("type"))) && 0 < Object.keys(a).length ? a : null;
 };
 utils.getAdditionalMetadata = function() {
-  let a = {};
+  var a = {};
   a = utils.addPropertyIfNotNull(a, "og_data", utils.openGraphDataAsObject());
   a = utils.addPropertyIfNotNull(a, "hosted_deeplink_data", utils.getHostedDeepLinkData());
   a = utils.addPropertyIfNotNull(a, "title", utils.getTitle());
@@ -1544,12 +1537,12 @@ utils.getAdditionalMetadata = function() {
 };
 utils.removePropertiesFromObject = function(a, b) {
   if (a && "object" === typeof a && !Array.isArray(a) && 0 < Object.keys(a).length && b && Array.isArray(b) && 0 < b.length) {
-    for (const c in a) {
+    for (var c in a) {
       a.hasOwnProperty(c) && -1 < b.indexOf(c) && delete a[c];
     }
   }
 };
-const BRANCH_STANDARD_EVENTS = "ADD_TO_CART ADD_TO_WISHLIST VIEW_CART INITIATE_PURCHASE ADD_PAYMENT_INFO PURCHASE SPEND_CREDITS SEARCH VIEW_ITEM VIEW_ITEMS RATE SHARE COMPLETE_REGISTRATION COMPLETE_TUTORIAL ACHIEVE_LEVEL UNLOCK_ACHIEVEMENT LOGIN SUBSCRIBE START_TRIAL INVITE RESERVE VIEW_AD CLICK_AD INITIATE_STREAM COMPLETE_STREAM".split(" "), BRANCH_STANDARD_EVENT_DATA = "transaction_id revenue currency shipping tax coupon affiliation search_query description".split(" ");
+var BRANCH_STANDARD_EVENTS = "ADD_TO_CART ADD_TO_WISHLIST VIEW_CART INITIATE_PURCHASE ADD_PAYMENT_INFO PURCHASE SPEND_CREDITS SEARCH VIEW_ITEM VIEW_ITEMS RATE SHARE COMPLETE_REGISTRATION COMPLETE_TUTORIAL ACHIEVE_LEVEL UNLOCK_ACHIEVEMENT LOGIN SUBSCRIBE START_TRIAL INVITE RESERVE VIEW_AD CLICK_AD INITIATE_STREAM COMPLETE_STREAM".split(" "), BRANCH_STANDARD_EVENT_DATA = "transaction_id revenue currency shipping tax coupon affiliation search_query description".split(" ");
 utils.isStandardEvent = function(a) {
   return a && -1 < BRANCH_STANDARD_EVENTS.indexOf(a);
 };
@@ -1557,9 +1550,8 @@ utils.separateEventAndCustomData = function(a) {
   if (!a || 0 === Object.keys(a).length) {
     return null;
   }
-  const b = utils.calculateDiffBetweenArrays(BRANCH_STANDARD_EVENT_DATA, Object.keys(a)), c = {};
-  for (let d = 0; d < b.length; d++) {
-    const e = b[d];
+  for (var b = utils.calculateDiffBetweenArrays(BRANCH_STANDARD_EVENT_DATA, Object.keys(a)), c = {}, d = 0; d < b.length; d++) {
+    var e = b[d];
     c[e] = a[e];
     delete a[e];
   }
@@ -1575,7 +1567,7 @@ utils.getScreenWidth = function() {
   return screen.width || 0;
 };
 utils.getUserData = function(a) {
-  let b = {};
+  var b = {};
   b = utils.addPropertyIfNotNull(b, "http_origin", document.URL);
   b = utils.addPropertyIfNotNull(b, "user_agent", navigator.userAgent);
   b = utils.addPropertyIfNotNull(b, "language", utils.getBrowserLanguageCode());
@@ -1594,7 +1586,7 @@ utils.isIframe = function() {
   return window.self !== window.top;
 };
 utils.isSameOriginFrame = function() {
-  let a = "true";
+  var a = "true";
   try {
     window.top.location.search && (a = "true");
   } catch (b) {
@@ -1618,7 +1610,7 @@ utils.convertObjectValuesToString = function(a) {
   if (!utils.validateParameterType(a, "object") || 0 === Object.keys(a).length) {
     return {};
   }
-  for (const b in a) {
+  for (var b in a) {
     a.hasOwnProperty(b) && (a[b] = utils.convertValueToString(a[b]));
   }
   return a;
@@ -1647,17 +1639,16 @@ utils.addPropertyIfNotNullorEmpty = function(a, b, c) {
 };
 utils.removeTrailingDotZeros = function(a) {
   if (a) {
-    const b = /^([1-9]\d*)\.(0\d*)(\.[0]\d*){1,}$/;
+    var b = /^([1-9]\d*)\.(0\d*)(\.[0]\d*){1,}$/;
     if (-1 !== a.indexOf(".")) {
-      const c = a.substring(0, a.indexOf("."));
+      var c = a.substring(0, a.indexOf("."));
       a = a.replace(b, c);
     }
   }
   return a;
 };
 // Input 5
-const resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4};
-let _validator;
+var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
 function validator(a, b) {
   return function(c, d, e) {
     if (utils.userPreferences.trackingDisabled) {
@@ -1697,7 +1688,7 @@ function validator(a, b) {
   };
 }
 function defaults(a) {
-  const b = {browser_fingerprint_id:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
+  var b = {browser_fingerprint_id:validator(!0, validationTypes.STRING), identity_id:validator(!0, validationTypes.STRING), sdk:validator(!0, validationTypes.STRING), session_id:validator(!0, validationTypes.STRING)};
   return utils.merge(a, b);
 }
 resources.open = {destination:config.api_endpoint, endpoint:"/v1/open", method:utils.httpMethod.POST, params:{browser_fingerprint_id:validator(!1, validationTypes.STRING), alternative_browser_fingerprint_id:validator(!1, validationTypes.STRING), identity_id:validator(!1, validationTypes.STRING), identity:validator(!1, validationTypes.STRING), link_identifier:validator(!1, validationTypes.STRING), sdk:validator(!1, validationTypes.STRING), options:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, 
@@ -1714,17 +1705,16 @@ resources.logStandardEvent = {destination:config.api_endpoint, endpoint:"/v2/eve
 resources.logCustomEvent = {destination:config.api_endpoint, endpoint:"/v2/event/custom", method:utils.httpMethod.POST, params:{name:validator(!0, validationTypes.STRING), user_data:validator(!0, validationTypes.STRING), custom_data:validator(!1, validationTypes.STRING), event_data:validator(!1, validationTypes.STRING), content_items:validator(!1, validationTypes.STRING), customer_event_alias:validator(!1, validationTypes.STRING)}};
 resources.pageview = {destination:config.api_endpoint, endpoint:"/v1/pageview", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
 validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), identity_id:validator(!1, 
-validationTypes.STRING), identity:validator(!0, validationTypes.STRING), session_referring_link_data:validator(!1, validationTypes.STRING)})};
+validationTypes.STRING), identity:validator(!0, validationTypes.STRING), session_referring_link_data:validator(!1, validationTypes.STRING), session_link_click_id:validator(!1, validationTypes.STRING)})};
 resources.dismiss = {destination:config.api_endpoint, endpoint:"/v1/dismiss", method:utils.httpMethod.POST, params:defaults({event:validator(!0, validationTypes.STRING), metadata:validator(!1, validationTypes.OBJECT), initial_referrer:validator(!1, validationTypes.STRING), tracking_disabled:validator(!1, validationTypes.BOOLEAN), branch_view_id:validator(!1, validationTypes.STRING), no_journeys:validator(!1, validationTypes.BOOLEAN), user_language:validator(!1, validationTypes.STRING), open_app:validator(!1, 
 validationTypes.BOOLEAN), has_app_websdk:validator(!1, validationTypes.BOOLEAN), source:validator(!1, validationTypes.STRING), feature:validator(!1, validationTypes.STRING), is_iframe:validator(!1, validationTypes.BOOLEAN), data:validator(!1, validationTypes.OBJECT), callback_string:validator(!1, validationTypes.STRING), journey_displayed:validator(!1, validationTypes.BOOLEAN), audience_rule_id:validator(!1, validationTypes.STRING), journey_dismissals:validator(!1, validationTypes.OBJECT), dismissal_source:validator(!1, 
 validationTypes.STRING)})};
 resources.crossPlatformIds = {destination:config.api_endpoint, endpoint:"/v1/cpid", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
 resources.lastAttributedTouchData = {destination:config.api_endpoint, endpoint:"/v1/cpid/latd", method:utils.httpMethod.POST, params:{user_data:validator(!0, validationTypes.STRING)}};
 // Input 6
-var storage = {};
-const BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", BranchStorage = function(a) {
-  for (let b = 0; b < a.length; b++) {
-    let c = this[a[b]];
+var COOKIE_MS = 31536E6, BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", storage, BranchStorage = function(a) {
+  for (var b = 0; b < a.length; b++) {
+    var c = this[a[b]];
     c = "function" === typeof c ? c() : c;
     if (c.isEnabled()) {
       return c._store = {}, c;
@@ -1742,12 +1732,11 @@ const BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", BranchStorage = function(a) {
   return "branch_session" === a || "branch_session_first" === a || hasBranchPrefix(a);
 }, processCookie = function(a) {
   a = a.trim();
-  const b = a.indexOf("=");
+  var b = a.indexOf("=");
   return {name:a.substring(0, b), value:retrieveValue(a.substring(b + 1, a.length))};
 }, webStorage = function(a) {
-  let b;
   try {
-    b = a && localStorage ? localStorage : sessionStorage;
+    var b = a && localStorage ? localStorage : sessionStorage;
   } catch (c) {
     return {isEnabled:function() {
       return !1;
@@ -1757,8 +1746,8 @@ const BRANCH_KEY_PREFIX = "BRANCH_WEBSDK_KEY", BranchStorage = function(a) {
     if ("undefined" === typeof b) {
       return null;
     }
-    let c = null;
-    for (const d in b) {
+    var c = null, d;
+    for (d in b) {
       0 === d.indexOf(BRANCH_KEY_PREFIX) && (null === c && (c = {}), c[trimPrefix(d)] = retrieveValue(b.getItem(d)));
     }
     return utils.decodeBFPs(c);
@@ -1786,23 +1775,21 @@ BranchStorage.prototype.local = function() {
 BranchStorage.prototype.session = function() {
   return webStorage(!1);
 };
-const cookies = function() {
-  const a = function(b, c) {
+var cookies = function() {
+  var a = function(b, c) {
     c && (b = prefix(b));
     document.cookie = b + "=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
   };
   return {getAll:function() {
-    const b = {}, c = document.cookie.split(";");
-    for (let d = 0; d < c.length; d++) {
-      const e = processCookie(c[d]);
+    for (var b = {}, c = document.cookie.split(";"), d = 0; d < c.length; d++) {
+      var e = processCookie(c[d]);
       e && e.hasOwnProperty("name") && e.hasOwnProperty("value") && isBranchCookie(e.name) && (b[trimPrefix(e.name)] = e.value);
     }
     return b;
   }, get:function(b) {
     b = prefix(b);
-    const c = document.cookie.split(";");
-    for (let d = 0; d < c.length; d++) {
-      const e = processCookie(c[d]);
+    for (var c = document.cookie.split(";"), d = 0; d < c.length; d++) {
+      var e = processCookie(c[d]);
       if (e && e.hasOwnProperty("name") && e.hasOwnProperty("value") && e.name === b) {
         return e.value;
       }
@@ -1814,9 +1801,8 @@ const cookies = function() {
   }, remove:function(b) {
     a(b, !0);
   }, clear:function() {
-    const b = document.cookie.split(";");
-    for (let c = 0; c < b.length; c++) {
-      const d = processCookie(b[c]);
+    for (var b = document.cookie.split(";"), c = 0; c < b.length; c++) {
+      var d = processCookie(b[c]);
       d && d.hasOwnProperty("name") && isBranchCookie(d.name) && a(d.name, !1);
     }
   }, isEnabled:function() {
@@ -1840,14 +1826,14 @@ BranchStorage.prototype.pojo = {getAll:function() {
   return !0;
 }};
 // Input 7
-const Server = function() {
+var Server = function() {
 };
 Server.prototype._jsonp_callback_index = 0;
 Server.prototype.serializeObject = function(a, b) {
   if ("undefined" === typeof a) {
     return "";
   }
-  const c = [];
+  var c = [];
   if (a instanceof Array) {
     for (var d = 0; d < a.length; d++) {
       c.push(encodeURIComponent(b) + "=" + encodeURIComponent(a[d]));
@@ -1860,9 +1846,7 @@ Server.prototype.serializeObject = function(a, b) {
   return c.join("&");
 };
 Server.prototype.getUrl = function(a, b) {
-  var c;
-  let d = a.destination + a.endpoint;
-  const e = /^[0-9]{15,20}$/, f = /key_(live|test)_[A-Za-z0-9]{32}/;
+  var c, d = a.destination + a.endpoint, e = /^[0-9]{15,20}$/, f = /key_(live|test)_[A-Za-z0-9]{32}/;
   if ("undefined" !== typeof a.queryPart) {
     for (h in a.queryPart) {
       if (a.queryPart.hasOwnProperty(h)) {
@@ -1873,7 +1857,7 @@ Server.prototype.getUrl = function(a, b) {
       }
     }
   }
-  const g = {};
+  var g = {};
   if ("undefined" !== typeof a.params && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint) {
     for (h in a.params) {
       if (a.params.hasOwnProperty(h)) {
@@ -1909,7 +1893,7 @@ Server.prototype.getUrl = function(a, b) {
   return {data:this.serializeObject(g, ""), url:d.replace(/^\//, "")};
 };
 Server.prototype.createScript = function(a, b, c) {
-  const d = document.createElement("script");
+  var d = document.createElement("script");
   d.type = "text/javascript";
   d.async = !0;
   d.src = a;
@@ -1918,11 +1902,11 @@ Server.prototype.createScript = function(a, b, c) {
   !a || 1 > a.length ? "function" === typeof b && b() : (a[0].appendChild(d), "function" === typeof b && utils.addEvent(d, "error", b), "function" === typeof c && utils.addEvent(d, "load", c));
 };
 Server.prototype.jsonpRequest = function(a, b, c, d) {
-  const e = Date.now(), f = utils.currentRequestBrttTag;
+  var e = Date.now(), f = utils.currentRequestBrttTag;
   0 === this._jsonp_callback_index && utils.isSafari11OrGreater() && this._jsonp_callback_index++;
-  const g = "branch_callback__" + this._jsonp_callback_index++, h = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
+  var g = "branch_callback__" + this._jsonp_callback_index++, h = 0 <= a.indexOf("branch.io") ? "&data=" : "&post_data=";
   b = "POST" === c ? encodeURIComponent(utils.base64encode(goog.json.serialize(b))) : "";
-  const k = window.setTimeout(function() {
+  var k = window.setTimeout(function() {
     window[g] = function() {
     };
     utils.addPropertyIfNotNull(utils.instrumentation, f, utils.calculateBrtt(e));
@@ -1944,7 +1928,7 @@ Server.prototype.jsonpRequest = function(a, b, c, d) {
   });
 };
 Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
-  const h = Date.now(), k = utils.currentRequestBrttTag, l = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+  var h = Date.now(), k = utils.currentRequestBrttTag, l = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
   g && (l.responseType = g);
   l.ontimeout = function() {
     utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(h));
@@ -1954,11 +1938,10 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
     e(Error(n.error || "Error in API: " + l.status), null, l.status);
   };
   l.onreadystatechange = function() {
-    let n;
     if (4 === l.readyState) {
       if (utils.addPropertyIfNotNull(utils.instrumentation, k, utils.calculateBrtt(h)), 200 === l.status) {
         if ("arraybuffer" === l.responseType) {
-          n = l.response;
+          var n = l.response;
         } else if (f) {
           n = l.responseText;
         } else {
@@ -1981,41 +1964,45 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
   }
 };
 Server.prototype.request = function(a, b, c, d) {
-  const e = this;
+  var e = this;
   utils.currentRequestBrttTag = "/v1/pageview" === a.endpoint && b && b.journey_displayed ? a.endpoint + "-1-brtt" : a.endpoint + "-brtt";
   "/v1/url" === a.endpoint && 1 < Object.keys(utils.instrumentation).length && (delete utils.instrumentation["-brtt"], b.instrumentation = safejson.stringify(utils.merge({}, utils.instrumentation)), utils.instrumentation = {});
   if (utils.userPreferences.trackingDisabled) {
-    var f = ["browser_fingerprint_id", "alternative_browser_fingerprint_id", "identity_id", "session_id", "identity"];
-    for (let m = 0; m < f.length; m++) {
-      b.hasOwnProperty(f[m]) && delete b[f[m]];
+    for (var f = ["browser_fingerprint_id", "alternative_browser_fingerprint_id", "identity_id", "session_id", "identity"], g = 0; g < f.length; g++) {
+      b.hasOwnProperty(f[g]) && delete b[f[g]];
     }
   }
   f = this.getUrl(a, b);
   if (f.error) {
     return d(Error(safejson.stringify({message:f.error, endpoint:a.endpoint, data:b})));
   }
-  let g, h = "";
-  "GET" === a.method ? g = f.url + "?" + f.data : (g = f.url, h = f.data);
-  let k;
-  k = c.get("use_jsonp") || a.jsonp ? b : h;
-  let l = utils.retries;
-  const n = function(m, p, t) {
-    if ("function" === typeof e.onAPIResponse) {
-      e.onAPIResponse(g, a.method, k, m, t, p);
-    }
-    m && 0 < l && "5" === (t || "").toString().substring(0, 1) ? (l--, window.setTimeout(function() {
-      w();
-    }, utils.retry_delay)) : d(m, p);
-  };
-  if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(g, b)) {
-    return utils.userPreferences.allowErrorsInCallback ? n(Error(utils.messages.trackingDisabled), null, 300) : n(null, {}, 200);
+  var h = "";
+  if ("GET" === a.method) {
+    var k = f.url + "?" + f.data;
+  } else {
+    k = f.url, h = f.data;
   }
-  let q = !1, r;
-  "/v1/qr-code" === a.endpoint && (q = !0, r = "arraybuffer");
-  const w = function() {
-    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(g, b, a.method, n) : e.XHRRequest(g, h, a.method, c, n, q, r);
+  var l = c.get("use_jsonp") || a.jsonp ? b : h;
+  var n = utils.retries, q = function(p, u, t) {
+    if ("function" === typeof e.onAPIResponse) {
+      e.onAPIResponse(k, a.method, l, p, t, u);
+    }
+    p && 0 < n && "5" === (t || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
+      m();
+    }, utils.retry_delay)) : d(p, u);
   };
-  w();
+  if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(k, b)) {
+    return utils.userPreferences.allowErrorsInCallback ? q(Error(utils.messages.trackingDisabled), null, 300) : q(null, {}, 200);
+  }
+  var r = !1;
+  if ("/v1/qr-code" === a.endpoint) {
+    r = !0;
+    var w = "arraybuffer";
+  }
+  var m = function() {
+    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, q) : e.XHRRequest(k, h, a.method, c, q, r, w);
+  };
+  m();
 };
 // Input 8
 var banner_utils = {animationSpeed:250, animationDelay:20, bannerHeight:"76px", error_timeout:2000, removeElement:function(a) {
@@ -2027,18 +2014,18 @@ var banner_utils = {animationSpeed:250, animationDelay:20, bannerHeight:"76px", 
 }, removeClass:function(a, b) {
   a && banner_utils.hasClass(a, b) && (a.className = a.className.replace(new RegExp("(\\s|^)" + b + "(\\s|$)"), " "));
 }, getDate:function(a) {
-  const b = new Date();
+  var b = new Date();
   return b.setDate(b.getDate() + a);
 }, getBodyStyle:function(a) {
   return document.body.currentStyle ? document.body.currentStyle[utils.snakeToCamel(a)] : window.getComputedStyle(document.body).getPropertyValue(a);
 }, addCSSLengths:function(a, b) {
-  const c = function(d) {
+  var c = function(d) {
     if (!d) {
       return 0;
     }
-    const e = d.replace(/[0-9,\.]/g, "");
+    var e = d.replace(/[0-9,\.]/g, "");
     d = d.match(/\d+/g);
-    const f = parseInt(0 < d.length ? d[0] : "0", 10), g = function() {
+    var f = parseInt(0 < d.length ? d[0] : "0", 10), g = function() {
       return Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100;
     }, h = function() {
       return Math.max(document.documentElement.clientHeight, window.innerHeight || 0) / 100;
@@ -2073,7 +2060,7 @@ var banner_utils = {animationSpeed:250, animationDelay:20, bannerHeight:"76px", 
     a = !1;
   }
   a = "number" === typeof a ? new Date() >= new Date(a) : !a;
-  let c = b.forgetHide;
+  var c = b.forgetHide;
   "number" === typeof c && (c = !1);
   return !document.getElementById("branch-banner") && !document.getElementById("branch-banner-iframe") && (a || c) && (b.showAndroid && "android" === utils.mobileUserAgent() || b.showiPad && "ipad" === utils.mobileUserAgent() || b.showiOS && "ios" === utils.mobileUserAgent() || b.showBlackberry && "blackberry" === utils.mobileUserAgent() || b.showWindowsPhone && "windows_phone" === utils.mobileUserAgent() || b.showKindle && "kindle" === utils.mobileUserAgent());
 }};
@@ -2109,9 +2096,9 @@ banner_css.css = function(a, b) {
 // Input 10
 var session = {get:function(a, b) {
   try {
-    const c = safejson.parse(a.get(b ? "branch_session_first" : "branch_session", b)) || null;
+    var c = safejson.parse(a.get(b ? "branch_session_first" : "branch_session", b)) || null;
     return utils.decodeBFPs(c);
-  } catch (c) {
+  } catch (d) {
     return null;
   }
 }, set:function(a, b, c) {
@@ -2126,7 +2113,7 @@ var session = {get:function(a, b) {
     a.set("branch_session", b);
   }
 }, patch:function(a, b, c, d) {
-  const e = function(g, h) {
+  var e = function(g, h) {
     return utils.encodeBFPs(utils.merge(safejson.parse(g), h, d));
   }, f = a.get("branch_session", !1) || {};
   a.set("branch_session", goog.json.serialize(e(f, b)));
@@ -2138,7 +2125,7 @@ var banner_html = {banner:function(a, b) {
   if (a.rating || a.reviewCount) {
     if (a.rating) {
       var c = "";
-      for (let d = 0; 5 > d; d++) {
+      for (var d = 0; 5 > d; d++) {
         c += '<span class="star"><svg class="star" fill="#555555" height="12" viewBox="3 2 20 19" width="12"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/><path d="M0 0h24v24H0z" fill="none"/><foreignObject display="none"><span class="star">\u2606</span></foreignObject></svg>', a.rating > d && (c += d + 1 > a.rating && a.rating % 1 ? '<span class="half"><svg fill="#555555" height="12" viewBox="3 2 20 19" width="12"><defs><path d="M0 0h24v24H0V0z" id="a"/></defs><clipPath id="b"><use overflow="visible" xlink:href="#a"/></clipPath><path clip-path="url(#b)" d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4V6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg><foreignObject display="none"><span class="half">\u2605</span></foreignObject></span>' : 
         '<span class="full"><svg fill="#555555" height="12" viewBox="3 2 20 19" width="12"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/><path d="M0 0h24v24H0z" fill="none"/><foreignObject display="none"><span class="full">\u2605</span></foreignObject></svg> </span>'), c += "</span>";
       }
@@ -2156,7 +2143,7 @@ var banner_html = {banner:function(a, b) {
 }, checkmark:function() {
   return window.ActiveXObject ? '<span class="checkmark">&#x2713;</span>' : '<svg version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 98.5 98.5" enable-background="new 0 0 98.5 98.5" xml:space="preserve"><path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3"/></svg>';
 }, iframe:function(a, b, c) {
-  const d = document.createElement("iframe");
+  var d = document.createElement("iframe");
   d.src = "about:blank";
   d.style.overflow = "hidden";
   d.scrolling = "no";
@@ -2166,7 +2153,7 @@ var banner_html = {banner:function(a, b) {
   d.onload = function() {
     var e = utils.mobileUserAgent();
     e = "ios" === e || "ipad" === e ? "branch-banner-ios" : "android" === e ? "branch-banner-android" : "branch-banner-other";
-    const f = d.contentDocument || d.contentWindow.document;
+    var f = d.contentDocument || d.contentWindow.document;
     f.head = f.createElement("head");
     f.body = f.createElement("body");
     f.body.className = e;
@@ -2176,7 +2163,7 @@ var banner_html = {banner:function(a, b) {
   document.body.appendChild(d);
 }, div:function(a, b, c) {
   c = c || document;
-  const d = c.createElement("div");
+  var d = c.createElement("div");
   d.id = "branch-banner";
   d.className = "branch-animation";
   d.innerHTML = banner_html.banner(a, b);
@@ -2192,8 +2179,7 @@ var banner = function(a, b, c, d) {
     return a._publishEvent("willNotShowBanner"), null;
   }
   a._publishEvent("willShowBanner");
-  let e;
-  const f = document.body.style.marginTop, g = document.body.style.marginBottom, h = function(k, l) {
+  var e, f = document.body.style.marginTop, g = document.body.style.marginBottom, h = function(k, l) {
     "function" === typeof k && (l = k, k = {});
     k = k || {};
     "top" === b.position ? e.style.top = "-" + banner_utils.bannerHeight : "bottom" === b.position && (e.style.bottom = "-" + banner_utils.bannerHeight);
@@ -2229,7 +2215,7 @@ var banner = function(a, b, c, d) {
       });
     }
     n = banner_utils.getBodyStyle("margin-top");
-    const q = banner_utils.getBodyStyle("margin-bottom");
+    var q = banner_utils.getBodyStyle("margin-bottom");
     banner_utils.addClass(document.body, "branch-banner-is-active");
     "top" === b.position ? document.body.style.marginTop = banner_utils.addCSSLengths(banner_utils.bannerHeight, n) : "bottom" === b.position && (document.body.style.marginBottom = banner_utils.addCSSLengths(banner_utils.bannerHeight, q));
     if (n = k.getElementById("branch-banner-close")) {
@@ -2256,7 +2242,7 @@ var banner = function(a, b, c, d) {
 };
 // Input 13
 var task_queue = function() {
-  const a = [], b = function() {
+  var a = [], b = function() {
     if (a.length) {
       a[0](function() {
         a.shift();
@@ -2306,12 +2292,12 @@ journeys_utils.previousPosition = "";
 journeys_utils.previousDivToInjectParents = [];
 journeys_utils.journeyLinkData = null;
 journeys_utils.getRelativeHeightValueOrFalseFromBannerHeight = function(a) {
-  const b = /vh|%/gi;
+  var b = /vh|%/gi;
   return b.test(a) ? a.replace(b, "") : !1;
 };
 journeys_utils.setPositionAndHeight = function(a) {
   setDefaultBannerProperties();
-  const b = journeys_utils.getMetadata(a) || {};
+  var b = journeys_utils.getMetadata(a) || {};
   if (b && b.bannerHeight && b.position && b.sticky) {
     journeys_utils.bannerHeight = b.bannerHeight, journeys_utils.position = b.position, journeys_utils.sticky = b.sticky;
   } else {
@@ -2340,7 +2326,7 @@ journeys_utils.getIframeCss = function(a) {
   }
 };
 journeys_utils.getCtaText = function(a, b) {
-  let c;
+  var c;
   b && a && a.ctaText && a.ctaText.has_app ? c = a.ctaText.has_app : a && a.ctaText && a.ctaText.no_app && (c = a.ctaText.no_app);
   return c;
 };
@@ -2360,7 +2346,7 @@ journeys_utils.getCss = function(a) {
 journeys_utils.getJsAndAddToParent = function(a) {
   if (a = a.match(journeys_utils.jsRe)) {
     a = a[1];
-    const b = document.createElement("script");
+    var b = document.createElement("script");
     b.id = "branch-journey-cta";
     utils.addNonceAttribute(b);
     b.innerHTML = a;
@@ -2368,7 +2354,7 @@ journeys_utils.getJsAndAddToParent = function(a) {
   }
 };
 journeys_utils.removeScriptAndCss = function(a) {
-  const b = a.match(journeys_utils.jsonRe), c = a.match(journeys_utils.jsRe), d = a.match(journeys_utils.cssRe), e = a.match(journeys_utils.iframeCssRe);
+  var b = a.match(journeys_utils.jsonRe), c = a.match(journeys_utils.jsRe), d = a.match(journeys_utils.cssRe), e = a.match(journeys_utils.iframeCssRe);
   b && (a = a.replace(journeys_utils.jsonRe, ""));
   c && (a = a.replace(journeys_utils.jsRe, ""));
   d && (a = a.replace(journeys_utils.cssRe, ""));
@@ -2376,7 +2362,7 @@ journeys_utils.removeScriptAndCss = function(a) {
   return a;
 };
 journeys_utils.createIframe = function() {
-  const a = document.createElement("iframe");
+  var a = document.createElement("iframe");
   a.src = "about:blank";
   a.style.overflow = "hidden";
   a.scrolling = "no";
@@ -2393,21 +2379,20 @@ journeys_utils.addHtmlToIframe = function(a, b, c) {
   a.body = a.createElement("body");
   a.body.innerHTML = b;
   a.body.className = c;
-  (b = a.querySelector('meta[name="accessibility"]')) && "wcag" === b.content && (b = a.createElement("script"), b.type = "text/javascript", b.text = "\nvar  focusableElements =\n\t\t\t\t\t'button, [href], input, select, textarea, [role=\"button\"], h1, [role=\"text\"], .branch-banner-content';\n\t\t\tvar modal = document.getElementById('branch-banner');\n\t\t\tvar focusableContent = modal.querySelectorAll(focusableElements);\n\t\t\tvar firstFocusableElement = focusableContent[0];\n\t\t\tvar lastFocusableElement = focusableContent[focusableContent.length - 1];\n\n\t\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\t\tvar isTabPressed = e.key === 'Tab' || e.keyCode === 9;\n\t\t\t\n\t\t\t\tif (!isTabPressed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (e.shiftKey) {\n\t\t\t\t\tif (document.activeElement === firstFocusableElement) {\n\t\t\t\t\t\tlastFocusableElement.focus();\n\t\t\t\t\t\te.preventDefault();\n\t\t\t\t\t}\n\t\t\t\t} else if (document.activeElement === lastFocusableElement) {\n\t\t\t\t\tfirstFocusableElement.focus();\n\t\t\t\t\te.preventDefault();\n\t\t\t\t}\n\t\t\t});\n\t\t\tsetTimeout(function() { firstFocusableElement.focus() }, 100);\n\t\t", 
+  (b = a.querySelector('meta[name="accessibility"]')) && "wcag" === b.content && (b = a.createElement("script"), b.type = "text/javascript", b.text = "\n\t\t\tvar  focusableElements =\n\t\t\t\t\t'button, [href], input, select, textarea, [role=\"button\"], h1, [role=\"text\"], .branch-banner-content';\n\t\t\tvar modal = document.getElementById('branch-banner');\n\t\t\tvar focusableContent = modal.querySelectorAll(focusableElements);\n\t\t\tvar firstFocusableElement = focusableContent[0];\n\t\t\tvar lastFocusableElement = focusableContent[focusableContent.length - 1];\n\n\t\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\t\tvar isTabPressed = e.key === 'Tab' || e.keyCode === 9;\n\t\t\t\n\t\t\t\tif (!isTabPressed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (e.shiftKey) {\n\t\t\t\t\tif (document.activeElement === firstFocusableElement) {\n\t\t\t\t\t\tlastFocusableElement.focus();\n\t\t\t\t\t\te.preventDefault();\n\t\t\t\t\t}\n\t\t\t\t} else if (document.activeElement === lastFocusableElement) {\n\t\t\t\t\tfirstFocusableElement.focus();\n\t\t\t\t\te.preventDefault();\n\t\t\t\t}\n\t\t\t});\n\t\t\tsetTimeout(function() { firstFocusableElement.focus() }, 100);\n\t\t", 
   a.querySelector("body").append(b));
 };
 journeys_utils.addIframeOuterCSS = function(a, b) {
-  const c = document.createElement("style");
+  var c = document.createElement("style");
   c.type = "text/css";
   c.id = "branch-iframe-css";
   journeys_utils.bodyMarginTop = banner_utils.getBodyStyle("margin-top");
-  const d = +journeys_utils.bodyMarginTop.slice(0, -2);
+  var d = +journeys_utils.bodyMarginTop.slice(0, -2);
   journeys_utils.bodyMarginBottom = banner_utils.getBodyStyle("margin-bottom");
-  const e = +journeys_utils.bodyMarginBottom.slice(0, -2), f = +journeys_utils.bannerHeight.slice(0, -2);
+  var e = +journeys_utils.bodyMarginBottom.slice(0, -2), f = +journeys_utils.bannerHeight.slice(0, -2);
   a || ("top" === journeys_utils.position ? document.body.style.marginTop = (+f + d).toString() + "px" : "bottom" === journeys_utils.position && (document.body.style.marginBottom = (+f + e).toString() + "px"));
   0 < journeys_utils.divToInjectParents.length && journeys_utils.divToInjectParents.forEach(function(g) {
-    let h;
-    const k = window.getComputedStyle(g);
+    var h, k = window.getComputedStyle(g);
     k && (h = journeys_utils.isFullPage && "fixed" === k.getPropertyValue("position"));
     h || (g.style.marginTop = journeys_utils.bannerHeight);
   });
@@ -2423,7 +2408,7 @@ journeys_utils.addIframeOuterCSS = function(a, b) {
   document.head.appendChild(c);
 };
 function generateIframeOuterCSS(a) {
-  let b = a = "";
+  var b = a = "";
   document.body.style.transition = "";
   document.getElementById("branch-banner-iframe") && (document.getElementById("branch-banner-iframe").style.transition = "");
   journeys_utils.entryAnimationDisabled || (a = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", b = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
@@ -2440,14 +2425,15 @@ journeys_utils.addIframeInnerCSS = function(a, b) {
   b.head.appendChild(c);
   if (journeys_utils.isHalfPage || journeys_utils.isFullPage) {
     c = b.getElementsByClassName("branch-banner-dismiss-background")[0];
-    const d = b.getElementsByClassName("branch-banner-content")[0];
+    var d = b.getElementsByClassName("branch-banner-content")[0];
     !c && d && (d.style.height = journeys_utils.bannerHeight);
   }
   "top" === journeys_utils.position ? a.style.top = "-" + journeys_utils.bannerHeight : "bottom" === journeys_utils.position && (a.style.bottom = "-" + journeys_utils.bannerHeight);
   try {
-    const d = b.getElementsByClassName("branch-banner-content")[0], e = window.getComputedStyle(d).getPropertyValue("background-color").split(", ");
+    d = b.getElementsByClassName("branch-banner-content")[0];
+    var e = window.getComputedStyle(d).getPropertyValue("background-color").split(", ");
     e[3] && 0 === parseFloat(e[3]) && (a.style.boxShadow = "none");
-  } catch (d) {
+  } catch (f) {
   }
 };
 journeys_utils.addDynamicCtaText = function(a, b) {
@@ -2459,7 +2445,7 @@ journeys_utils.centerOverlay = function(a) {
 journeys_utils.animateBannerEntrance = function(a, b) {
   banner_utils.addClass(document.body, "branch-banner-is-active");
   if (journeys_utils.isFullPage && "fixed" === journeys_utils.sticky) {
-    const c = document.createElement("style");
+    var c = document.createElement("style");
     c.type = "text/css";
     c.innerHTML = ".branch-banner-no-scroll {overflow: hidden;}";
     document.head.appendChild(c);
@@ -2485,14 +2471,14 @@ journeys_utils._dynamicallyRepositionBanner = function() {
   window.addEventListener("scroll", journeys_utils._scrollListener);
 };
 journeys_utils._resetJourneysBannerPosition = function(a, b) {
-  const c = document.getElementById("branch-banner-iframe"), d = c.offsetHeight, e = c.offsetTop, f = window.innerHeight;
+  var c = document.getElementById("branch-banner-iframe"), d = c.offsetHeight, e = c.offsetTop, f = window.innerHeight;
   if (b && 0 !== window.pageYOffset) {
     return c.style.bottom = "0", !1;
   }
   a ? c.style.top = f - d + d / 2 + "px" : f - e != d && (c.style.top = "" + (f - d) + "px");
 };
 journeys_utils._addSecondsToDate = function(a) {
-  const b = new Date();
+  var b = new Date();
   return b.setSeconds(b.getSeconds() + a);
 };
 journeys_utils._findGlobalDismissPeriod = function(a) {
@@ -2527,7 +2513,7 @@ journeys_utils._setupDismissBehavior = function(a, b, c, d, e, f, g, h, k, l) {
   });
 };
 journeys_utils._setJourneyDismiss = function(a, b, c) {
-  let d = a.get("journeyDismissals", !0);
+  var d = a.get("journeyDismissals", !0);
   d = d ? safejson.parse(d) : {};
   d[c] = {view_id:b, dismiss_time:Date.now()};
   a.set("journeyDismissals", safejson.stringify(d), !0);
@@ -2541,7 +2527,7 @@ journeys_utils.decodeSymbols = function(a) {
   "\u00f6").replace(/&oslash;/g, "\u00f8").replace(/&ugrave;/g, "\u00f9").replace(/&uacute;/g, "\u00fa").replace(/&ucirc;/g, "\u00fb").replace(/&uuml;/g, "\u00fc").replace(/&yacute;/g, "\u00fd").replace(/&thorn;/g, "\u00fe").replace(/&yuml;/g, "\u00ff");
 };
 journeys_utils._getDismissRequestData = function(a, b) {
-  const c = {}, d = utils.getHostedDeepLinkData();
+  var c = {}, d = utils.getHostedDeepLinkData();
   d && 0 < Object.keys(d).length && (c.hosted_deeplink_data = d);
   a = a._getPageviewRequestData(journeys_utils._getPageviewMetadata(null, c), null, journeys_utils.branch, !0);
   if (journeys_utils.journeyLinkData && journeys_utils.journeyLinkData.journey_link_data) {
@@ -2561,16 +2547,16 @@ journeys_utils._getDismissRequestData = function(a, b) {
   return a;
 };
 journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, h) {
-  const k = g ? 0 : journeys_utils._findGlobalDismissPeriod(f);
+  var k = g ? 0 : journeys_utils._findGlobalDismissPeriod(f);
   journeys_utils.branch._publishEvent(a, journeys_utils.journeyLinkData);
   journeys_utils.journeyDismissed = !0;
   journeys_utils.animateBannerExit(c);
   if (!g) {
     void 0 !== k && b.set("globalJourneysDismiss", k, !0);
     journeys_utils._setJourneyDismiss(b, d, e);
-    const l = function() {
+    var l = function() {
       journeys_utils.branch.removeListener(l);
-      const n = journeys_utils._getDismissRequestData(h, utils.dismissEventToSourceMapping[a]);
+      var n = journeys_utils._getDismissRequestData(h, utils.dismissEventToSourceMapping[a]);
       journeys_utils.branch._api(resources.dismiss, n, function(q, r) {
         !q && f && f.dismissRedirect ? window.location = f.dismissRedirect : !q && "object" === typeof r && r.template && h.shouldDisplayJourney(r, null, !1) && h.displayJourney(r.template, n, n.branch_view_id || r.event_data.branch_view_data.id, r.event_data.branch_view_data, !1, r.journey_link_data);
       });
@@ -2588,7 +2574,7 @@ journeys_utils.animateBannerExit = function(a, b) {
   if (journeys_utils.entryAnimationDisabled && !journeys_utils.exitAnimationDisabled) {
     document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease";
     document.getElementById("branch-banner-iframe").style.transition = "all 0" + journeys_utils.animationSpeed / 1000 + "s ease";
-    let c = document.getElementById("branch-iframe-css").innerHTML + "\n";
+    var c = document.getElementById("branch-iframe-css").innerHTML + "\n";
     c += "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n";
     c += "#branch-banner-iframe { -webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; }\n";
     document.getElementById("branch-iframe-css").innerHTML = "";
@@ -2601,8 +2587,8 @@ journeys_utils.animateBannerExit = function(a, b) {
     banner_utils.removeElement(document.getElementById("branch-css"));
     banner_utils.removeElement(document.getElementById("branch-iframe-css"));
     banner_utils.removeElement(document.getElementById("branch-journey-cta"));
-    (!journeys_utils.exitAnimationDisabled || journeys_utils.journeyDismissed) && journeys_utils.divToInjectParents && 0 < journeys_utils.divToInjectParents.length ? journeys_utils.divToInjectParents.forEach(function(c) {
-      c.style.marginTop = 0;
+    (!journeys_utils.exitAnimationDisabled || journeys_utils.journeyDismissed) && journeys_utils.divToInjectParents && 0 < journeys_utils.divToInjectParents.length ? journeys_utils.divToInjectParents.forEach(function(d) {
+      d.style.marginTop = 0;
     }) : (journeys_utils.exitAnimationDisabledPreviously = journeys_utils.exitAnimationDisabled, journeys_utils.previousPosition = journeys_utils.position, journeys_utils.previousDivToInjectParents = journeys_utils.divToInjectParents);
     "top" === journeys_utils.position ? document.body.style.marginTop = journeys_utils.bodyMarginTop : "bottom" === journeys_utils.position && (document.body.style.marginBottom = journeys_utils.bodyMarginBottom);
     banner_utils.removeClass(document.body, "branch-banner-is-active");
@@ -2617,7 +2603,7 @@ journeys_utils.animateBannerExit = function(a, b) {
   }, journeys_utils.exitAnimationDisabled ? 0 : journeys_utils.animationSpeed + journeys_utils.animationDelay);
 };
 journeys_utils.setJourneyLinkData = function(a) {
-  const b = {banner_id:journeys_utils.branchViewId};
+  var b = {banner_id:journeys_utils.branchViewId};
   a && "object" === typeof a && 0 < Object.keys(a || {}).length && (utils.removePropertiesFromObject(a, ["browser_fingerprint_id", "app_id", "source", "open_app", "link_click_id"]), b.journey_link_data = {}, utils.merge(b.journey_link_data, a));
   journeys_utils.journeyLinkData = b;
 };
@@ -2638,10 +2624,10 @@ journeys_utils.getJourneyCtaLink = function() {
 journeys_utils.tryReplaceJourneyCtaLink = function(a) {
   try {
     if (journeys_utils.hasJourneyCtaLink()) {
-      const b = 'validate("' + journeys_utils.getJourneyCtaLink() + '")';
+      var b = 'validate("' + journeys_utils.getJourneyCtaLink() + '")';
       return a.replace(/validate[(].+[)];/g, b).replace("window.top.location.replace(", "window.top.location = ");
     }
-  } catch (b) {
+  } catch (c) {
   }
   return a;
 };
@@ -2649,21 +2635,21 @@ journeys_utils.trySetJourneyUrls = function(a, b = ["$android_url", "$ios_url", 
   if (!a) {
     return a;
   }
-  const c = function(d) {
-    return b.reduce((e, f) => {
-      if (e[f]) {
-        return e;
+  var c = function(e) {
+    return b.reduce((f, g) => {
+      if (f[g]) {
+        return f;
       }
-      const g = journeys_utils.getBranchViewDataItemOrUndefined(f);
-      g && (e[f] = g);
-      return e;
-    }, d);
+      var h = journeys_utils.getBranchViewDataItemOrUndefined(g);
+      h && (f[g] = h);
+      return f;
+    }, e);
   };
   try {
-    const d = safejson.parse(a.data);
+    var d = safejson.parse(a.data);
     a.data = JSON.stringify(c(d));
     return a;
-  } catch (d) {
+  } catch (e) {
     return a;
   }
 };
@@ -2673,15 +2659,15 @@ function checkPreviousBanner() {
   return document.getElementById("branch-banner") || document.getElementById("branch-banner-iframe") || document.getElementById("branch-banner-container") ? !0 : !1;
 }
 function renderHtmlBlob(a, b, c, d) {
-  let e = c ? "OPEN" : "GET";
+  var e = c ? "OPEN" : "GET";
   journeys_utils.setPositionAndHeight(b);
-  const f = journeys_utils.getMetadata(b);
+  var f = journeys_utils.getMetadata(b);
   f && (e = journeys_utils.getCtaText(f, c), journeys_utils.findInsertionDiv(a, f));
-  const g = journeys_utils.getCss(b);
+  var g = journeys_utils.getCss(b);
   journeys_utils.getJsAndAddToParent(b);
-  const h = journeys_utils.getIframeCss(b);
+  var h = journeys_utils.getIframeCss(b);
   b = journeys_utils.removeScriptAndCss(b);
-  const k = journeys_utils.createIframe();
+  var k = journeys_utils.createIframe();
   k.onload = function() {
     journeys_utils.addHtmlToIframe(k, b, utils.mobileUserAgent());
     journeys_utils.addIframeOuterCSS(h, f);
@@ -2695,7 +2681,7 @@ function renderHtmlBlob(a, b, c, d) {
   return k;
 }
 function _areJourneysDismissedGlobally(a) {
-  const b = a._storage.get("globalJourneysDismiss", !0);
+  var b = a._storage.get("globalJourneysDismiss", !0);
   if (!0 === b || b > Date.now()) {
     return !0;
   }
@@ -2703,7 +2689,7 @@ function _areJourneysDismissedGlobally(a) {
   return !1;
 }
 branch_view.shouldDisplayJourney = function(a, b, c) {
-  return !checkPreviousBanner() && a.event_data && a.template ? c ? !0 : !a.event_data.branch_view_data.id || b && b.no_journeys || _areJourneysDismissedGlobally(journeys_utils.branch) ? (branch_view.callback_index = 1, !1) : !0 : !1;
+  return !checkPreviousBanner() && utils.mobileUserAgent() && a.event_data && a.template ? c ? !0 : !a.event_data.branch_view_data.id || b && b.no_journeys || _areJourneysDismissedGlobally(journeys_utils.branch) ? (branch_view.callback_index = 1, !1) : !0 : !1;
 };
 branch_view.incrementPageviewAnalytics = function(a) {
   a = {event:"pageview", journey_displayed:!0, audience_rule_id:a.audience_rule_id, branch_view_id:a.branch_view_id};
@@ -2725,9 +2711,9 @@ branch_view.displayJourney = function(a, b, c, d, e, f) {
     banner_utils.addClass(h, "branch-banner-is-active");
     var k = !1, l = b.callback_string, n = null, q = journeys_utils.branch._storage;
     if (a) {
-      const r = journeys_utils.getMetadata(a) || {};
+      var r = journeys_utils.getMetadata(a) || {};
       a = journeys_utils.tryReplaceJourneyCtaLink(a);
-      const w = window.setTimeout(function() {
+      var w = window.setTimeout(function() {
         window[l] = function() {
         };
       }, utils.timeout);
@@ -2750,9 +2736,9 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   a || (a = {});
   journeys_utils.entryAnimationDisabled = b.disable_entry_animation || !1;
   journeys_utils.exitAnimationDisabled = b.disable_exit_animation || !1;
-  let e = utils.merge({}, c._branchViewData);
-  const f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, h = f.hasOwnProperty("identity") ? f.identity : null, k = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, n = utils.getInitialReferrer(c._referringLink()), q = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
+  var e = utils.merge({}, c._branchViewData), f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, h = f.hasOwnProperty("identity") ? f.identity : null, k = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, n = utils.getInitialReferrer(c._referringLink()), q = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
   c = b.make_new_link ? null : utils.getClickIdAndSearchStringFromLink(c._referringLink(!0));
+  var r = f.hasOwnProperty("session_link_click_id") ? f.session_link_click_id : null;
   e.event = d ? "dismiss" : "pageview";
   e.metadata = a;
   e = utils.addPropertyIfNotNull(e, "initial_referrer", n);
@@ -2761,6 +2747,7 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   e = utils.addPropertyIfNotNull(e, "is_iframe", utils.isIframe());
   e = utils.addPropertyIfNotNull(e, "journey_dismissals", k);
   e = utils.addPropertyIfNotNull(e, "identity", h);
+  e = utils.addPropertyIfNotNull(e, "session_link_click_id", r);
   e.user_language = l;
   e.open_app = b.open_app || !1;
   e.has_app_websdk = g;
@@ -2775,16 +2762,18 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   return e = utils.cleanLinkData(e);
 };
 // Input 16
-let default_branch;
-const callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, init_states = {NO_INIT:0, INIT_PENDING:1, INIT_FAILED:2, INIT_SUCCEEDED:3}, init_state_fail_codes = {NO_FAILURE:0, UNKNOWN_CAUSE:1, OPEN_FAILED:2, BFP_NOT_FOUND:3, HAS_APP_FAILED:4}, wrap = function(a, b, c) {
+var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, init_states = {NO_INIT:0, INIT_PENDING:1, INIT_FAILED:2, INIT_SUCCEEDED:3}, init_state_fail_codes = {NO_FAILURE:0, UNKNOWN_CAUSE:1, OPEN_FAILED:2, BFP_NOT_FOUND:3, HAS_APP_FAILED:4}, wrap = function(a, b, c) {
   return function() {
-    const d = this;
-    let e, f;
-    const g = arguments[arguments.length - 1];
-    a === callback_params.NO_CALLBACK || "function" !== typeof g ? (f = function(h) {
-    }, e = Array.prototype.slice.call(arguments)) : (e = Array.prototype.slice.call(arguments, 0, arguments.length - 1) || [], f = g);
+    var d = this, e = arguments[arguments.length - 1];
+    if (a === callback_params.NO_CALLBACK || "function" !== typeof e) {
+      var f = function(h) {
+      };
+      var g = Array.prototype.slice.call(arguments);
+    } else {
+      g = Array.prototype.slice.call(arguments, 0, arguments.length - 1) || [], f = e;
+    }
     d._queue(function(h) {
-      const k = function(l, n) {
+      var k = function(l, n) {
         try {
           if (l && a === callback_params.NO_CALLBACK) {
             throw l;
@@ -2805,12 +2794,11 @@ const callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, in
           return k(Error(utils.message(utils.messages.nonInit)), null);
         }
       }
-      e.unshift(k);
-      b.apply(d, e);
+      g.unshift(k);
+      b.apply(d, g);
     });
   };
-};
-var Branch = function() {
+}, Branch = function() {
   if (!(this instanceof Branch)) {
     return default_branch || (default_branch = new Branch()), default_branch;
   }
@@ -2852,13 +2840,13 @@ Branch.prototype._referringLink = function(a) {
   return (a = this._storage.get("click_id")) ? config.link_service_endpoint + "/c/" + a : null;
 };
 Branch.prototype._publishEvent = function(a, b) {
-  for (let c = 0; c < this._listeners.length; c++) {
+  for (var c = 0; c < this._listeners.length; c++) {
     this._listeners[c].event && this._listeners[c].event !== a || this._listeners[c].listener(a, b);
   }
 };
 Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c) {
   utils.navigationTimingAPIEnabled && (utils.instrumentation["init-began-at"] = utils.timeSinceNavigationStart());
-  const d = this;
+  var d = this;
   d.init_state = init_states.INIT_PENDING;
   utils.isKey(b) ? d.branch_key = b : d.app_id = b;
   c = c && utils.validateParameterType(c, "object") ? c : {};
@@ -2876,8 +2864,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   utils.userPreferences.trackingDisabled && utils.cleanApplicationAndSessionStorage(d);
   b = session.get(d._storage, !0);
   d.identity_id = b && b.identity_id;
-  const e = function(m) {
+  var e = function(m) {
     m.link_click_id && (d.link_click_id = m.link_click_id.toString());
+    m.session_link_click_id && (d.session_link_click_id = m.session_link_click_id.toString());
     m.session_id && (d.session_id = m.session_id.toString());
     m.identity_id && (d.identity_id = m.identity_id.toString());
     m.identity && (d.identity = m.identity.toString());
@@ -2888,16 +2877,16 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
     return m;
   };
   b = session.get(d._storage);
-  const f = c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null, g = f || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), h = !d.identity_id;
+  var f = c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null, g = f || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), h = !d.identity_id;
   d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
-  const k = function(m) {
-    const p = {sdk:config.version, branch_key:d.branch_key}, t = session.get(d._storage) || {}, u = session.get(d._storage, !0) || {};
-    u.browser_fingerprint_id && (p._t = u.browser_fingerprint_id);
+  var k = function(m) {
+    var p = {sdk:config.version, branch_key:d.branch_key}, u = session.get(d._storage) || {}, t = session.get(d._storage, !0) || {};
+    t.browser_fingerprint_id && (p._t = t.browser_fingerprint_id);
     utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, p, function(v, x) {
       v && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = v.message);
-      x && (t.browser_fingerprint_id = x);
+      x && (u.browser_fingerprint_id = x);
     });
-    m && m(null, t);
+    m && m(null, u);
   }, l = function(m) {
     h && (m.identity = d.identity);
     return m;
@@ -2908,29 +2897,31 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
     }
     try {
       a(m, p && utils.whiteListSessionData(p));
-    } catch (u) {
+    } catch (t) {
     } finally {
       d.renderFinalize();
     }
     m = utils.getAdditionalMetadata();
     (p = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (p = utils.mergeHostedDeeplinkData(m.hosted_deeplink_data, p)) && 0 < Object.keys(p).length && (m.hosted_deeplink_data = p);
-    const t = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(c, m), c, d, !1);
+    var u = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(c, m), c, d, !1);
     d.renderQueue(function() {
-      d._api(resources.pageview, t, function(u, v) {
-        u || "object" !== typeof v || (u = t.branch_view_id ? !0 : !1, branch_view.shouldDisplayJourney(v, c, u) ? branch_view.displayJourney(v.template, t, t.branch_view_id || v.event_data.branch_view_data.id, v.event_data.branch_view_data, u, v.journey_link_data) : ((v.auto_branchify || !f && utils.getParamValue("branchify_url") && d._referringLink()) && this.branch.deepview({}, {make_new_link:!1, open_app:!0, auto_branchify:!0}), journeys_utils.branch._publishEvent("willNotShowJourney")));
+      d._api(resources.pageview, u, function(t, v) {
+        t || "object" !== typeof v || (t = u.branch_view_id ? !0 : !1, branch_view.shouldDisplayJourney(v, c, t) ? branch_view.displayJourney(v.template, u, u.branch_view_id || v.event_data.branch_view_data.id, v.event_data.branch_view_data, t, v.journey_link_data) : ((v.auto_branchify || !f && utils.getParamValue("branchify_url") && d._referringLink()) && this.branch.deepview({}, {make_new_link:!1, open_app:!0, auto_branchify:!0}), journeys_utils.branch._publishEvent("willNotShowJourney")));
         utils.userPreferences.trackingDisabled && (utils.userPreferences.allowErrorsInCallback = !0);
       });
     });
   }, q = function() {
-    let m, p;
-    "undefined" !== typeof document.hidden ? (m = "hidden", p = "visibilitychange") : "undefined" !== typeof document.mozHidden ? (m = "mozHidden", p = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", p = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", p = "webkitvisibilitychange");
+    if ("undefined" !== typeof document.hidden) {
+      var m = "hidden";
+      var p = "visibilitychange";
+    } else {
+      "undefined" !== typeof document.mozHidden ? (m = "mozHidden", p = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", p = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", p = "webkitvisibilitychange");
+    }
     p && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(p, function() {
       document[m] || (k(null), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
     }, !1));
   };
-  if (b && b.session_id && !g && !utils.getParamValue("branchify_url")) {
-    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), k(n);
-  } else {
+  if (!b || g || utils.getParamValue("branchify_url")) {
     b = {sdk:config.version, branch_key:d.branch_key};
     var r = session.get(d._storage, !0) || {};
     r.browser_fingerprint_id && (b._t = r.browser_fingerprint_id);
@@ -2950,14 +2941,16 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
       }
       utils.delay(function() {
         d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || p, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
-        null}, function(t, u) {
-          t && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = t.message);
-          t || "object" !== typeof u || (u.branch_view_enabled && (d._branchViewEnabled = !!u.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (u.click_id = g));
+        null}, function(u, t) {
+          u && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = u.message);
+          u || "object" !== typeof t || (t.branch_view_enabled && (d._branchViewEnabled = !!t.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (t.click_id = g));
           q();
-          n(t, u);
+          n(u, t);
         });
       }, w);
     });
+  } else {
+    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), k(n);
   }
 }, !0);
 Branch.prototype.renderQueue = wrap(callback_params.NO_CALLBACK, function(a, b) {
@@ -2972,7 +2965,7 @@ Branch.prototype.renderFinalize = wrap(callback_params.CALLBACK_ERR_DATA, functi
   a(null, null);
 });
 Branch.prototype.data = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
-  const b = utils.whiteListSessionData(session.get(this._storage));
+  var b = utils.whiteListSessionData(session.get(this._storage));
   b.referring_link = this._referringLink();
   b.data_parsed = b.data && 0 !== b.data.length ? safejson.parse(b.data) : {};
   a(null, b);
@@ -2982,7 +2975,7 @@ Branch.prototype.first = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
 });
 Branch.prototype.setIdentity = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b) {
   if (b) {
-    const c = {identity_id:this.identity_id, session_id:this.session_id, link:this.sessionLink, developer_identity:b};
+    var c = {identity_id:this.identity_id, session_id:this.session_id, link:this.sessionLink, developer_identity:b};
     this.identity = b;
     session.patch(this._storage, {identity:b}, !0);
     a(null, c);
@@ -2996,7 +2989,7 @@ Branch.prototype.logout = wrap(callback_params.CALLBACK_ERR, function(a) {
   a(null);
 });
 Branch.prototype.getBrowserFingerprintId = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
-  const b = session.get(this._storage, !0) || {};
+  var b = session.get(this._storage, !0) || {};
   a(null, b.browser_fingerprint_id || null);
 });
 Branch.prototype.crossPlatformIds = wrap(callback_params.CALLBACK_ERR_DATA, function(a) {
@@ -3006,7 +2999,7 @@ Branch.prototype.crossPlatformIds = wrap(callback_params.CALLBACK_ERR_DATA, func
 });
 Branch.prototype.lastAttributedTouchData = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b) {
   b = utils.validateParameterType(b, "number") ? b : null;
-  const c = utils.getUserData(this);
+  var c = utils.getUserData(this);
   utils.addPropertyIfNotNull(c, "attribution_window", b);
   this._api(resources.lastAttributedTouchData, {user_data:safejson.stringify(c)}, function(d, e) {
     return a(d || null, e || null);
@@ -3018,10 +3011,10 @@ Branch.prototype.track = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d)
   utils.nonce = d.nonce ? d.nonce : utils.nonce;
   if ("pageview" === b) {
     (b = utils.mergeHostedDeeplinkData(utils.getHostedDeepLinkData(), c)) && 0 < Object.keys(b).length && (c.hosted_deeplink_data = b);
-    const e = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(d, c), d, this, !1);
+    var e = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(d, c), d, this, !1);
     this._api(resources.pageview, e, function(f, g) {
       if (!f && "object" === typeof g) {
-        const h = e.branch_view_id ? !0 : !1;
+        var h = e.branch_view_id ? !0 : !1;
         branch_view.shouldDisplayJourney(g, d, h) ? branch_view.displayJourney(g.template, e, e.branch_view_id || g.event_data.branch_view_data.id, g.event_data.branch_view_data, h, g.journey_link_data) : journeys_utils.branch._publishEvent("willNotShowJourney");
       }
       "function" === typeof a && a.apply(this, arguments);
@@ -3042,7 +3035,7 @@ Branch.prototype.logEvent = wrap(callback_params.CALLBACK_ERR, function(a, b, c,
   });
 });
 Branch.prototype.link = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b) {
-  const c = utils.cleanLinkData(b), d = this.branch_key;
+  var c = utils.cleanLinkData(b), d = this.branch_key;
   this._api(resources.link, c, function(e, f) {
     if (e) {
       return a(e, utils.generateDynamicBNCLink(d, c));
@@ -3065,19 +3058,19 @@ Branch.prototype.qrCode = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b,
   });
 });
 Branch.prototype.deepview = wrap(callback_params.CALLBACK_ERR, function(a, b, c) {
-  const d = this;
+  var d = this;
   c || (c = {});
   c.deepview_type = "undefined" === typeof c.deepview_type ? "deepview" : "banner";
   b.data = utils.merge(utils.getHostedDeepLinkData(), b.data);
   b = utils.isIframe() ? utils.merge({is_iframe:!0}, b) : b;
   b = utils.cleanLinkData(b);
-  const e = utils.generateDynamicBNCLink(this.branch_key, b);
+  var e = utils.generateDynamicBNCLink(this.branch_key, b);
   if (c.open_app || null === c.open_app || "undefined" === typeof c.open_app) {
     b.open_app = !0;
   }
   b.append_deeplink_path = !!c.append_deeplink_path;
   b.deepview_type = c.deepview_type;
-  const f = d._referringLink();
+  var f = d._referringLink();
   f && !c.make_new_link && (b.link_click_id = utils.getClickIdAndSearchStringFromLink(f));
   b.banner_options = c;
   c.auto_branchify && (b.auto_branchify = !0);
@@ -3128,7 +3121,7 @@ Branch.prototype.setBranchViewData = wrap(callback_params.CALLBACK_ERR, function
   _setBranchViewData.call(null, this, a, b);
 }, !0);
 Branch.prototype.closeJourney = wrap(callback_params.CALLBACK_ERR, function(a) {
-  const b = this;
+  var b = this;
   b.renderQueue(function() {
     if (journeys_utils.banner && journeys_utils.isJourneyDisplayed) {
       b._publishEvent("didCallJourneyClose", journeys_utils.journeyLinkData), journeys_utils.animateBannerExit(journeys_utils.banner, !0);
@@ -3144,13 +3137,13 @@ Branch.prototype.banner = wrap(callback_params.CALLBACK_ERR, function(a, b, c) {
     _setBranchViewData.call(null, this, function() {
     }, c);
     "undefined" === typeof b.showAgain && "undefined" !== typeof b.forgetHide && (b.showAgain = b.forgetHide);
-    const d = {icon:utils.cleanBannerText(b.icon) || "", title:utils.cleanBannerText(b.title) || "", description:utils.cleanBannerText(b.description) || "", reviewCount:"number" === typeof b.reviewCount && 0 < b.reviewCount ? Math.floor(b.reviewCount) : null, rating:"number" === typeof b.rating && 5 >= b.rating && 0 < b.rating ? Math.round(2 * b.rating) / 2 : null, openAppButtonText:utils.cleanBannerText(b.openAppButtonText) || "View in app", downloadAppButtonText:utils.cleanBannerText(b.downloadAppButtonText) || 
+    var d = {icon:utils.cleanBannerText(b.icon) || "", title:utils.cleanBannerText(b.title) || "", description:utils.cleanBannerText(b.description) || "", reviewCount:"number" === typeof b.reviewCount && 0 < b.reviewCount ? Math.floor(b.reviewCount) : null, rating:"number" === typeof b.rating && 5 >= b.rating && 0 < b.rating ? Math.round(2 * b.rating) / 2 : null, openAppButtonText:utils.cleanBannerText(b.openAppButtonText) || "View in app", downloadAppButtonText:utils.cleanBannerText(b.downloadAppButtonText) || 
     "Download App", iframe:"undefined" === typeof b.iframe ? !0 : b.iframe, showiOS:"undefined" === typeof b.showiOS ? !0 : b.showiOS, showiPad:"undefined" === typeof b.showiPad ? !0 : b.showiPad, showAndroid:"undefined" === typeof b.showAndroid ? !0 : b.showAndroid, showBlackberry:"undefined" === typeof b.showBlackberry ? !0 : b.showBlackberry, showWindowsPhone:"undefined" === typeof b.showWindowsPhone ? !0 : b.showWindowsPhone, showKindle:"undefined" === typeof b.showKindle ? !0 : b.showKindle, 
     disableHide:!!b.disableHide, forgetHide:"number" === typeof b.forgetHide ? b.forgetHide : !!b.forgetHide, respectDNT:"undefined" === typeof b.respectDNT ? !1 : b.respectDNT, position:b.position || "top", customCSS:b.customCSS || "", mobileSticky:"undefined" === typeof b.mobileSticky ? !1 : b.mobileSticky, buttonBorderColor:b.buttonBorderColor || "", buttonBackgroundColor:b.buttonBackgroundColor || "", buttonFontColor:b.buttonFontColor || "", buttonBorderColorHover:b.buttonBorderColorHover || 
     "", buttonBackgroundColorHover:b.buttonBackgroundColorHover || "", buttonFontColorHover:b.buttonFontColorHover || "", make_new_link:!!b.make_new_link, open_app:!!b.open_app, immediate:!!b.immediate, append_deeplink_path:!!b.append_deeplink_path};
     "undefined" !== typeof b.showMobile && (d.showiOS = b.showMobile, d.showAndroid = b.showMobile, d.showBlackberry = b.showMobile, d.showWindowsPhone = b.showMobile, d.showKindle = b.showMobile);
     c.data = utils.merge(utils.getHostedDeepLinkData(), c.data);
-    const e = this;
+    var e = this;
     e.renderQueue(function() {
       e.closeBannerPointer = banner(e, d, c, e._storage);
     });
@@ -3160,7 +3153,7 @@ Branch.prototype.banner = wrap(callback_params.CALLBACK_ERR, function(a, b, c) {
   a();
 });
 Branch.prototype.closeBanner = wrap(0, function(a) {
-  const b = this;
+  var b = this;
   b.renderQueue(function() {
     b.closeBannerPointer && (b._publishEvent("willCloseBanner"), b.closeBannerPointer(function() {
       b._publishEvent("didCloseBanner");
@@ -3169,9 +3162,9 @@ Branch.prototype.closeBanner = wrap(0, function(a) {
   a();
 });
 Branch.prototype.trackCommerceEvent = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
-  const e = this;
+  var e = this;
   e.renderQueue(function() {
-    const f = utils.validateCommerceEventParams(b, c);
+    var f = utils.validateCommerceEventParams(b, c);
     if (f) {
       return a(Error(f));
     }
@@ -3199,10 +3192,9 @@ Branch.prototype.referringLink = function(a) {
 // Input 17
 var branch_instance = new Branch();
 if (window.branch && window.branch._q) {
-  const a = window.branch._q;
-  for (let b = 0; b < a.length; b++) {
-    const c = a[b];
-    branch_instance[c[0]].apply(branch_instance, c[1]);
+  for (var queue = window.branch._q, i = 0; i < queue.length; i++) {
+    var task = queue[i];
+    branch_instance[task[0]].apply(branch_instance, task[1]);
   }
 }
 "function" === typeof define && define.amd ? define("branch", function() {
