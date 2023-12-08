@@ -1648,16 +1648,6 @@ utils.removeTrailingDotZeros = function(a) {
   }
   return a;
 };
-utils.deepCopy = function(a) {
-  var b = {}, c;
-  for (c in a) {
-    if (a.hasOwnProperty(c)) {
-      var d = a[c];
-      b[c] = "object" === typeof d && null !== d ? utils.deepCopy(d) : d;
-    }
-  }
-  return b;
-};
 // Input 5
 var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
 function validator(a, b) {
@@ -1884,7 +1874,7 @@ Server.prototype.getUrl = function(a, b) {
   } else {
     "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint || utils.merge(g, b);
   }
-  b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = JSON.stringify(utils.deepCopy(b.branch_requestMetadata)));
+  b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
   if ("POST" === a.method) {
     try {
       var h = g;
