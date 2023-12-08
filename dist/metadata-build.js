@@ -1884,7 +1884,7 @@ Server.prototype.getUrl = function(a, b) {
   } else {
     "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint || utils.merge(g, b);
   }
-  b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = utils.deepCopy(b.branch_requestMetadata));
+  b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = JSON.stringify(utils.deepCopy(b.branch_requestMetadata)));
   if ("POST" === a.method) {
     try {
       var h = g;
@@ -1902,7 +1902,6 @@ Server.prototype.getUrl = function(a, b) {
       return {error:k.message};
     }
   }
-  ("/v1/pageview" === a.endpoint || "/v1/dismiss" === a.endpoint) && g.metadata && (g.metadata = JSON.stringify(g.metadata || {}));
   "/v1/open" === a.endpoint && (g.options = safejson.stringify(g.options || {}));
   return {data:this.serializeObject(g, ""), url:d.replace(/^\//, "")};
 };
