@@ -1902,7 +1902,7 @@ Server.prototype.getUrl = function(a, b) {
       return {error:k.message};
     }
   }
-  ("/v1/pageview" === a.endpoint || "/v1/dismiss" === a.endpoint) && g.metadata && (g.metadata = safejson.stringify(g.metadata || {}));
+  "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint || !g.metadata || (b = safejson.stringify(g.metadata || {}), g.metadata = b);
   "/v1/open" === a.endpoint && (g.options = safejson.stringify(g.options || {}));
   return {data:this.serializeObject(g, ""), url:d.replace(/^\//, "")};
 };
