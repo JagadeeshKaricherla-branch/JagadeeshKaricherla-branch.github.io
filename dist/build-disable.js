@@ -2915,7 +2915,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
       document[m] || (k(null), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
     }, !1));
   };
-  if (!b || g || utils.getParamValue("branchify_url")) {
+  if (b && b.session_id && !g && !utils.getParamValue("branchify_url")) {
+    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), k(n);
+  } else {
     b = {sdk:config.version, branch_key:d.branch_key};
     var r = session.get(d._storage, !0) || {};
     r.browser_fingerprint_id && (b._t = r.browser_fingerprint_id);
@@ -2943,8 +2945,6 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         });
       }, w);
     });
-  } else {
-    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), k(n);
   }
 }, !0);
 Branch.prototype.renderQueue = wrap(callback_params.NO_CALLBACK, function(a, b) {
