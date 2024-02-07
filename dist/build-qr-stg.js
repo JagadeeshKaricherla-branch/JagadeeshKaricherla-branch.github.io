@@ -2665,6 +2665,7 @@ function renderHtmlBlob(a, b, c, d) {
   journeys_utils.getJsAndAddToParent(b);
   var h = journeys_utils.getIframeCss(b);
   b = journeys_utils.removeScriptAndCss(b);
+  a = document.createElement("div");
   var k = journeys_utils.createIframe();
   k.onload = function() {
     journeys_utils.addHtmlToIframe(k, b, utils.getPlatformByUserAgent());
@@ -2675,7 +2676,8 @@ function renderHtmlBlob(a, b, c, d) {
     journeys_utils.animateBannerEntrance(k, h);
     d(k);
   };
-  document.body.appendChild(k);
+  a.appendChild(k);
+  document.body.appendChild(a);
   return k;
 }
 function _areJourneysDismissedGlobally(a) {
