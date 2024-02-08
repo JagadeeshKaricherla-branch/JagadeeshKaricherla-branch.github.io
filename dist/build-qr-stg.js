@@ -2412,7 +2412,7 @@ function generateIframeOuterCSS(a) {
   var d = journeys_utils.bannerHeight;
   a = journeys_utils.position;
   var e = journeys_utils.windowWidth;
-  b = "#branch-banner-iframe-embed { z-index: 99999; }\n" + (b || "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: " + d + "; z-index: 99999; " + c + "; position: " + journeys_utils.sticky + "; }\n");
+  b = "#branch-banner-iframe-embed { z-index: 99999; position: fixed; height: 100%; width: 100%; }\n" + (b || "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: " + d + "; " + c + "; position: " + journeys_utils.sticky + "; }\n");
   journeys_utils.isDesktopJourney || (d = journeys_utils.isFullPage ? e + "px" : d, b += "@media only screen and (orientation: landscape) { body { " + ("top" === a ? "margin-top: " : "margin-bottom: ") + d + "; }\n#branch-banner-iframe { height: " + d + "; }\n");
   return b;
 }
