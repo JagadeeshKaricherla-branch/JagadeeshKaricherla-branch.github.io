@@ -2405,12 +2405,16 @@ journeys_utils.addIframeOuterCSS = function(a, b) {
   document.head.appendChild(c);
 };
 function generateIframeOuterCSS(a) {
-  var b = a = "";
+  var b = "", c = "";
   document.body.style.transition = "";
   document.getElementById("branch-banner-iframe") && (document.getElementById("branch-banner-iframe").style.transition = "");
-  journeys_utils.entryAnimationDisabled || (a = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", b = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
-  return (a ? a : "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + journeys_utils.bannerHeight + "; z-index: 99999; " + b + " }\n#branch-banner-iframe { position: " + journeys_utils.sticky + "; }\n@media only screen and (orientation: landscape) { body { " + ("top" === journeys_utils.position ? "margin-top: " : "margin-bottom: ") + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + 
-  "; }\n#branch-banner-iframe { height: " + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + "; }");
+  journeys_utils.entryAnimationDisabled || (b = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", c = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
+  var d = journeys_utils.bannerHeight;
+  a = journeys_utils.position;
+  var e = journeys_utils.windowWidth;
+  var f = "#branch-banner-iframe-embed { z-index: 99999;  position: " + f + "; }\n" + (b || "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: " + d + "; " + c + "; }\n");
+  journeys_utils.isDesktopJourney || (d = journeys_utils.isFullPage ? e + "px" : d, f += "@media only screen and (orientation: landscape) { body { " + ("top" === a ? "margin-top: " : "margin-bottom: ") + d + "; }\n#branch-banner-iframe { height: " + d + "; }\n");
+  return f;
 }
 journeys_utils.addIframeInnerCSS = function(a, b) {
   var c = document.createElement("style");
@@ -2420,7 +2424,7 @@ journeys_utils.addIframeInnerCSS = function(a, b) {
   utils.addNonceAttribute(c);
   b = a.contentWindow.document;
   b.head.appendChild(c);
-  c = journeys_utils.journeyLinkData && journeys_utils.journeyLinkData.journey_link_data && journeys_utils.journeyLinkData.journey_link_data.type && "desktop" === journeys_utils.journeyLinkData.journey_link_data.type && journeys_utils.journeyLinkData && journeys_utils.journeyLinkData.journey_link_data && journeys_utils.journeyLinkData.journey_link_data.variant && "overlay" === journeys_utils.journeyLinkData.journey_link_data.variant;
+  c = journeys_utils.isDesktopJourney && "overlay" === journeys_utils.journeyVariant;
   if ((journeys_utils.isHalfPage || journeys_utils.isFullPage) && !c) {
     c = b.getElementsByClassName("branch-banner-dismiss-background")[0];
     var d = b.getElementsByClassName("branch-banner-content")[0];
@@ -2604,6 +2608,9 @@ journeys_utils.setJourneyLinkData = function(a) {
   var b = {banner_id:journeys_utils.branchViewId};
   a && "object" === typeof a && 0 < Object.keys(a || {}).length && (utils.removePropertiesFromObject(a, ["browser_fingerprint_id", "app_id", "source", "open_app", "link_click_id"]), b.journey_link_data = {}, utils.merge(b.journey_link_data, a));
   journeys_utils.journeyLinkData = b;
+  journeys_utils.journeyType = b.journey_link_data.type || null;
+  journeys_utils.isDesktopJourney = "desktop" === b.journey_link_data.type;
+  journeys_utils.journeyVariant = b.journey_link_data.variant || null;
 };
 journeys_utils.getValueForKeyInBranchViewData = function(a) {
   return journeys_utils && journeys_utils.branch && journeys_utils.branch._branchViewData && journeys_utils.branch._branchViewData.data ? journeys_utils.branch._branchViewData.data[a] : !1;
@@ -2666,6 +2673,7 @@ function renderHtmlBlob(a, b, c, d) {
   var h = journeys_utils.getIframeCss(b);
   b = journeys_utils.removeScriptAndCss(b);
   a = document.createElement("div");
+  a.id = "branch-banner-iframe-embed";
   var k = journeys_utils.createIframe();
   k.onload = function() {
     journeys_utils.addHtmlToIframe(k, b, utils.getPlatformByUserAgent());
