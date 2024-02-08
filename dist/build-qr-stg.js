@@ -2405,16 +2405,19 @@ journeys_utils.addIframeOuterCSS = function(a, b) {
   document.head.appendChild(c);
 };
 function generateIframeOuterCSS(a) {
-  var b = "", c = "";
+  var b = a = "";
   document.body.style.transition = "";
   document.getElementById("branch-banner-iframe") && (document.getElementById("branch-banner-iframe").style.transition = "");
-  journeys_utils.entryAnimationDisabled || (b = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", c = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
-  var d = journeys_utils.bannerHeight;
-  a = journeys_utils.position;
-  var e = journeys_utils.windowWidth;
-  b = "#branch-banner-iframe-embed { z-index: 99999; position: fixed; height: 100%; width: 100%; }\n" + (b || "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: " + d + "; " + c + "; position: " + journeys_utils.sticky + "; }\n");
-  journeys_utils.isDesktopJourney || (d = journeys_utils.isFullPage ? e + "px" : d, b += "@media only screen and (orientation: landscape) { body { " + ("top" === a ? "margin-top: " : "margin-bottom: ") + d + "; }\n#branch-banner-iframe { height: " + d + "; }\n");
-  return b;
+  journeys_utils.entryAnimationDisabled || (a = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", b = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
+  if (journeys_utils.isDesktopJourney) {
+    var c = journeys_utils.bannerHeight, d = journeys_utils.bannerWidth, e = journeys_utils.sticky;
+    "overlay" === journeys_utils.journeyVariant && (d = c = "100%!important", e = "fixed");
+    a = "" + (a || "") + ("#branch-banner-iframe-embed { z-index: 99999!important; height: " + c + "; width: " + d + "; padding: 0px!important; margin: 0px!important; ; position: " + e + "; }\n#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: 100%!important; width: 100%!important; ") + (b + "; position: " + e + "; }\n");
+  } else {
+    a = (a ? a : "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + journeys_utils.bannerHeight + "; z-index: 99999; " + b + " }\n#branch-banner-iframe { position: " + journeys_utils.sticky + "; }\n@media only screen and (orientation: landscape) { body { " + ("top" === journeys_utils.position ? "margin-top: " : "margin-bottom: ") + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + 
+    "; }\n#branch-banner-iframe { height: " + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + "; }");
+  }
+  return a;
 }
 journeys_utils.addIframeInnerCSS = function(a, b) {
   var c = document.createElement("style");
@@ -2684,8 +2687,7 @@ function renderHtmlBlob(a, b, c, d) {
     journeys_utils.animateBannerEntrance(k, h);
     d(k);
   };
-  a.appendChild(k);
-  document.body.appendChild(a);
+  journeys_utils.isDesktopJourney ? (a.appendChild(k), document.body.appendChild(a)) : document.body.appendChild(k);
   return k;
 }
 function _areJourneysDismissedGlobally(a) {
