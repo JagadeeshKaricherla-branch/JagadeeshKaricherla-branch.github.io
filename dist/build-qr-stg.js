@@ -1648,6 +1648,9 @@ utils.removeTrailingDotZeros = function(a) {
   }
   return a;
 };
+utils.isValidURL = function(a) {
+  return a && "" !== a.trim() ? RegExp("^(https?|ftp)://((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|((\\d{1,3}\\.){3}\\d{1,3}))(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*(\\?[;&a-z\\d%_.~+=-]*)?(\\#[-a-z\\d_]*)?$", "i").test(a) : !1;
+};
 // Input 5
 var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
 function validator(a, b) {
@@ -2409,15 +2412,8 @@ function generateIframeOuterCSS(a) {
   document.body.style.transition = "";
   document.getElementById("branch-banner-iframe") && (document.getElementById("branch-banner-iframe").style.transition = "");
   journeys_utils.entryAnimationDisabled || (a = "body { -webkit-transition: all " + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease; }\n", document.body.style.transition = "all 0" + 1.5 * journeys_utils.animationSpeed / 1000 + "s ease", b = "-webkit-transition: all " + journeys_utils.animationSpeed / 1000 + "s ease; transition: all 0" + journeys_utils.animationSpeed / 1000 + "s ease;");
-  if (journeys_utils.isDesktopJourney) {
-    var c = journeys_utils.bannerHeight, d = journeys_utils.bannerWidth, e = journeys_utils.sticky;
-    "overlay" === journeys_utils.journeyVariant && (d = c = "100%!important", e = "fixed");
-    a = "" + (a || "") + ("#branch-banner-iframe-embed { z-index: 99999!important; height: " + c + "; width: " + d + "; padding: 0px!important; margin: 0px!important; ; position: " + e + "; }\n#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width: 100%; left: 0; right: 0; border: 0; height: 100%!important; width: 100%!important; ") + (b + "; position: " + e + "; }\n");
-  } else {
-    a = (a ? a : "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + journeys_utils.bannerHeight + "; z-index: 99999; " + b + " }\n#branch-banner-iframe { position: " + journeys_utils.sticky + "; }\n@media only screen and (orientation: landscape) { body { " + ("top" === journeys_utils.position ? "margin-top: " : "margin-bottom: ") + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + 
-    "; }\n#branch-banner-iframe { height: " + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + "; }");
-  }
-  return a;
+  return (a ? a : "") + ("#branch-banner-iframe { box-shadow: 0 0 5px rgba(0, 0, 0, .35); width: 1px; min-width:100%; left: 0; right: 0; border: 0; height: " + journeys_utils.bannerHeight + "; z-index: 99999; " + b + " }\n#branch-banner-iframe { position: " + journeys_utils.sticky + "; }\n@media only screen and (orientation: landscape) { body { " + ("top" === journeys_utils.position ? "margin-top: " : "margin-bottom: ") + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + 
+  "; }\n#branch-banner-iframe { height: " + (journeys_utils.isFullPage ? journeys_utils.windowWidth + "px" : journeys_utils.bannerHeight) + "; }");
 }
 journeys_utils.addIframeInnerCSS = function(a, b) {
   var c = document.createElement("style");
@@ -2427,8 +2423,7 @@ journeys_utils.addIframeInnerCSS = function(a, b) {
   utils.addNonceAttribute(c);
   b = a.contentWindow.document;
   b.head.appendChild(c);
-  c = journeys_utils.isDesktopJourney && "overlay" === journeys_utils.journeyVariant;
-  if ((journeys_utils.isHalfPage || journeys_utils.isFullPage) && !c) {
+  if (journeys_utils.isHalfPage || journeys_utils.isFullPage) {
     c = b.getElementsByClassName("branch-banner-dismiss-background")[0];
     var d = b.getElementsByClassName("branch-banner-content")[0];
     !c && d && (d.style.height = journeys_utils.bannerHeight);
@@ -2611,9 +2606,6 @@ journeys_utils.setJourneyLinkData = function(a) {
   var b = {banner_id:journeys_utils.branchViewId};
   a && "object" === typeof a && 0 < Object.keys(a || {}).length && (utils.removePropertiesFromObject(a, ["browser_fingerprint_id", "app_id", "source", "open_app", "link_click_id"]), b.journey_link_data = {}, utils.merge(b.journey_link_data, a));
   journeys_utils.journeyLinkData = b;
-  journeys_utils.journeyType = b.journey_link_data.type || null;
-  journeys_utils.isDesktopJourney = "desktop" === b.journey_link_data.type;
-  journeys_utils.journeyVariant = b.journey_link_data.variant || null;
 };
 journeys_utils.getValueForKeyInBranchViewData = function(a) {
   return journeys_utils && journeys_utils.branch && journeys_utils.branch._branchViewData && journeys_utils.branch._branchViewData.data ? journeys_utils.branch._branchViewData.data[a] : !1;
@@ -2675,8 +2667,6 @@ function renderHtmlBlob(a, b, c, d) {
   journeys_utils.getJsAndAddToParent(b);
   var h = journeys_utils.getIframeCss(b);
   b = journeys_utils.removeScriptAndCss(b);
-  a = document.createElement("div");
-  a.id = "branch-banner-iframe-embed";
   var k = journeys_utils.createIframe();
   k.onload = function() {
     journeys_utils.addHtmlToIframe(k, b, utils.getPlatformByUserAgent());
@@ -2687,7 +2677,7 @@ function renderHtmlBlob(a, b, c, d) {
     journeys_utils.animateBannerEntrance(k, h);
     d(k);
   };
-  journeys_utils.isDesktopJourney ? (a.appendChild(k), document.body.appendChild(a)) : document.body.appendChild(k);
+  document.body.appendChild(k);
   return k;
 }
 function _areJourneysDismissedGlobally(a) {
@@ -3213,6 +3203,12 @@ Branch.prototype.setRequestMetaData = function(a, b) {
   } catch (c) {
     console.error("An error occured while setting request metadata", c);
   }
+};
+Branch.prototype.setAPIUrl = function(a) {
+  utils.isValidURL(a) ? config.api_endpoint = a : console.error("setAPIUrl: Invalid URL format. Default URL will be set.");
+};
+Branch.prototype.getAPIUrl = function() {
+  return config.api_endpoint;
 };
 // Input 17
 var branch_instance = new Branch();
