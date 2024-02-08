@@ -2827,7 +2827,6 @@ Branch.prototype._api = function(a, b, c) {
       this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata || (b.branch_requestMetadata = {}), b.branch_requestMetadata[d] = this.requestMetadata[d]);
     }
   }
-  a.destination = config.api_endpoint;
   return this._server.request(a, b, this._storage, function(e, f) {
     c(e, f);
   });
