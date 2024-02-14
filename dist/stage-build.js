@@ -1899,7 +1899,7 @@ Server.prototype.getUrl = function(a, b) {
     utils.merge(g, b), g.branch_requestMetadata && delete g.branch_requestMetadata;
   }
   b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
-  b.branch_dma_data && utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
+  b.branch_dma_data && (utils.setDMAParams(g, b.branch_dma_data, a.endpoint), g.branch_dma_data && delete g.branch_dma_data);
   if ("POST" === a.method) {
     try {
       var h = g;
