@@ -1114,7 +1114,7 @@ utils.timeSinceNavigationStart = function() {
   return (Date.now() - window.performance.timing.navigationStart).toString();
 };
 utils.currentRequestBrttTag = "";
-utils.allowDMAParamURLMap = {"v1/open":"", "v1/pageview":"", "v2/event":"user_data"};
+utils.allowDMAParamURLMap = {"/v1/open":"", "/v1/pageview":"", "/v2/event":"user_data"};
 utils.calculateBrtt = function(a) {
   return a && "number" === typeof a ? (Date.now() - a).toString() : null;
 };
