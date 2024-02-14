@@ -94,6 +94,14 @@
 			// Avoid XSS by HTML escaping the data for display
 			$('#info').text(JSON.stringify(data));
 		});
+		branch.setBranchViewData({
+  tags: ['tag1', 'tag2'],
+  data: {
+    mydata: 'something',
+    foo: 'bar',
+    '$deeplink_path': 'open/item/1234'
+  }
+});
 	</script>
 	<script type="text/javascript">
 		var request = $('#request');
