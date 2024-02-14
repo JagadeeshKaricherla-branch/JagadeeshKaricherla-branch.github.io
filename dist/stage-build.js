@@ -1662,12 +1662,13 @@ utils.removeTrailingDotZeros = function(a) {
   return a;
 };
 utils.shouldAddDMAParams = function(a) {
-  return Object.keys(utils.allowDMAParamURLMap).includes(a);
+  return utils.allowDMAParamURLMap.hasOwnProperty(a);
 };
 utils.setDMAParams = function(a, b = {}, c) {
+  b = {dma_eea:b.eeaRegion || !1, dma_ad_personalization:b.adPersonalizationConsent || !1, dma_ad_user_data:b.adUserDataUsageConsent || !1};
   for (const [d, e] of Object.entries(utils.allowDMAParamURLMap)) {
     if (c.includes(d)) {
-      "" === e ? (a.dma_eea = b.eeaRegion || !1, a.dma_ad_personalization = b.adPersonalizationConsent || !1, a.dma_ad_user_data = b.property3 || !1) : (a[e].dma_eea = b.eeaRegion || !1, a[e].dma_ad_personalization = b.adPersonalizationConsent || !1, a[e].dma_ad_user_data = b.adUserDataUsageConsent || !1);
+      "" === e ? Object.assign(a, b) : a[e] = Object.assign({}, a[e], b);
       break;
     }
   }
