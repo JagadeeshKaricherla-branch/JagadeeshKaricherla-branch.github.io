@@ -96,6 +96,18 @@ $jscomp.polyfill("Array.prototype.includes", function(a) {
     return !1;
   };
 }, "es7", "es3");
+$jscomp.owns = function(a, b) {
+  return Object.prototype.hasOwnProperty.call(a, b);
+};
+$jscomp.polyfill("Object.entries", function(a) {
+  return a ? a : function(b) {
+    var c = [], d;
+    for (d in b) {
+      $jscomp.owns(b, d) && c.push([d, b[d]]);
+    }
+    return c;
+  };
+}, "es8", "es3");
 var COMPILED = !0, goog = goog || {};
 goog.global = this || self;
 goog.exportPath_ = function(a, b, c, d) {
@@ -1102,6 +1114,7 @@ utils.timeSinceNavigationStart = function() {
   return (Date.now() - window.performance.timing.navigationStart).toString();
 };
 utils.currentRequestBrttTag = "";
+utils.allowDMAParamURLMap = {"v1/open":"", "v1/pageview":"", "v2/event":"user_data"};
 utils.calculateBrtt = function(a) {
   return a && "number" === typeof a ? (Date.now() - a).toString() : null;
 };
@@ -1648,6 +1661,17 @@ utils.removeTrailingDotZeros = function(a) {
   }
   return a;
 };
+utils.shouldAddDMAParams = function(a) {
+  return Object.keys(utils.allowDMAParamURLMap).includes(a);
+};
+utils.setDMAParams = function(a, b = {}, c) {
+  for (const [d, e] of Object.entries(utils.allowDMAParamURLMap)) {
+    if (c.includes(d)) {
+      "" === e ? (a.dma_eea = b.eeaRegion || !1, a.dma_ad_personalization = b.adPersonalizationConsent || !1, a.dma_ad_user_data = b.property3 || !1) : (a[e].dma_eea = b.eeaRegion || !1, a[e].dma_ad_personalization = b.adPersonalizationConsent || !1, a[e].dma_ad_user_data = b.adUserDataUsageConsent || !1);
+      break;
+    }
+  }
+};
 // Input 5
 var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
 function validator(a, b) {
@@ -1875,6 +1899,7 @@ Server.prototype.getUrl = function(a, b) {
     utils.merge(g, b), g.branch_requestMetadata && delete g.branch_requestMetadata;
   }
   b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
+  b.branch_dma_data && utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
   if ("POST" === a.method) {
     try {
       var h = g;
@@ -2839,6 +2864,7 @@ Branch.prototype._api = function(a, b, c) {
       this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata || (b.branch_requestMetadata = {}), b.branch_requestMetadata[d] = this.requestMetadata[d]);
     }
   }
+  utils.shouldAddDMAParams(a.endpoint) && (d = this._storage.get("branch_dma_data", !0), b.branch_dma_data = d ? safejson.parse(d) : {});
   return this._server.request(a, b, this._storage, function(e, f) {
     c(e, f);
   });
@@ -3211,9 +3237,13 @@ Branch.prototype.referringLink = function(a) {
 };
 Branch.prototype.setDMAParamsForEEA = function(a, b, c) {
   try {
-    "undefined" !== typeof key && null !== key && 0 !== key.length && "undefined" !== typeof value && (this.requestMetadata.hasOwnProperty(key) && null === value && delete this.requestMetadata[key], this.requestMetadata = utils.addPropertyIfNotNull(this.requestMetadata, key, value));
-  } catch (d) {
-    console.error("An error occured while setting request metadata", d);
+    var d = {};
+    d.eeaRegion = a || !1;
+    d.adPersonalizationConsent = b || !1;
+    d.adUserDataUsageConsent = c || !1;
+    this._storage.set("branch_dma_data", d, !0);
+  } catch (e) {
+    console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", e);
   }
 };
 Branch.prototype.setRequestMetaData = function(a, b) {
