@@ -3241,7 +3241,7 @@ Branch.prototype.setDMAParamsForEEA = function(a, b, c) {
     d.eeaRegion = a || !1;
     d.adPersonalizationConsent = b || !1;
     d.adUserDataUsageConsent = c || !1;
-    this._storage.set("branch_dma_data", d, !0);
+    this._storage.set("branch_dma_data", safejson.stringify(d), !0);
   } catch (e) {
     console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", e);
   }
