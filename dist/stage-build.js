@@ -1666,24 +1666,26 @@ utils.shouldAddDMAParams = function(a) {
 };
 utils.setDMAParams = function(a, b = {}, c) {
   b = {dma_eea:b.eeaRegion || !1, dma_ad_personalization:b.adPersonalizationConsent || !1, dma_ad_user_data:b.adUserDataUsageConsent || !1};
-  for (const [d, e] of Object.entries(utils.allowDMAParamURLMap)) {
-    if (c.includes(d)) {
-      if ("" === e) {
+  const d = utils.allowDMAParamURLMap;
+  for (const [e, f] of Object.entries(d)) {
+    if (c.includes(e)) {
+      let g;
+      if ("" === f) {
         Object.assign(a, b);
       } else {
-        let f;
-        if (e in a && "" !== a[e]) {
+        if (f in a && "" !== a[f]) {
           try {
-            const g = JSON.parse(a[e]), h = Object.assign({}, g, b);
-            f = JSON.stringify(h);
-          } catch (g) {
-            console.error(`setDMAParams:: ${e} is not a valid JSON string`);
+            const h = JSON.parse(a[f]), k = Object.assign({}, h, b);
+            g = JSON.stringify(k);
+          } catch (h) {
+            console.error(`setDMAParams:: ${f} is not a valid JSON string`);
           }
         } else {
-          f = JSON.stringify(b);
+          g = JSON.stringify(b);
         }
-        f && (a[e] = f, console.log(a[e]));
+        g && (a[f] = g, console.log(a[f]));
       }
+      break;
     }
   }
 };
