@@ -134,6 +134,7 @@
     SAMSUNG_IFA: 'ola'
   }
 };
+branch.setDMAParamsForEEA(false, true, true);
 			// Take the Branch key from a meta tag
 			branch.init($('meta[name="branch_key"]').attr('content'),options, function(err, data) {
 				response.html(err || JSON.stringify(data));
