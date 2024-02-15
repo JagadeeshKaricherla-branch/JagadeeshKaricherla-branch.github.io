@@ -3256,17 +3256,18 @@ Branch.prototype.setAPIResponseCallback = wrap(callback_params.NO_CALLBACK, func
 Branch.prototype.referringLink = function(a) {
   return this._referringLink(a);
 };
-Branch.prototype.setDMAParamsForEEA = function(a, b, c) {
+Branch.prototype.setDMAParamsForEEA = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
   try {
-    var d = {};
-    d.eeaRegion = a || !1;
-    d.adPersonalizationConsent = b || !1;
-    d.adUserDataUsageConsent = c || !1;
-    this._storage.set("branch_dma_data", safejson.stringify(d), !0);
-  } catch (e) {
-    console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", e);
+    var e = {};
+    e.eeaRegion = b || !1;
+    e.adPersonalizationConsent = c || !1;
+    e.adUserDataUsageConsent = d || !1;
+    this._storage.set("branch_dma_data", safejson.stringify(e), !0);
+  } catch (f) {
+    console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", f);
   }
-};
+  a();
+}, !0);
 Branch.prototype.setRequestMetaData = function(a, b) {
   try {
     "undefined" !== typeof a && null !== a && 0 !== a.length && "undefined" !== typeof b && (this.requestMetadata.hasOwnProperty(a) && null === b && delete this.requestMetadata[a], this.requestMetadata = utils.addPropertyIfNotNull(this.requestMetadata, a, b));
