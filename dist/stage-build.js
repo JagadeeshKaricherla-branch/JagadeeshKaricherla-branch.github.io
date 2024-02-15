@@ -1668,8 +1668,22 @@ utils.setDMAParams = function(a, b = {}, c) {
   b = {dma_eea:b.eeaRegion || !1, dma_ad_personalization:b.adPersonalizationConsent || !1, dma_ad_user_data:b.adUserDataUsageConsent || !1};
   for (const [d, e] of Object.entries(utils.allowDMAParamURLMap)) {
     if (c.includes(d)) {
-      "" === e ? Object.assign(a, b) : a[e] = Object.assign({}, a[e], b);
-      break;
+      if ("" === e) {
+        Object.assign(a, b);
+      } else {
+        let f;
+        if (e in a && "" !== a[e]) {
+          try {
+            const g = JSON.parse(a[e]), h = Object.assign({}, g, b);
+            f = JSON.stringify(h);
+          } catch (g) {
+            console.error(`setDMAParams:: ${e} is not a valid JSON string`);
+          }
+        } else {
+          f = JSON.stringify(b);
+        }
+        f && (a[e] = f, console.log(a[e]));
+      }
     }
   }
 };
