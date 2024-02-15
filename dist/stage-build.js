@@ -1083,7 +1083,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"2.81.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.81.0"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1114,7 +1114,7 @@ utils.timeSinceNavigationStart = function() {
   return (Date.now() - window.performance.timing.navigationStart).toString();
 };
 utils.currentRequestBrttTag = "";
-utils.allowDMAParamURLMap = {"/v1/open":"", "/v1/pageview":"", "/v2/event":"user_data"};
+utils.allowDMAParamURLMap = {"/v1/open":"", "/v1/pageview":"", "/v2/event/standard":"user_data", "/v2/event/custom":"user_data"};
 utils.calculateBrtt = function(a) {
   return a && "number" === typeof a ? (Date.now() - a).toString() : null;
 };
@@ -1672,6 +1672,9 @@ utils.setDMAParams = function(a, b = {}, c) {
       break;
     }
   }
+};
+utils.isValidURL = function(a) {
+  return a && "" !== a.trim() ? RegExp("^(https?)://((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|((\\d{1,3}\\.){3}\\d{1,3}))(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*(\\?[;&a-z\\d%_.~+=-]*)?(\\#[-a-z\\d_]*)?$", "i").test(a) : !1;
 };
 // Input 5
 var resources = {}, validationTypes = {OBJECT:0, STRING:1, NUMBER:2, ARRAY:3, BOOLEAN:4}, _validator;
@@ -2866,6 +2869,7 @@ Branch.prototype._api = function(a, b, c) {
     }
   }
   utils.shouldAddDMAParams(a.endpoint) && (d = this._storage.get("branch_dma_data", !0), b.branch_dma_data = d ? safejson.parse(d) : {});
+  "/_r" !== a.endpoint && (a.destination = config.api_endpoint);
   return this._server.request(a, b, this._storage, function(e, f) {
     c(e, f);
   });
@@ -3253,6 +3257,12 @@ Branch.prototype.setRequestMetaData = function(a, b) {
   } catch (c) {
     console.error("An error occured while setting request metadata", c);
   }
+};
+Branch.prototype.setAPIUrl = function(a) {
+  utils.isValidURL(a) ? config.api_endpoint = a : console.error("setAPIUrl: Invalid URL format. Default URL will be set.");
+};
+Branch.prototype.getAPIUrl = function() {
+  return config.api_endpoint;
 };
 // Input 17
 var branch_instance = new Branch();
