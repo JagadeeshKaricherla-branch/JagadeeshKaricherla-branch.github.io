@@ -1083,7 +1083,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"2.81.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"2.82.0"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1669,10 +1669,10 @@ utils.setDMAParams = function(a, b = {}, c) {
   const d = utils.allowDMAParamURLMap;
   for (const [e, f] of Object.entries(d)) {
     if (c.includes(e)) {
-      let g;
       if ("" === f) {
         Object.assign(a, b);
       } else {
+        let g;
         if (f in a && "" !== a[f]) {
           try {
             const h = JSON.parse(a[f]), k = Object.assign({}, h, b);
@@ -1683,7 +1683,7 @@ utils.setDMAParams = function(a, b = {}, c) {
         } else {
           g = JSON.stringify(b);
         }
-        g && (a[f] = g, console.log(a[f]));
+        g && (a[f] = g);
       }
       break;
     }
@@ -1919,12 +1919,14 @@ Server.prototype.getUrl = function(a, b) {
     utils.merge(g, b), g.branch_requestMetadata && delete g.branch_requestMetadata;
   }
   b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
-  b.branch_dma_data && (utils.setDMAParams(g, b.branch_dma_data, a.endpoint), g.branch_dma_data && delete g.branch_dma_data);
+  if (b.branch_dma_data) {
+    var h = b.branch_dma_data.eeaRegion;
+    null === h || void 0 === h || !0 !== h && !1 !== h || utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
+    g.branch_dma_data && delete g.branch_dma_data;
+  }
   if ("POST" === a.method) {
     try {
-      var h = g;
-      "undefined" === typeof h && (h = {});
-      if (b.branch_key && f.test(b.branch_key)) {
+      if (h = g, "undefined" === typeof h && (h = {}), b.branch_key && f.test(b.branch_key)) {
         h.branch_key = b.branch_key;
       } else if (b.app_id && e.test(b.app_id)) {
         h.app_id = b.app_id;
@@ -3259,10 +3261,7 @@ Branch.prototype.referringLink = function(a) {
 Branch.prototype.setDMAParamsForEEA = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
   try {
     var e = {};
-    e.eeaRegion = b || !1;
-    e.adPersonalizationConsent = c || !1;
-    e.adUserDataUsageConsent = d || !1;
-    this._storage.set("branch_dma_data", safejson.stringify(e), !0);
+    null !== b && void 0 !== b ? (e.eeaRegion = !!b, e.adPersonalizationConsent = !!c, e.adUserDataUsageConsent = !!d, this._storage.set("branch_dma_data", safejson.stringify(e), !0)) : console.error("setDMAParamsForEEA::DMA parameters for EEA cannot be null");
   } catch (f) {
     console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", f);
   }
@@ -3294,4 +3293,3 @@ if (window.branch && window.branch._q) {
 }) : "object" === typeof exports && (module.exports = branch_instance);
 window && (window.branch = branch_instance);
 })();
-
