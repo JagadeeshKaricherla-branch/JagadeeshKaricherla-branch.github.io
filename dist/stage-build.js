@@ -1902,14 +1902,12 @@ Server.prototype.getUrl = function(a, b) {
     utils.merge(g, b), g.branch_requestMetadata && delete g.branch_requestMetadata;
   }
   b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
-  if (b.branch_dma_data) {
-    var h = b.branch_dma_data.eeaRegion;
-    !0 !== h && !1 !== h || utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
-    g.branch_dma_data && delete g.branch_dma_data;
-  }
+  b.branch_dma_data && (utils.setDMAParams(g, b.branch_dma_data, a.endpoint), g.branch_dma_data && delete g.branch_dma_data);
   if ("POST" === a.method) {
     try {
-      if (h = g, "undefined" === typeof h && (h = {}), b.branch_key && f.test(b.branch_key)) {
+      var h = g;
+      "undefined" === typeof h && (h = {});
+      if (b.branch_key && f.test(b.branch_key)) {
         h.branch_key = b.branch_key;
       } else if (b.app_id && e.test(b.app_id)) {
         h.app_id = b.app_id;
