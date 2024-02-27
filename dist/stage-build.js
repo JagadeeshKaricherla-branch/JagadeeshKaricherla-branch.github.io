@@ -1653,19 +1653,18 @@ utils.shouldAddDMAParams = function(a) {
   return utils.allowDMAParamURLMap.hasOwnProperty(a);
 };
 utils.setDMAParams = function(a, b = {}, c) {
+  const d = ["/v2/event/standard", "/v2/event/custom"];
   b = {dma_eea:b.eeaRegion, dma_ad_personalization:b.adPersonalizationConsent, dma_ad_user_data:b.adUserDataUsageConsent};
-  const d = ["/v1/open", "/v1/pageview"].includes(c);
-  c = ["/v2/event/standard", "/v2/event/custom"].includes(c);
-  if (d || c) {
-    if (d) {
-      Object.assign(a, b);
-    } else {
-      try {
-        const e = JSON.parse(a.user_data || "{}");
-        a.user_data = JSON.stringify(Object.assign({}, e, b));
-      } catch (e) {
-        console.error(`setDMAParams:: ${a.user_data} is not a valid JSON string`);
-      }
+  if (["/v1/open", "/v1/pageview"].includes(c)) {
+    Object.assign(a, b);
+  } else if (d.includes(c)) {
+    try {
+      let e;
+      e = a.user_data ? JSON.parse(a.user_data) : {};
+      Object.assign(e, b);
+      a.user_data = JSON.stringify(e);
+    } catch (e) {
+      console.error(`setDMAParams:: ${a.user_data} is not a valid JSON string`);
     }
   }
 };
@@ -3241,7 +3240,7 @@ Branch.prototype.referringLink = function(a) {
 };
 Branch.prototype.setDMAParamsForEEA = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
   try {
-    const e = (f, g) => utils.isBoolean(f) ? !0 : (console.warn(`setDMAParamsForEEA::DMA parameter ${g} must be boolean`), !1);
+    const e = (f, g) => utils.isBoolean(f) ? !0 : (console.warn(`setDMAParamsForEEA: ${g} must be boolean, but got ${f}`), !1);
     if (!(e(b, "eeaRegion") && e(c, "adPersonalizationConsent") && e(d, "adUserDataUsageConsent"))) {
       return;
     }
