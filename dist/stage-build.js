@@ -96,18 +96,6 @@ $jscomp.polyfill("Array.prototype.includes", function(a) {
     return !1;
   };
 }, "es7", "es3");
-$jscomp.owns = function(a, b) {
-  return Object.prototype.hasOwnProperty.call(a, b);
-};
-$jscomp.polyfill("Object.entries", function(a) {
-  return a ? a : function(b) {
-    var c = [], d;
-    for (d in b) {
-      $jscomp.owns(b, d) && c.push([d, b[d]]);
-    }
-    return c;
-  };
-}, "es8", "es3");
 var COMPILED = !0, goog = goog || {};
 goog.global = this || self;
 goog.exportPath_ = function(a, b, c, d) {
@@ -1665,29 +1653,24 @@ utils.shouldAddDMAParams = function(a) {
   return utils.allowDMAParamURLMap.hasOwnProperty(a);
 };
 utils.setDMAParams = function(a, b = {}, c) {
-  b = {dma_eea:b.eeaRegion || !1, dma_ad_personalization:b.adPersonalizationConsent || !1, dma_ad_user_data:b.adUserDataUsageConsent || !1};
-  const d = utils.allowDMAParamURLMap;
-  for (const [e, f] of Object.entries(d)) {
-    if (c.includes(e)) {
-      if ("" === f) {
-        Object.assign(a, b);
-      } else {
-        let g;
-        if (f in a && "" !== a[f]) {
-          try {
-            const h = JSON.parse(a[f]), k = Object.assign({}, h, b);
-            g = JSON.stringify(k);
-          } catch (h) {
-            console.error(`setDMAParams:: ${f} is not a valid JSON string`);
-          }
-        } else {
-          g = JSON.stringify(b);
-        }
-        g && (a[f] = g);
+  b = {dma_eea:b.eeaRegion, dma_ad_personalization:b.adPersonalizationConsent, dma_ad_user_data:b.adUserDataUsageConsent};
+  const d = ["/v1/open", "/v1/pageview"].includes(c);
+  c = ["/v2/event/standard", "/v2/event/custom"].includes(c);
+  if (d || c) {
+    if (d) {
+      Object.assign(a, b);
+    } else {
+      try {
+        const e = JSON.parse(a.user_data || "{}");
+        a.user_data = JSON.stringify(Object.assign({}, e, b));
+      } catch (e) {
+        console.error(`setDMAParams:: ${a.user_data} is not a valid JSON string`);
       }
-      break;
     }
   }
+};
+utils.isBoolean = function(a) {
+  return !0 === a || !1 === a;
 };
 utils.isValidURL = function(a) {
   return a && "" !== a.trim() ? RegExp("^(https?)://((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|((\\d{1,3}\\.){3}\\d{1,3}))(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*(\\?[;&a-z\\d%_.~+=-]*)?(\\#[-a-z\\d_]*)?$", "i").test(a) : !1;
@@ -1921,7 +1904,7 @@ Server.prototype.getUrl = function(a, b) {
   b.hasOwnProperty("branch_requestMetadata") && b.branch_requestMetadata && "/v1/pageview" !== a.endpoint && "/v1/dismiss" !== a.endpoint && (g.metadata = safejson.stringify(b.branch_requestMetadata));
   if (b.branch_dma_data) {
     var h = b.branch_dma_data.eeaRegion;
-    null === h || void 0 === h || !0 !== h && !1 !== h || utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
+    !0 !== h && !1 !== h || utils.setDMAParams(g, b.branch_dma_data, a.endpoint);
     g.branch_dma_data && delete g.branch_dma_data;
   }
   if ("POST" === a.method) {
@@ -2886,7 +2869,7 @@ Branch.prototype._api = function(a, b, c) {
       this.requestMetadata.hasOwnProperty(d) && (b.branch_requestMetadata || (b.branch_requestMetadata = {}), b.branch_requestMetadata[d] = this.requestMetadata[d]);
     }
   }
-  utils.shouldAddDMAParams(a.endpoint) && (d = this._storage.get("branch_dma_data", !0), b.branch_dma_data = d ? safejson.parse(d) : {});
+  utils.shouldAddDMAParams(a.endpoint) && (d = this._storage.get("branch_dma_data", !0), b.branch_dma_data = d ? safejson.parse(d) : null);
   "/_r" !== a.endpoint && (a.destination = config.api_endpoint);
   return this._server.request(a, b, this._storage, function(e, f) {
     c(e, f);
@@ -3260,10 +3243,13 @@ Branch.prototype.referringLink = function(a) {
 };
 Branch.prototype.setDMAParamsForEEA = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
   try {
-    var e = {};
-    null !== b && void 0 !== b ? (e.eeaRegion = !!b, e.adPersonalizationConsent = !!c, e.adUserDataUsageConsent = !!d, this._storage.set("branch_dma_data", safejson.stringify(e), !0)) : console.error("setDMAParamsForEEA::DMA parameters for EEA cannot be null");
-  } catch (f) {
-    console.error("setDMAParamsForEEA::An error occured while setting DMA parameters for EEA", f);
+    const e = (f, g) => utils.isBoolean(f) ? !0 : (console.warn(`setDMAParamsForEEA::DMA parameter ${g} must be boolean`), !1);
+    if (!(e(b, "eeaRegion") && e(c, "adPersonalizationConsent") && e(d, "adUserDataUsageConsent"))) {
+      return;
+    }
+    this._storage.set("branch_dma_data", safejson.stringify({eeaRegion:b, adPersonalizationConsent:c, adUserDataUsageConsent:d}), !0);
+  } catch (e) {
+    console.error("setDMAParamsForEEA::An error occurred while setting DMA parameters for EEA", e);
   }
   a();
 }, !0);
