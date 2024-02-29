@@ -83,31 +83,61 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
-		(function(b, r, a, n, c, h, _, s, d, k) {
-    if (!b[n] || !b[n]._q) {
-        for (; s < _.length;) c(h, _[s++]);
-        d = r.createElement(a);
-        d.async = 1;
-        d.src = "/dist/stage-build.js";
-        k = r.getElementsByTagName(a)[0];
-        k.parentNode.insertBefore(d, k);
-        b[n] = h
-    }
-})(window, document, "script", "branch", function(b, r) {
-    b[r] = function() {
-        b._q.push([r, arguments])
-    };
-    // Extract method names dynamically from the Branch SDK object
-    var methods = Object.keys(b[r]);
-    methods.forEach(function(method) {
-        b[r][method] = function() {
-            b._q.push([method, arguments]);
-        };
-    });
-}, {
-    _q: [],
-    _v: 1
-}, 0);
+		(function(root, doc, scriptStr, branchStr, createCallback, branchSdk, funcs, i, scriptTag, firstScript) {
+	if (!root[branchStr] || !root[branchStr]._q) {
+		while (i < funcs.length) {
+			createCallback(branchSdk, funcs[i++]);
+		}
+
+		scriptTag = doc.createElement(scriptStr);
+		scriptTag.async = 1;
+		scriptTag.src = 'SCRIPT_URL_HERE';
+		firstScript = doc.getElementsByTagName(scriptStr)[0];
+		firstScript.parentNode.insertBefore(scriptTag, firstScript);
+
+		root[branchStr] = branchSdk;
+	}
+})(
+	window, document, 'script', 'branch', function(branch, name) {
+		branch[name] = function() {
+			branch._q.push([ name, arguments ]);
+		};
+	},
+	{
+		_q: [], // _q: the "queue" of calls
+		_v: 1 // _v: the "version" of the embed script
+	},
+	[
+		'addListener',
+		'banner',
+		'closeBanner',
+		'closeJourney',
+		'data',
+		'deepview',
+		'deepviewCta',
+		'first',
+		'init',
+		'link',
+		'logout',
+		'removeListener',
+		'setBranchViewData',
+		'setIdentity',
+		'track',
+		'trackCommerceEvent',
+		'logEvent',
+		'disableTracking',
+		'getBrowserFingerprintId',
+		'crossPlatformIds',
+		'lastAttributedTouchData',
+		'setAPIResponseCallback',
+		'qrCode',
+		'setRequestMetaData',
+		'setDMAParamsForEEA',
+		'setAPIUrl',
+		'getAPIUrl'
+	],
+	0
+);
                  var options = {
   advertising_ids: {
     SAMSUNG_IFA: 'ola'
