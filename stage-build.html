@@ -91,7 +91,7 @@
 
 		scriptTag = doc.createElement(scriptStr);
 		scriptTag.async = 1;
-		scriptTag.src = 'SCRIPT_URL_HERE';
+		scriptTag.src = '/dist/stage-build.js';
 		firstScript = doc.getElementsByTagName(scriptStr)[0];
 		firstScript.parentNode.insertBefore(scriptTag, firstScript);
 
