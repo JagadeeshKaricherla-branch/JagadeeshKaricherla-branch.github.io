@@ -811,8 +811,8 @@ goog.createTrustedTypesPolicy = function(a) {
   goog.Dependency.call(this, a, b, c, d, e);
 }, goog.inherits(goog.Es6ModuleDependency, goog.Dependency), goog.Es6ModuleDependency.prototype.load = function(a) {
   function b(l, n) {
-    var p = "", q = goog.getScriptNonce_();
-    q && (p = ' nonce="' + q + '"');
+    var p = "", r = goog.getScriptNonce_();
+    r && (p = ' nonce="' + r + '"');
     l = n ? '<script type="module" crossorigin' + p + ">" + n + "\x3c/script>" : '<script type="module" crossorigin src="' + l + '"' + p + ">\x3c/script>";
     d.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(l) : l);
   }
@@ -822,8 +822,8 @@ goog.createTrustedTypesPolicy = function(a) {
     p.async = !1;
     p.type = "module";
     p.setAttribute("crossorigin", !0);
-    var q = goog.getScriptNonce_();
-    q && (p.nonce = q);
+    var r = goog.getScriptNonce_();
+    r && (p.nonce = r);
     n ? p.text = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScript(n) : n : p.src = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScriptURL(l) : l;
     d.head.appendChild(p);
   }
@@ -1071,7 +1071,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"2.84.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.84.0"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1968,8 +1968,9 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
     e(Error(utils.messages.timeout), null, 504);
   };
   l.onerror = function(n) {
-    var p = l.method || "Unknown", q = l.responseURL || "Unknown", w = l.status || "No status available", m = l.responseText || "No response text available";
-    e(Error(n.error || "Error in API: Method - " + p + ", URL - " + q + ", Status - " + w + ", Response - " + m), null, l.status);
+    var p = "Error in API: Method - " + (l.method || "Unknown") + ", URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available");
+    console.log(p);
+    e(Error(n.error || p), null, l.status);
   };
   l.onreadystatechange = function() {
     if (4 === l.readyState) {
@@ -1987,7 +1988,7 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
         }
         e(null, n, l.status);
       } else if ("4" === l.status.toString().substring(0, 1) || "5" === l.status.toString().substring(0, 1)) {
-        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : e(Error("Error in API: Method - " + (l.method || "Unknown") + ", URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available")), null, l.status);
+        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : (n = "Error in API: Method - " + (l.method || "Unknown") + ", URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available"), console.log(n), e(Error(n), null, l.status));
       }
     }
   };
@@ -2017,24 +2018,24 @@ Server.prototype.request = function(a, b, c, d) {
     k = f.url, h = f.data;
   }
   var l = c.get("use_jsonp") || a.jsonp ? b : h;
-  var n = utils.retries, p = function(r, u, t) {
+  var n = utils.retries, p = function(q, u, t) {
     if ("function" === typeof e.onAPIResponse) {
-      e.onAPIResponse(k, a.method, l, r, t, u);
+      e.onAPIResponse(k, a.method, l, q, t, u);
     }
-    r && 0 < n && "5" === (t || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
+    q && 0 < n && "5" === (t || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
       m();
-    }, utils.retry_delay)) : d(r, u);
+    }, utils.retry_delay)) : d(q, u);
   };
   if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(k, b)) {
     return utils.userPreferences.allowErrorsInCallback ? p(Error(utils.messages.trackingDisabled), null, 300) : p(null, {}, 200);
   }
-  var q = !1;
+  var r = !1;
   if ("/v1/qr-code" === a.endpoint) {
-    q = !0;
+    r = !0;
     var w = "arraybuffer";
   }
   var m = function() {
-    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, p) : e.XHRRequest(k, h, a.method, c, p, q, w);
+    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, p) : e.XHRRequest(k, h, a.method, c, p, r, w);
   };
   m();
 };
@@ -2237,8 +2238,8 @@ var banner = function(a, b, c, d) {
     c.channel = c.channel || "app banner";
     k = b.iframe ? e.contentWindow.document : document;
     var n = utils.getPlatformByUserAgent();
-    !["other", "desktop"].includes(n) && (b.open_app = b.open_app, b.append_deeplink_path = b.append_deeplink_path, b.make_new_link = b.make_new_link, b.deepview_type = "banner", a.deepview(c, b), n = k.getElementById("branch-mobile-action")) && (n.onclick = function(q) {
-      q.preventDefault();
+    !["other", "desktop"].includes(n) && (b.open_app = b.open_app, b.append_deeplink_path = b.append_deeplink_path, b.make_new_link = b.make_new_link, b.deepview_type = "banner", a.deepview(c, b), n = k.getElementById("branch-mobile-action")) && (n.onclick = function(r) {
+      r.preventDefault();
       a.deepviewCta();
     });
     n = banner_utils.getBodyStyle("margin-top");
@@ -2246,8 +2247,8 @@ var banner = function(a, b, c, d) {
     banner_utils.addClass(document.body, "branch-banner-is-active");
     "top" === b.position ? document.body.style.marginTop = banner_utils.addCSSLengths(banner_utils.bannerHeight, n) : "bottom" === b.position && (document.body.style.marginBottom = banner_utils.addCSSLengths(banner_utils.bannerHeight, p));
     if (n = k.getElementById("branch-banner-close")) {
-      n.onclick = function(q) {
-        q.preventDefault();
+      n.onclick = function(r) {
+        r.preventDefault();
         a._publishEvent("willCloseBanner");
         h({}, function() {
           a._publishEvent("didCloseBanner");
@@ -2255,8 +2256,8 @@ var banner = function(a, b, c, d) {
       };
     }
     if (k = k.getElementById("branch-banner-modal-background")) {
-      k.onclick = function(q) {
-        q.preventDefault();
+      k.onclick = function(r) {
+        r.preventDefault();
         a._publishEvent("willCloseBanner");
         h({}, function() {
           a._publishEvent("didCloseBanner");
@@ -2594,8 +2595,8 @@ journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, h) {
     var l = function() {
       journeys_utils.branch.removeListener(l);
       var n = journeys_utils._getDismissRequestData(h, utils.dismissEventToSourceMapping[a]);
-      journeys_utils.branch._api(resources.dismiss, n, function(p, q) {
-        !p && f && f.dismissRedirect ? window.location = f.dismissRedirect : !p && "object" === typeof q && q.template && h.shouldDisplayJourney(q, null, !1) && h.displayJourney(q.template, n, n.branch_view_id || q.event_data.branch_view_data.id, q.event_data.branch_view_data, !1, q.journey_link_data);
+      journeys_utils.branch._api(resources.dismiss, n, function(p, r) {
+        !p && f && f.dismissRedirect ? window.location = f.dismissRedirect : !p && "object" === typeof r && r.template && h.shouldDisplayJourney(r, null, !1) && h.displayJourney(r.template, n, n.branch_view_id || r.event_data.branch_view_data.id, r.event_data.branch_view_data, !1, r.journey_link_data);
       });
     };
     journeys_utils.branch.addListener("branch_internal_event_didCloseJourney", l);
@@ -2753,7 +2754,7 @@ branch_view.displayJourney = function(a, b, c, d, e, f) {
     banner_utils.addClass(h, "branch-banner-is-active");
     var k = !1, l = b.callback_string, n = null, p = journeys_utils.branch._storage;
     if (a) {
-      var q = journeys_utils.getMetadata(a) || {};
+      var r = journeys_utils.getMetadata(a) || {};
       a = journeys_utils.tryReplaceJourneyCtaLink(a);
       var w = window.setTimeout(function() {
         window[l] = function() {
@@ -2761,11 +2762,11 @@ branch_view.displayJourney = function(a, b, c, d, e, f) {
       }, utils.timeout);
       window[l] = function(m) {
         window.clearTimeout(w);
-        k || (n = m, journeys_utils.finalHookups(c, g, p, n, null, q, e, branch_view));
+        k || (n = m, journeys_utils.finalHookups(c, g, p, n, null, r, e, branch_view));
       };
       renderHtmlBlob(document.body, a, b.has_app_websdk, function(m) {
         journeys_utils.banner = m;
-        null === m ? k = !0 : (journeys_utils.finalHookups(c, g, p, n, m, q, e, branch_view), utils.navigationTimingAPIEnabled && (utils.instrumentation["journey-load-time"] = utils.timeSinceNavigationStart()), document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d));
+        null === m ? k = !0 : (journeys_utils.finalHookups(c, g, p, n, m, r, e, branch_view), utils.navigationTimingAPIEnabled && (utils.instrumentation["journey-load-time"] = utils.timeSinceNavigationStart()), document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d));
       });
     } else {
       document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d);
@@ -2780,7 +2781,7 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   journeys_utils.exitAnimationDisabled = b.disable_exit_animation || !1;
   var e = utils.merge({}, c._branchViewData), f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, h = f.hasOwnProperty("identity") ? f.identity : null, k = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, n = utils.getInitialReferrer(c._referringLink()), p = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
   c = b.make_new_link ? null : utils.getClickIdAndSearchStringFromLink(c._referringLink(!0));
-  var q = f.hasOwnProperty("session_link_click_id") ? f.session_link_click_id : null;
+  var r = f.hasOwnProperty("session_link_click_id") ? f.session_link_click_id : null;
   e.event = d ? "dismiss" : "pageview";
   e.metadata = a;
   e = utils.addPropertyIfNotNull(e, "initial_referrer", n);
@@ -2789,7 +2790,7 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   e = utils.addPropertyIfNotNull(e, "is_iframe", utils.isIframe());
   e = utils.addPropertyIfNotNull(e, "journey_dismissals", k);
   e = utils.addPropertyIfNotNull(e, "identity", h);
-  e = utils.addPropertyIfNotNull(e, "session_link_click_id", q);
+  e = utils.addPropertyIfNotNull(e, "session_link_click_id", r);
   e.user_language = l;
   e.open_app = b.open_app || !1;
   e.has_app_websdk = g;
@@ -2930,9 +2931,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   var f = c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null, g = f || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), h = !d.identity_id;
   d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
   var k = function(m) {
-    var r = {sdk:config.version, branch_key:d.branch_key}, u = session.get(d._storage) || {}, t = session.get(d._storage, !0) || {};
-    t.browser_fingerprint_id && (r._t = t.browser_fingerprint_id);
-    utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, r, function(v, x) {
+    var q = {sdk:config.version, branch_key:d.branch_key}, u = session.get(d._storage) || {}, t = session.get(d._storage, !0) || {};
+    t.browser_fingerprint_id && (q._t = t.browser_fingerprint_id);
+    utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, q, function(v, x) {
       v && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = v.message);
       x && (u.browser_fingerprint_id = x);
     });
@@ -2940,19 +2941,19 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   }, l = function(m) {
     h && (m.identity = d.identity);
     return m;
-  }, n = function(m, r) {
-    r && (r = e(r), utils.userPreferences.trackingDisabled || (r = l(r), session.set(d._storage, r, h)), d.init_state = init_states.INIT_SUCCEEDED, r.data_parsed = r.data && 0 !== r.data.length ? safejson.parse(r.data) : {});
+  }, n = function(m, q) {
+    q && (q = e(q), utils.userPreferences.trackingDisabled || (q = l(q), session.set(d._storage, q, h)), d.init_state = init_states.INIT_SUCCEEDED, q.data_parsed = q.data && 0 !== q.data.length ? safejson.parse(q.data) : {});
     if (m) {
-      return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = m.message), a(m, r && utils.whiteListSessionData(r));
+      return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = m.message), a(m, q && utils.whiteListSessionData(q));
     }
     try {
-      a(m, r && utils.whiteListSessionData(r));
+      a(m, q && utils.whiteListSessionData(q));
     } catch (t) {
     } finally {
       d.renderFinalize();
     }
     m = utils.getAdditionalMetadata();
-    (r = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (r = utils.mergeHostedDeeplinkData(m.hosted_deeplink_data, r)) && 0 < Object.keys(r).length && (m.hosted_deeplink_data = r);
+    (q = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (q = utils.mergeHostedDeeplinkData(m.hosted_deeplink_data, q)) && 0 < Object.keys(q).length && (m.hosted_deeplink_data = q);
     var u = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(c, m), c, d, !1);
     d.renderQueue(function() {
       d._api(resources.pageview, u, function(t, v) {
@@ -2963,11 +2964,11 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   }, p = function() {
     if ("undefined" !== typeof document.hidden) {
       var m = "hidden";
-      var r = "visibilitychange";
+      var q = "visibilitychange";
     } else {
-      "undefined" !== typeof document.mozHidden ? (m = "mozHidden", r = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", r = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", r = "webkitvisibilitychange");
+      "undefined" !== typeof document.mozHidden ? (m = "mozHidden", q = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", q = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", q = "webkitvisibilitychange");
     }
-    r && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(r, function() {
+    q && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(q, function() {
       document[m] || (k(null), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
     }, !1));
   };
@@ -2975,24 +2976,24 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
     session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), p(), k(n);
   } else {
     b = {sdk:config.version, branch_key:d.branch_key};
-    var q = session.get(d._storage, !0) || {};
-    q.browser_fingerprint_id && (b._t = q.browser_fingerprint_id);
-    q.identity && (d.identity = q.identity);
+    var r = session.get(d._storage, !0) || {};
+    r.browser_fingerprint_id && (b._t = r.browser_fingerprint_id);
+    r.identity && (d.identity = r.identity);
     var w = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
     utils.isSafari11OrGreater() || utils.isIOSWKWebView() ? utils.delay(function() {
-      d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || q.browser_fingerprint_id, identity:q.identity ? q.identity : null, alternative_browser_fingerprint_id:q.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
-      null}, function(m, r) {
+      d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || r.browser_fingerprint_id, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
+      null}, function(m, q) {
         m && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = m.message);
-        m || "object" !== typeof r || (r.branch_view_enabled && (d._branchViewEnabled = !!r.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (r.click_id = g));
+        m || "object" !== typeof q || (q.branch_view_enabled && (d._branchViewEnabled = !!q.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (q.click_id = g));
         p();
-        n(m, r);
+        n(m, q);
       });
-    }, w) : d._api(resources._r, b, function(m, r) {
+    }, w) : d._api(resources._r, b, function(m, q) {
       if (m) {
         return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = m.message, n(m, null);
       }
       utils.delay(function() {
-        d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || r, identity:q.identity ? q.identity : null, alternative_browser_fingerprint_id:q.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
+        d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || q, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
         null}, function(u, t) {
           u && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = u.message);
           u || "object" !== typeof t || (t.branch_view_enabled && (d._branchViewEnabled = !!t.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (t.click_id = g));
