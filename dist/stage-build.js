@@ -1968,7 +1968,7 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
     e(Error(utils.messages.timeout), null, 504);
   };
   l.onerror = function(n) {
-    var p = "Error in API: Method - " + (l.method || "Unknown") + ", URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available");
+    var p = "Error in API: URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available");
     console.log(p);
     e(Error(n.error || p), null, l.status);
   };
@@ -1988,7 +1988,7 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
         }
         e(null, n, l.status);
       } else if ("4" === l.status.toString().substring(0, 1) || "5" === l.status.toString().substring(0, 1)) {
-        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : (n = "Error in API: Method - " + (l.method || "Unknown") + ", URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available"), console.log(n), e(Error(n), null, l.status));
+        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : (n = "Error in API: URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available"), console.log(n), e(Error(n), null, l.status));
       }
     }
   };
