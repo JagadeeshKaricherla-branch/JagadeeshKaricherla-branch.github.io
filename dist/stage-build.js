@@ -2807,19 +2807,20 @@ var Logger = function() {
   this.level_ = "info";
 };
 Logger.prototype.setLevel = function(a) {
-  ["verbose", "info", "warning", "error", "none"].includes(a) ? this.level_ = a : console.error(`Invalid log level: ${a}`);
+  -1 !== ["verbose", "info", "warning", "error", "none"].indexOf(a) ? this.level_ = a : console.error(`Invalid log level: ${a}`);
 };
-Logger.prototype.log = function(a, ...b) {
+Logger.prototype.log = function(a) {
+  var b = Array.prototype.slice.call(arguments, 1);
   if (this.shouldLog(a)) {
     switch(a) {
       case "info":
-        this.logInfo_(...b);
+        this.logInfo_(b);
         break;
       case "warning":
-        this.logWarning_(...b);
+        this.logWarning_(b);
         break;
       case "error":
-        this.logError_(...b);
+        this.logError_(b);
     }
   }
 };
@@ -2827,17 +2828,18 @@ Logger.prototype.shouldLog = function(a) {
   if ("none" === this.level_) {
     return !1;
   }
-  const b = ["verbose", "info", "warning", "error", "none"], c = b.indexOf(this.level_);
+  const b = ["verbose", "info", "warning", "error", "none"];
+  let c = b.indexOf(this.level_);
   return b.indexOf(a) >= c;
 };
-Logger.prototype.logInfo_ = function(...a) {
-  console.info(...a);
+Logger.prototype.logInfo_ = function(a) {
+  console.info.apply(console, a);
 };
-Logger.prototype.logWarning_ = function(...a) {
-  console.warn(...a);
+Logger.prototype.logWarning_ = function(a) {
+  console.warn.apply(console, a);
 };
-Logger.prototype.logError_ = function(...a) {
-  console.error(...a);
+Logger.prototype.logError_ = function(a) {
+  console.error.apply(console, a);
 };
 // Input 17
 var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, init_states = {NO_INIT:0, INIT_PENDING:1, INIT_FAILED:2, INIT_SUCCEEDED:3}, init_state_fail_codes = {NO_FAILURE:0, UNKNOWN_CAUSE:1, OPEN_FAILED:2, BFP_NOT_FOUND:3, HAS_APP_FAILED:4}, wrap = function(a, b, c) {
