@@ -3280,7 +3280,7 @@ Branch.prototype.referringLink = function(a) {
 };
 Branch.prototype.setDMAParamsForEEA = wrap(callback_params.CALLBACK_ERR, function(a, b, c, d) {
   try {
-    var e = (f, g) => utils.isBoolean(f) ? !0 : (console.warn(`setDMAParamsForEEA: ${g} must be boolean, but got ${f}`), !1);
+    var e = (f, g) => utils.isBoolean(f) ? !0 : (this._logger.log("warn", `setDMAParamsForEEA: ${g} must be boolean, but got ${f}`), !1);
     if (!(e(b, "eeaRegion") && e(c, "adPersonalizationConsent") && e(d, "adUserDataUsageConsent"))) {
       return;
     }
