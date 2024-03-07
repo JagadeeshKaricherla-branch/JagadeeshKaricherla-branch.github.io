@@ -811,21 +811,21 @@ goog.createTrustedTypesPolicy = function(a) {
   goog.Dependency.call(this, a, b, c, d, e);
 }, goog.inherits(goog.Es6ModuleDependency, goog.Dependency), goog.Es6ModuleDependency.prototype.load = function(a) {
   function b(l, n) {
-    var p = "", r = goog.getScriptNonce_();
-    r && (p = ' nonce="' + r + '"');
-    l = n ? '<script type="module" crossorigin' + p + ">" + n + "\x3c/script>" : '<script type="module" crossorigin src="' + l + '"' + p + ">\x3c/script>";
+    var q = "", r = goog.getScriptNonce_();
+    r && (q = ' nonce="' + r + '"');
+    l = n ? '<script type="module" crossorigin' + q + ">" + n + "\x3c/script>" : '<script type="module" crossorigin src="' + l + '"' + q + ">\x3c/script>";
     d.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(l) : l);
   }
   function c(l, n) {
-    var p = d.createElement("script");
-    p.defer = !0;
-    p.async = !1;
-    p.type = "module";
-    p.setAttribute("crossorigin", !0);
+    var q = d.createElement("script");
+    q.defer = !0;
+    q.async = !1;
+    q.type = "module";
+    q.setAttribute("crossorigin", !0);
     var r = goog.getScriptNonce_();
-    r && (p.nonce = r);
-    n ? p.text = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScript(n) : n : p.src = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScriptURL(l) : l;
-    d.head.appendChild(p);
+    r && (q.nonce = r);
+    n ? q.text = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScript(n) : n : q.src = goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createScriptURL(l) : l;
+    d.head.appendChild(q);
   }
   if (goog.global.CLOSURE_IMPORT_SCRIPT) {
     goog.global.CLOSURE_IMPORT_SCRIPT(this.path) ? a.loaded() : a.pause();
@@ -892,9 +892,9 @@ goog.createTrustedTypesPolicy = function(a) {
     var l = goog.global.document, n = goog.Dependency.registerCallback_(function() {
       goog.Dependency.unregisterCallback_(n);
       c();
-    }), p = goog.getScriptNonce_();
-    p = "<script" + (p ? ' nonce="' + p + '"' : "") + ">" + goog.protectScriptTag_('goog.Dependency.callback_("' + n + '");') + "\x3c/script>";
-    l.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(p) : p);
+    }), q = goog.getScriptNonce_();
+    q = "<script" + (q ? ' nonce="' + q + '"' : "") + ">" + goog.protectScriptTag_('goog.Dependency.callback_("' + n + '");') + "\x3c/script>";
+    l.write(goog.TRUSTED_TYPES_POLICY_ ? goog.TRUSTED_TYPES_POLICY_.createHTML(q) : q);
   }
   var e = this;
   if (goog.global.CLOSURE_IMPORT_SCRIPT) {
@@ -1071,7 +1071,7 @@ goog.json.Serializer.prototype.serializeObject_ = function(a, b) {
   b.push("}");
 };
 // Input 2
-var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api2.branch.io", version:"2.84.0"};
+var config = {app_service_endpoint:"https://app.link", link_service_endpoint:"https://bnc.lt", api_endpoint:"https://api.stage.branch.io", version:"2.84.0"};
 // Input 3
 var safejson = {parse:function(a) {
   a = String(a);
@@ -1968,9 +1968,7 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
     e(Error(utils.messages.timeout), null, 504);
   };
   l.onerror = function(n) {
-    var p = "Error in API: URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available");
-    console.log(p);
-    e(Error(n.error || p), null, l.status);
+    e(Error(n.error || "Error in API: " + l.status), null, l.status);
   };
   l.onreadystatechange = function() {
     if (4 === l.readyState) {
@@ -1982,13 +1980,13 @@ Server.prototype.XHRRequest = function(a, b, c, d, e, f, g) {
         } else {
           try {
             n = safejson.parse(l.responseText);
-          } catch (p) {
+          } catch (q) {
             n = {};
           }
         }
         e(null, n, l.status);
       } else if ("4" === l.status.toString().substring(0, 1) || "5" === l.status.toString().substring(0, 1)) {
-        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : (n = "Error in API: URL - " + (l.responseURL || "Unknown") + ", Status - " + (l.status || "No status available") + ", Response - " + (l.responseText || "No response text available"), console.log(n), e(Error(n), null, l.status));
+        l.responseURL && l.responseURL.includes("v2/event") ? e(l.responseText, null, l.status) : e(Error("Error in API: " + l.status), null, l.status);
       }
     }
   };
@@ -2018,16 +2016,16 @@ Server.prototype.request = function(a, b, c, d) {
     k = f.url, h = f.data;
   }
   var l = c.get("use_jsonp") || a.jsonp ? b : h;
-  var n = utils.retries, p = function(q, u, t) {
+  var n = utils.retries, q = function(p, u, t) {
     if ("function" === typeof e.onAPIResponse) {
-      e.onAPIResponse(k, a.method, l, q, t, u);
+      e.onAPIResponse(k, a.method, l, p, t, u);
     }
-    q && 0 < n && "5" === (t || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
+    p && 0 < n && "5" === (t || "").toString().substring(0, 1) ? (n--, window.setTimeout(function() {
       m();
-    }, utils.retry_delay)) : d(q, u);
+    }, utils.retry_delay)) : d(p, u);
   };
   if (utils.userPreferences.trackingDisabled && utils.userPreferences.shouldBlockRequest(k, b)) {
-    return utils.userPreferences.allowErrorsInCallback ? p(Error(utils.messages.trackingDisabled), null, 300) : p(null, {}, 200);
+    return utils.userPreferences.allowErrorsInCallback ? q(Error(utils.messages.trackingDisabled), null, 300) : q(null, {}, 200);
   }
   var r = !1;
   if ("/v1/qr-code" === a.endpoint) {
@@ -2035,7 +2033,7 @@ Server.prototype.request = function(a, b, c, d) {
     var w = "arraybuffer";
   }
   var m = function() {
-    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, p) : e.XHRRequest(k, h, a.method, c, p, r, w);
+    c.get("use_jsonp") || a.jsonp ? e.jsonpRequest(k, b, a.method, q) : e.XHRRequest(k, h, a.method, c, q, r, w);
   };
   m();
 };
@@ -2243,9 +2241,9 @@ var banner = function(a, b, c, d) {
       a.deepviewCta();
     });
     n = banner_utils.getBodyStyle("margin-top");
-    var p = banner_utils.getBodyStyle("margin-bottom");
+    var q = banner_utils.getBodyStyle("margin-bottom");
     banner_utils.addClass(document.body, "branch-banner-is-active");
-    "top" === b.position ? document.body.style.marginTop = banner_utils.addCSSLengths(banner_utils.bannerHeight, n) : "bottom" === b.position && (document.body.style.marginBottom = banner_utils.addCSSLengths(banner_utils.bannerHeight, p));
+    "top" === b.position ? document.body.style.marginTop = banner_utils.addCSSLengths(banner_utils.bannerHeight, n) : "bottom" === b.position && (document.body.style.marginBottom = banner_utils.addCSSLengths(banner_utils.bannerHeight, q));
     if (n = k.getElementById("branch-banner-close")) {
       n.onclick = function(r) {
         r.preventDefault();
@@ -2545,7 +2543,7 @@ journeys_utils.finalHookups = function(a, b, c, d, e, f, g, h) {
 journeys_utils._setupDismissBehavior = function(a, b, c, d, e, f, g, h, k, l) {
   a = d.contentWindow.document.querySelectorAll(a);
   Array.prototype.forEach.call(a, function(n) {
-    n.addEventListener(l, function(p) {
+    n.addEventListener(l, function(q) {
       journeys_utils._handleJourneyDismiss(b, c, d, e, f, g, h, k);
     });
   });
@@ -2595,8 +2593,8 @@ journeys_utils._handleJourneyDismiss = function(a, b, c, d, e, f, g, h) {
     var l = function() {
       journeys_utils.branch.removeListener(l);
       var n = journeys_utils._getDismissRequestData(h, utils.dismissEventToSourceMapping[a]);
-      journeys_utils.branch._api(resources.dismiss, n, function(p, r) {
-        !p && f && f.dismissRedirect ? window.location = f.dismissRedirect : !p && "object" === typeof r && r.template && h.shouldDisplayJourney(r, null, !1) && h.displayJourney(r.template, n, n.branch_view_id || r.event_data.branch_view_data.id, r.event_data.branch_view_data, !1, r.journey_link_data);
+      journeys_utils.branch._api(resources.dismiss, n, function(q, r) {
+        !q && f && f.dismissRedirect ? window.location = f.dismissRedirect : !q && "object" === typeof r && r.template && h.shouldDisplayJourney(r, null, !1) && h.displayJourney(r.template, n, n.branch_view_id || r.event_data.branch_view_data.id, r.event_data.branch_view_data, !1, r.journey_link_data);
       });
     };
     journeys_utils.branch.addListener("branch_internal_event_didCloseJourney", l);
@@ -2752,7 +2750,7 @@ branch_view.displayJourney = function(a, b, c, d, e, f) {
     h.id = "branch-banner";
     document.body.insertBefore(h, null);
     banner_utils.addClass(h, "branch-banner-is-active");
-    var k = !1, l = b.callback_string, n = null, p = journeys_utils.branch._storage;
+    var k = !1, l = b.callback_string, n = null, q = journeys_utils.branch._storage;
     if (a) {
       var r = journeys_utils.getMetadata(a) || {};
       a = journeys_utils.tryReplaceJourneyCtaLink(a);
@@ -2762,11 +2760,11 @@ branch_view.displayJourney = function(a, b, c, d, e, f) {
       }, utils.timeout);
       window[l] = function(m) {
         window.clearTimeout(w);
-        k || (n = m, journeys_utils.finalHookups(c, g, p, n, null, r, e, branch_view));
+        k || (n = m, journeys_utils.finalHookups(c, g, q, n, null, r, e, branch_view));
       };
       renderHtmlBlob(document.body, a, b.has_app_websdk, function(m) {
         journeys_utils.banner = m;
-        null === m ? k = !0 : (journeys_utils.finalHookups(c, g, p, n, m, r, e, branch_view), utils.navigationTimingAPIEnabled && (utils.instrumentation["journey-load-time"] = utils.timeSinceNavigationStart()), document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d));
+        null === m ? k = !0 : (journeys_utils.finalHookups(c, g, q, n, m, r, e, branch_view), utils.navigationTimingAPIEnabled && (utils.instrumentation["journey-load-time"] = utils.timeSinceNavigationStart()), document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d));
       });
     } else {
       document.body.removeChild(h), utils.userPreferences.trackingDisabled || e || branch_view.incrementPageviewAnalytics(d);
@@ -2779,13 +2777,13 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   a || (a = {});
   journeys_utils.entryAnimationDisabled = b.disable_entry_animation || !1;
   journeys_utils.exitAnimationDisabled = b.disable_exit_animation || !1;
-  var e = utils.merge({}, c._branchViewData), f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, h = f.hasOwnProperty("identity") ? f.identity : null, k = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, n = utils.getInitialReferrer(c._referringLink()), p = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
+  var e = utils.merge({}, c._branchViewData), f = session.get(c._storage) || {}, g = f.hasOwnProperty("has_app") ? f.has_app : !1, h = f.hasOwnProperty("identity") ? f.identity : null, k = c._storage.get("journeyDismissals", !0), l = (b.user_language || utils.getBrowserLanguageCode() || "en").toLowerCase() || null, n = utils.getInitialReferrer(c._referringLink()), q = b.branch_view_id || utils.getParameterByName("_branch_view_id") || null;
   c = b.make_new_link ? null : utils.getClickIdAndSearchStringFromLink(c._referringLink(!0));
   var r = f.hasOwnProperty("session_link_click_id") ? f.session_link_click_id : null;
   e.event = d ? "dismiss" : "pageview";
   e.metadata = a;
   e = utils.addPropertyIfNotNull(e, "initial_referrer", n);
-  e = utils.addPropertyIfNotNull(e, "branch_view_id", p);
+  e = utils.addPropertyIfNotNull(e, "branch_view_id", q);
   e = utils.addPropertyIfNotNull(e, "no_journeys", b.no_journeys);
   e = utils.addPropertyIfNotNull(e, "is_iframe", utils.isIframe());
   e = utils.addPropertyIfNotNull(e, "journey_dismissals", k);
@@ -2805,6 +2803,43 @@ branch_view._getPageviewRequestData = function(a, b, c, d) {
   return e = utils.cleanLinkData(e);
 };
 // Input 16
+var Logger = function() {
+  this.level_ = "info";
+};
+Logger.prototype.setLevel = function(a) {
+  ["verbose", "info", "warning", "error", "none"].includes(a) ? this.level_ = a : console.error(`Invalid log level: ${a}`);
+};
+Logger.prototype.log = function(a, ...b) {
+  if (this.shouldLog(a)) {
+    switch(a) {
+      case "info":
+        this.logInfo_(...b);
+        break;
+      case "warning":
+        this.logWarning_(...b);
+        break;
+      case "error":
+        this.logError_(...b);
+    }
+  }
+};
+Logger.prototype.shouldLog = function(a) {
+  if ("none" === this.level_) {
+    return !1;
+  }
+  const b = ["verbose", "info", "warning", "error", "none"], c = b.indexOf(this.level_);
+  return b.indexOf(a) >= c;
+};
+Logger.prototype.logInfo_ = function(...a) {
+  console.info(...a);
+};
+Logger.prototype.logWarning_ = function(...a) {
+  console.warn(...a);
+};
+Logger.prototype.logError_ = function(...a) {
+  console.error(...a);
+};
+// Input 17
 var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_ERR_DATA:2}, init_states = {NO_INIT:0, INIT_PENDING:1, INIT_FAILED:2, INIT_SUCCEEDED:3}, init_state_fail_codes = {NO_FAILURE:0, UNKNOWN_CAUSE:1, OPEN_FAILED:2, BFP_NOT_FOUND:3, HAS_APP_FAILED:4}, wrap = function(a, b, c) {
   return function() {
     var d = this, e = arguments[arguments.length - 1];
@@ -2848,6 +2883,7 @@ var default_branch, callback_params = {NO_CALLBACK:0, CALLBACK_ERR:1, CALLBACK_E
   this._queue = task_queue();
   this._storage = new storage.BranchStorage(["session", "cookie", "pojo"]);
   this._server = new Server();
+  this._logger = new Logger();
   this._listeners = [];
   this.sdk = "web" + config.version;
   this.requestMetadata = {};
@@ -2931,9 +2967,9 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   var f = c && "undefined" !== typeof c.branch_match_id && null !== c.branch_match_id ? c.branch_match_id : null, g = f || utils.getParamValue("_branch_match_id") || utils.hashValue("r"), h = !d.identity_id;
   d._branchViewEnabled = !!d._storage.get("branch_view_enabled");
   var k = function(m) {
-    var q = {sdk:config.version, branch_key:d.branch_key}, u = session.get(d._storage) || {}, t = session.get(d._storage, !0) || {};
-    t.browser_fingerprint_id && (q._t = t.browser_fingerprint_id);
-    utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, q, function(v, x) {
+    var p = {sdk:config.version, branch_key:d.branch_key}, u = session.get(d._storage) || {}, t = session.get(d._storage, !0) || {};
+    t.browser_fingerprint_id && (p._t = t.browser_fingerprint_id);
+    utils.isSafari11OrGreater() || utils.isIOSWKWebView() || d._api(resources._r, p, function(v, x) {
       v && (d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = v.message);
       x && (u.browser_fingerprint_id = x);
     });
@@ -2941,19 +2977,19 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
   }, l = function(m) {
     h && (m.identity = d.identity);
     return m;
-  }, n = function(m, q) {
-    q && (q = e(q), utils.userPreferences.trackingDisabled || (q = l(q), session.set(d._storage, q, h)), d.init_state = init_states.INIT_SUCCEEDED, q.data_parsed = q.data && 0 !== q.data.length ? safejson.parse(q.data) : {});
+  }, n = function(m, p) {
+    p && (p = e(p), utils.userPreferences.trackingDisabled || (p = l(p), session.set(d._storage, p, h)), d.init_state = init_states.INIT_SUCCEEDED, p.data_parsed = p.data && 0 !== p.data.length ? safejson.parse(p.data) : {});
     if (m) {
-      return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = m.message), a(m, q && utils.whiteListSessionData(q));
+      return d.init_state = init_states.INIT_FAILED, d.init_state_fail_code || (d.init_state_fail_code = init_state_fail_codes.UNKNOWN_CAUSE, d.init_state_fail_details = m.message), a(m, p && utils.whiteListSessionData(p));
     }
     try {
-      a(m, q && utils.whiteListSessionData(q));
+      a(m, p && utils.whiteListSessionData(p));
     } catch (t) {
     } finally {
       d.renderFinalize();
     }
     m = utils.getAdditionalMetadata();
-    (q = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (q = utils.mergeHostedDeeplinkData(m.hosted_deeplink_data, q)) && 0 < Object.keys(q).length && (m.hosted_deeplink_data = q);
+    (p = utils.validateParameterType(c.metadata, "object") ? c.metadata : null) && (p = utils.mergeHostedDeeplinkData(m.hosted_deeplink_data, p)) && 0 < Object.keys(p).length && (m.hosted_deeplink_data = p);
     var u = branch_view._getPageviewRequestData(journeys_utils._getPageviewMetadata(c, m), c, d, !1);
     d.renderQueue(function() {
       d._api(resources.pageview, u, function(t, v) {
@@ -2961,19 +2997,19 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
         utils.userPreferences.trackingDisabled && (utils.userPreferences.allowErrorsInCallback = !0);
       });
     });
-  }, p = function() {
+  }, q = function() {
     if ("undefined" !== typeof document.hidden) {
       var m = "hidden";
-      var q = "visibilitychange";
+      var p = "visibilitychange";
     } else {
-      "undefined" !== typeof document.mozHidden ? (m = "mozHidden", q = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", q = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", q = "webkitvisibilitychange");
+      "undefined" !== typeof document.mozHidden ? (m = "mozHidden", p = "mozvisibilitychange") : "undefined" !== typeof document.msHidden ? (m = "msHidden", p = "msvisibilitychange") : "undefined" !== typeof document.webkitHidden && (m = "webkitHidden", p = "webkitvisibilitychange");
     }
-    q && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(q, function() {
+    p && !d.changeEventListenerAdded && (d.changeEventListenerAdded = !0, document.addEventListener(p, function() {
       document[m] || (k(null), "function" === typeof d._deepviewRequestForReplay && d._deepviewRequestForReplay());
     }, !1));
   };
   if (b && b.session_id && !g && !utils.getParamValue("branchify_url")) {
-    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), p(), k(n);
+    session.update(d._storage, {data:""}), session.update(d._storage, {referring_link:""}), q(), k(n);
   } else {
     b = {sdk:config.version, branch_key:d.branch_key};
     var r = session.get(d._storage, !0) || {};
@@ -2982,22 +3018,22 @@ Branch.prototype.init = wrap(callback_params.CALLBACK_ERR_DATA, function(a, b, c
     var w = parseInt(utils.getParamValue("[?&]_open_delay_ms"), 10);
     utils.isSafari11OrGreater() || utils.isIOSWKWebView() ? utils.delay(function() {
       d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || r.browser_fingerprint_id, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
-      null}, function(m, q) {
+      null}, function(m, p) {
         m && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = m.message);
-        m || "object" !== typeof q || (q.branch_view_enabled && (d._branchViewEnabled = !!q.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (q.click_id = g));
-        p();
-        n(m, q);
+        m || "object" !== typeof p || (p.branch_view_enabled && (d._branchViewEnabled = !!p.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (p.click_id = g));
+        q();
+        n(m, p);
       });
-    }, w) : d._api(resources._r, b, function(m, q) {
+    }, w) : d._api(resources._r, b, function(m, p) {
       if (m) {
         return d.init_state_fail_code = init_state_fail_codes.BFP_NOT_FOUND, d.init_state_fail_details = m.message, n(m, null);
       }
       utils.delay(function() {
-        d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || q, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
+        d._api(resources.open, {link_identifier:g, browser_fingerprint_id:g || p, identity:r.identity ? r.identity : null, alternative_browser_fingerprint_id:r.browser_fingerprint_id, options:c, initial_referrer:utils.getInitialReferrer(d._referringLink()), current_url:utils.getCurrentUrl(), screen_height:utils.getScreenHeight(), screen_width:utils.getScreenWidth(), model:utils.userAgentData ? utils.userAgentData.model : null, os_version:utils.userAgentData ? utils.userAgentData.platformVersion : 
         null}, function(u, t) {
           u && (d.init_state_fail_code = init_state_fail_codes.OPEN_FAILED, d.init_state_fail_details = u.message);
           u || "object" !== typeof t || (t.branch_view_enabled && (d._branchViewEnabled = !!t.branch_view_enabled, d._storage.set("branch_view_enabled", d._branchViewEnabled)), g && (t.click_id = g));
-          p();
+          q();
           n(u, t);
         });
       }, w);
@@ -3271,7 +3307,7 @@ Branch.prototype.setAPIUrl = function(a) {
 Branch.prototype.getAPIUrl = function() {
   return config.api_endpoint;
 };
-// Input 17
+// Input 18
 var branch_instance = new Branch();
 if (window.branch && window.branch._q) {
   for (var queue = window.branch._q, i = 0; i < queue.length; i++) {
