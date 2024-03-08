@@ -2807,7 +2807,7 @@ var Logger = function() {
   this.level_ = "info";
 };
 Logger.prototype.setLevel = function(a) {
-  -1 !== ["verbose", "info", "warning", "error", "none"].indexOf(a) ? this.level_ = a : console.error(`Invalid log level: ${a}`);
+  -1 !== ["verbose", "info", "warn", "error", "none"].indexOf(a) ? this.level_ = a : console.error(`Invalid log level: ${a}`);
 };
 Logger.prototype.log = function(a) {
   var b = Array.prototype.slice.call(arguments, 1);
@@ -2816,7 +2816,7 @@ Logger.prototype.log = function(a) {
       case "info":
         this.logInfo_(b);
         break;
-      case "warning":
+      case "warn":
         this.logWarning_(b);
         break;
       case "error":
@@ -2828,7 +2828,7 @@ Logger.prototype.shouldLog = function(a) {
   if ("none" === this.level_) {
     return !1;
   }
-  const b = ["verbose", "info", "warning", "error", "none"];
+  const b = ["verbose", "info", "warn", "error", "none"];
   let c = b.indexOf(this.level_);
   return b.indexOf(a) >= c;
 };
